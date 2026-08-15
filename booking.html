@@ -281,13 +281,14 @@
     const locationRequired = val === "emergency" || val === "home-visit";
     locationRequiredMark.style.display = locationRequired ? "inline" : "none";
     locationInput.required = locationRequired;
-    // Date/time selection is hidden for emergency, shown for scheduled services (home visit / workshop)
-    if (val === "emergency") {
+    
+    // Date/time selection is hidden by default, shown only for scheduled services (home visit / workshop)
+    if (val === "home-visit" || val === "workshop") {
+      dateTimeWrap.style.display = "grid";
+    } else {
       dateTimeWrap.style.display = "none";
       document.getElementById("b-date").value = "";
       document.getElementById("b-time").value = "";
-    } else {
-      dateTimeWrap.style.display = "grid";
     }
   }
   serviceSelect.addEventListener("change", syncServiceUI);
