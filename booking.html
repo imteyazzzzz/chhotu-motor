@@ -304,7 +304,7 @@
 
     // 3. Issue visibility and required status
     const issueRequired = val === "home-visit" || val === "workshop";
-    const showIssue = val === "home-visit" || val === "workshop";
+    const showIssue = val !== "";
     
     issueInput.required = issueRequired;
     issueRequiredMark.style.display = issueRequired ? "inline" : "none";
