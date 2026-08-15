@@ -250,63 +250,72 @@ function initTestimonialAutoScroll() {
 
 /* ---- Emergency WhatsApp Auto Location Detection ---- */
 function initEmergencyWhatsApp() {
-  const btn = document.getElementById("emergency-wa-btn");
-  if (!btn) return;
+  const triggers = document.querySelectorAll(".emergency-wa-trigger");
+  if (triggers.length === 0) return;
 
-  btn.addEventListener("click", (e) => {
-    e.preventDefault();
+  triggers.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
 
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
-    }
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        return;
+      }
 
-    const originalText = btn.innerHTML;
-    btn.style.pointerEvents = "none";
-    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Detecting location...`;
+      const originalText = btn.innerHTML;
+      btn.style.pointerEvents = "none";
+      
+      // Determine if this is an icon-only trigger or text trigger
+      const isIcon = btn.querySelector("i.fa-whatsapp") && !btn.innerText;
+      if (isIcon) {
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i>`;
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Detecting location...`;
+      }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        let locationStr = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-        
-        try {
-          // Reverse geocode via osm nominatim
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
-            headers: { "Accept-Language": "en" }
-          });
-          if (response.ok) {
-            const data = await response.json();
-            if (data && data.display_name) {
-              locationStr = data.display_name;
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          let locationStr = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          
+          try {
+            // Reverse geocode via osm nominatim
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
+              headers: { "Accept-Language": "en" }
+            });
+            if (response.ok) {
+              const data = await response.json();
+              if (data && data.display_name) {
+                locationStr = data.display_name;
+              }
             }
+          } catch (err) {
+            console.error("Reverse geocoding failed for emergency WhatsApp", err);
+          } finally {
+            const finalMsg = `Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ${locationStr}`;
+            window.open(buildWhatsAppLink(finalMsg), "_blank");
+            btn.style.pointerEvents = "auto";
+            btn.innerHTML = originalText;
           }
-        } catch (err) {
-          console.error("Reverse geocoding failed for emergency WhatsApp", err);
-        } finally {
-          const finalMsg = `Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ${locationStr}`;
-          window.open(buildWhatsAppLink(finalMsg), "_blank");
+        },
+        (error) => {
+          console.error("Emergency Geolocation error:", error);
+          let errorDesc = "Unable to retrieve your location.";
+          if (error.code === error.PERMISSION_DENIED) {
+            errorDesc = "Location permission denied. Please allow location access to request emergency roadside assistance.";
+          } else if (error.code === error.POSITION_UNAVAILABLE) {
+            errorDesc = "Location details unavailable. Please turn on your device's GPS/location services and try again.";
+          } else if (error.code === error.TIMEOUT) {
+            errorDesc = "Location request timed out. Please check your signal and try again.";
+          }
+          
+          alert(errorDesc);
           btn.style.pointerEvents = "auto";
           btn.innerHTML = originalText;
-        }
-      },
-      (error) => {
-        console.error("Emergency Geolocation error:", error);
-        let errorDesc = "Unable to retrieve your location.";
-        if (error.code === error.PERMISSION_DENIED) {
-          errorDesc = "Location permission denied. Please allow location access to request emergency roadside assistance.";
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          errorDesc = "Location details unavailable. Please turn on your device's GPS/location services and try again.";
-        } else if (error.code === error.TIMEOUT) {
-          errorDesc = "Location request timed out. Please check your signal and try again.";
-        }
-        
-        alert(errorDesc);
-        btn.style.pointerEvents = "auto";
-        btn.innerHTML = originalText;
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-    );
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    });
   });
 }
 

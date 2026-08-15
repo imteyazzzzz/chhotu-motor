@@ -25,13 +25,13 @@
 
   <!-- ============ EMERGENCY STRIP (ANNOUNCEMENT BAR) ============ -->
   <section class="emergency-strip">
-    <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
-      <p class="font-display font-semibold text-sm md:text-base flex items-center gap-2">
-        <i class="fa-solid fa-triangle-exclamation"></i> 24/7 ROADSIDE ASSISTANCE — STRANDED NOW?
-      </p>
-      <div class="flex gap-3">
-        <a href="tel:+9779813691072" class="font-mono text-sm font-bold underline underline-offset-2"><i class="fa-solid fa-phone"></i> +977 981-369-1072</a>
-        <a href="#" id="emergency-wa-btn" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: " class="font-mono text-sm font-bold underline underline-offset-2"><i class="fa-brands fa-whatsapp"></i> WhatsApp Us</a>
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-2 md:py-3 flex items-center justify-center md:justify-between gap-3 text-center">
+      <a href="#" class="emergency-wa-trigger font-display font-semibold text-xs md:text-sm flex items-center justify-center gap-2 hover:text-[#FF5A1F] transition-colors" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ">
+        <i class="fa-solid fa-triangle-exclamation text-[#FF5A1F]"></i> 24/7 ROADSIDE ASSISTANCE — STRANDED NOW?
+      </a>
+      <div class="hidden md:flex gap-4">
+        <a href="tel:+9779813691072" class="font-mono text-xs font-bold underline underline-offset-2 hover:text-[#FF5A1F] transition-colors"><i class="fa-solid fa-phone"></i> +977 981-369-1072</a>
+        <a href="#" class="emergency-wa-trigger font-mono text-xs font-bold underline underline-offset-2 hover:text-[#FF5A1F] transition-colors" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: "><i class="fa-brands fa-whatsapp"></i> WhatsApp Us</a>
       </div>
     </div>
   </section>
@@ -59,9 +59,17 @@
       <a href="booking.html" class="btn btn-primary !py-2 !px-4 !text-xs">Book a Repair</a>
     </div>
 
-    <button id="nav-toggle" class="md:hidden text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-      <i class="fa-solid fa-bars"></i>
-    </button>
+    <div class="flex items-center gap-1 md:hidden">
+      <!-- Mobile-only WhatsApp button next to hamburger menu -->
+      <a href="#" class="emergency-wa-trigger flex items-center justify-center text-[#25D366] text-2xl w-11 h-11" title="Emergency WhatsApp" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+      
+      <!-- Hamburger menu toggle -->
+      <button id="nav-toggle" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
   </div>
 </header>
 
