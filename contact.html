@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us | Chhotu Motorcycles Workshop, Jorpati Boudha</title>
+<meta name="description" content="Contact Chhotu Motorcycles Workshop in Jorpati, Boudha Rd, Kathmandu. Call, WhatsApp, or send a message. Workshop hours, map, and answers to common questions.">
+<meta property="og:title" content="Contact Chhotu Motorcycles Workshop">
+<meta property="og:description" content="Jorpati, Boudha Rd, Kathmandu 44600. Call +977 981-369-1072 or message us on WhatsApp.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_NP">
+<link rel="icon" href="data:,">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="antialiased">
+
+<!-- =====================================================================
+     SHARED HEADER START — keep identical across all pages.
+     ===================================================================== -->
+<header class="sticky top-0 z-40 bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
+      <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-wrench"></i></span>
+      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU<span class="text-[#FF5A1F]">MOTORCYCLES</span></span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+      <a href="index.html" data-nav-link class="nav-link">Home</a>
+      <a href="about.html" data-nav-link class="nav-link">About</a>
+      <a href="services.html" data-nav-link class="nav-link">Services</a>
+      <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+      <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    </nav>
+
+    <div class="hidden md:flex items-center gap-3">
+      <a href="tel:+9779813691072" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-phone"></i> Call</a>
+      <a href="booking.html" class="btn btn-primary !py-2 !px-4 !text-xs">Book a Repair</a>
+    </div>
+
+    <button id="nav-toggle" class="md:hidden text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+<div id="mobile-menu" class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden" aria-hidden="true">
+  <div class="flex items-center justify-between h-16 px-4 border-b border-[#3A3F49]">
+    <span class="font-display text-sm">MENU</span>
+    <button id="nav-close" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <nav class="flex flex-col p-6 gap-6 text-lg" aria-label="Mobile Primary">
+    <a href="index.html" data-nav-link class="nav-link">Home</a>
+    <a href="about.html" data-nav-link class="nav-link">About</a>
+    <a href="services.html" data-nav-link class="nav-link">Services</a>
+    <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+    <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    <a href="tel:+9779813691072" class="btn btn-call mt-4"><i class="fa-solid fa-phone"></i> Call +977 981-369-1072</a>
+  </nav>
+</div>
+<!-- =====================================================================
+     SHARED HEADER END
+     ===================================================================== -->
+
+<main>
+
+  <section class="border-b border-[#3A3F49] py-14">
+    <div class="max-w-4xl mx-auto px-4 md:px-8 text-center reveal">
+      <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">GET IN TOUCH</p>
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">CONTACT CHHOTU MOTORCYCLES</h1>
+      <p class="text-[#B9B6AC]">Questions, feedback, or a job that doesn't fit the booking form — reach us directly.</p>
+    </div>
+  </section>
+
+  <section class="max-w-7xl mx-auto px-4 md:px-8 py-16">
+    <div class="grid lg:grid-cols-2 gap-10">
+
+      <!-- ============ CONTACT FORM ============ -->
+      <div class="reveal">
+        <form id="contact-form" class="card p-6 md:p-8 space-y-6" novalidate>
+          <div>
+            <label class="field-label" for="c-name">Full Name *</label>
+            <input id="c-name" name="name" type="text" class="field-input" placeholder="Your name" required>
+            <p class="field-error" id="c-name-error">Please enter your name.</p>
+          </div>
+          <div>
+            <label class="field-label" for="c-phone">Phone Number *</label>
+            <input id="c-phone" name="phone" type="tel" class="field-input" placeholder="98XXXXXXXX" required>
+            <p class="field-error" id="c-phone-error">Enter a valid Nepal phone number.</p>
+          </div>
+          <div>
+            <label class="field-label" for="c-email">Email (optional)</label>
+            <input id="c-email" name="email" type="email" class="field-input" placeholder="you@example.com">
+            <p class="field-error" id="c-email-error">Enter a valid email address.</p>
+          </div>
+          <div>
+            <label class="field-label" for="c-message">Message *</label>
+            <textarea id="c-message" name="message" rows="5" class="field-input" placeholder="How can we help?" required></textarea>
+            <p class="field-error" id="c-message-error">Please enter a message.</p>
+          </div>
+
+          <button type="submit" id="c-submit" class="btn btn-primary w-full sm:w-auto">
+            <i class="fa-solid fa-paper-plane"></i> Send Message
+          </button>
+
+          <div id="c-success" class="hidden bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-5">
+            <p class="font-display text-sm text-[#FF5A1F] mb-2"><i class="fa-solid fa-circle-check"></i> MESSAGE SENT</p>
+            <p class="text-[#B9B6AC] text-sm">Thanks — we'll get back to you shortly. For urgent repairs, please call or WhatsApp instead.</p>
+          </div>
+
+          <div id="c-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-5">
+            <p class="font-display text-sm text-red-400 mb-2"><i class="fa-solid fa-triangle-exclamation"></i> SEND FAILED</p>
+            <p class="text-[#B9B6AC] text-sm mb-4">Something went wrong. Please try again, or reach us directly on WhatsApp.</p>
+            <a href="#" data-wa-fallback class="btn btn-outline !text-xs"><i class="fa-brands fa-whatsapp"></i> Send via WhatsApp Instead</a>
+          </div>
+        </form>
+      </div>
+
+      <!-- ============ MAP + DETAILS ============ -->
+      <div class="reveal space-y-6" style="transition-delay:100ms">
+        <div class="card overflow-hidden">
+          <iframe
+            title="Chhotu Motorcycles Workshop location map"
+            src="https://www.google.com/maps?q=Jorpati,+Boudha+Rd,+Kathmandu+44600,+Nepal&output=embed"
+            width="100%" height="280" style="border:0;" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+
+        <div class="card p-6">
+          <h3 class="font-display text-sm mb-4 text-[#FF5A1F]">REACH US DIRECTLY</h3>
+          <ul class="space-y-3 text-sm text-[#B9B6AC]">
+            <li class="flex items-start gap-3"><i class="fa-solid fa-location-dot text-[#FF5A1F] mt-1"></i> Jorpati, Boudha Rd, Kathmandu 44600, Nepal</li>
+            <li class="flex items-center gap-3"><i class="fa-solid fa-phone text-[#FF5A1F]"></i> <a href="tel:+9779813691072" class="hover:text-[#F4F1E8]">+977 981-369-1072</a></li>
+            <li class="flex items-center gap-3"><i class="fa-brands fa-whatsapp text-[#FF5A1F]"></i> <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." class="hover:text-[#F4F1E8]">WhatsApp Us</a></li>
+          </ul>
+        </div>
+
+        <div class="card p-6">
+          <h3 class="font-display text-sm mb-4 text-[#FF5A1F]">WORKSHOP HOURS</h3>
+          <table class="w-full text-sm">
+            <tbody class="divide-y divide-[#3A3F49]">
+              <tr><td class="py-2 text-[#B9B6AC]">Emergency Roadside</td><td class="py-2 text-right font-mono text-[#FF5A1F]">24/7</td></tr>
+              <tr><td class="py-2 text-[#B9B6AC]">Workshop (Jorpati)</td><td class="py-2 text-right font-mono">Mon–Sat, 9AM–7PM</td></tr>
+              <tr><td class="py-2 text-[#B9B6AC]">Home / Office Visits</td><td class="py-2 text-right font-mono">Daily, 9AM–7PM</td></tr>
+              <tr><td class="py-2 text-[#B9B6AC]">Workshop Closed</td><td class="py-2 text-right font-mono">Sundays &amp; Public Holidays*</td></tr>
+            </tbody>
+          </table>
+          <p class="text-xs text-[#B9B6AC] mt-3 font-mono">*Emergency line stays open every day, including holidays.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="bg-[#1B1E24] border-y border-[#3A3F49] py-20">
+    <div class="max-w-3xl mx-auto px-4 md:px-8">
+      <div class="reveal mb-10 text-center">
+        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">COMMON QUESTIONS</p>
+        <h2 class="text-3xl md:text-4xl font-bold">FAQ</h2>
+      </div>
+
+      <div class="space-y-3 reveal">
+        <details class="card p-5 group">
+          <summary class="font-display text-sm cursor-pointer list-none flex items-center justify-between">
+            How fast is your emergency response time?
+            <i class="fa-solid fa-chevron-down text-[#FF5A1F] transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-[#B9B6AC] text-sm mt-3">Typically 20–35 minutes within Jorpati, Boudha, and Chabahil. Outside the core area, response time depends on distance — WhatsApp your location and we'll give you an ETA.</p>
+        </details>
+
+        <details class="card p-5 group">
+          <summary class="font-display text-sm cursor-pointer list-none flex items-center justify-between">
+            What areas do you cover?
+            <i class="fa-solid fa-chevron-down text-[#FF5A1F] transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-[#B9B6AC] text-sm mt-3">Jorpati, Boudha, Chabahil, and the greater Kathmandu Valley for roadside and home visits. Workshop appointments welcome riders from anywhere in the valley.</p>
+        </details>
+
+        <details class="card p-5 group">
+          <summary class="font-display text-sm cursor-pointer list-none flex items-center justify-between">
+            What payment methods do you accept?
+            <i class="fa-solid fa-chevron-down text-[#FF5A1F] transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-[#B9B6AC] text-sm mt-3">Cash, eSewa, and Khalti are accepted for all services, roadside included.</p>
+        </details>
+
+        <details class="card p-5 group">
+          <summary class="font-display text-sm cursor-pointer list-none flex items-center justify-between">
+            Is there a warranty on repairs?
+            <i class="fa-solid fa-chevron-down text-[#FF5A1F] transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-[#B9B6AC] text-sm mt-3">Workshop repairs carry a labor warranty, and genuine parts carry their manufacturer warranty. Ask your mechanic for specifics on your job before work begins.</p>
+        </details>
+
+        <details class="card p-5 group">
+          <summary class="font-display text-sm cursor-pointer list-none flex items-center justify-between">
+            How much do home visits cost?
+            <i class="fa-solid fa-chevron-down text-[#FF5A1F] transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-[#B9B6AC] text-sm mt-3">Home visits carry a fixed visit charge plus parts/labor for the work done, quoted before we start. Message us your bike model and issue for an estimate.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="relative border-t border-[#3A3F49] overflow-hidden">
+    <div class="hazard-stripe"></div>
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-16 text-center reveal">
+      <h2 class="text-3xl md:text-5xl font-bold mb-5">READY TO BOOK?</h2>
+      <p class="text-[#B9B6AC] mb-8 max-w-xl mx-auto">Skip the form and go straight to booking your service.</p>
+      <a href="booking.html" class="btn btn-primary text-base"><i class="fa-solid fa-calendar-check"></i> Book Now</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- =====================================================================
+     SHARED FOOTER START — keep identical across all pages.
+     ===================================================================== -->
+<footer class="bg-[#1B1E24] border-t border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 py-14 grid md:grid-cols-4 gap-10">
+    <div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-wrench"></i></span>
+        <span class="font-display font-semibold text-sm">CHHOTU MOTORCYCLES</span>
+      </div>
+      <p class="text-[#B9B6AC] text-sm">24/7 emergency roadside repair, home visits, and workshop appointments for every motorcycle in Kathmandu.</p>
+      <div class="flex gap-3 mt-5 text-lg">
+        <a href="#" aria-label="Facebook" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-facebook"></i></a>
+        <a href="#" aria-label="Instagram" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." aria-label="WhatsApp" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">QUICK LINKS</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="index.html" class="hover:text-[#F4F1E8]">Home</a></li>
+        <li><a href="about.html" class="hover:text-[#F4F1E8]">About</a></li>
+        <li><a href="services.html" class="hover:text-[#F4F1E8]">Services</a></li>
+        <li><a href="booking.html" class="hover:text-[#F4F1E8]">Booking</a></li>
+        <li><a href="contact.html" class="hover:text-[#F4F1E8]">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">SERVICES</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="services.html#emergency" class="hover:text-[#F4F1E8]">Emergency Repair</a></li>
+        <li><a href="services.html#home-visit" class="hover:text-[#F4F1E8]">Home / Office Visit</a></li>
+        <li><a href="services.html#workshop" class="hover:text-[#F4F1E8]">Workshop Appointment</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">CONTACT</h4>
+      <ul class="space-y-3 text-sm text-[#B9B6AC]">
+        <li class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-1"></i> Jorpati, Boudha Rd, Kathmandu 44600, Nepal</li>
+        <li class="flex items-center gap-2"><i class="fa-solid fa-phone"></i> <a href="tel:+9779813691072" class="hover:text-[#F4F1E8]">+977 981-369-1072</a></li>
+        <li class="flex items-center gap-2"><i class="fa-brands fa-whatsapp"></i> <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." class="hover:text-[#F4F1E8]">WhatsApp</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-[#3A3F49] py-5">
+    <p class="text-center text-xs text-[#B9B6AC]">© <span id="year"></span> Chhotu Motorcycles Workshop. All rights reserved.</p>
+  </div>
+</footer>
+<!-- =====================================================================
+     SHARED FOOTER END
+     ===================================================================== -->
+
+<a href="#" data-wa-message="Hi Chhotu Motorcycles, I'd like to know more." class="fab-whatsapp" aria-label="Chat on WhatsApp">
+  <i class="fa-brands fa-whatsapp"></i>
+</a>
+<a href="tel:+9779813691072" class="fab-call" aria-label="Call Chhotu Motorcycles">
+  <i class="fa-solid fa-phone"></i>
+</a>
+<button id="back-to-top" class="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script src="assets/main.js"></script>
+<script src="assets/forms.js"></script>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  const form = document.getElementById("contact-form");
+  const submitBtn = document.getElementById("c-submit");
+  const successEl = document.getElementById("c-success");
+  const errorEl = document.getElementById("c-error");
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const nameInput = document.getElementById("c-name");
+    const phoneInput = document.getElementById("c-phone");
+    const emailInput = document.getElementById("c-email");
+    const messageInput = document.getElementById("c-message");
+
+    const rules = [
+      { input: nameInput, error: document.getElementById("c-name-error"), required: true },
+      { input: phoneInput, error: document.getElementById("c-phone-error"), required: true, validator: isValidPhone },
+      { input: messageInput, error: document.getElementById("c-message-error"), required: true },
+    ];
+    if (emailInput.value.trim()) {
+      rules.push({ input: emailInput, error: document.getElementById("c-email-error"), required: false, validator: isValidEmail });
+    } else {
+      clearFieldError(emailInput, document.getElementById("c-email-error"));
+    }
+
+    if (!validateForm(rules)) return;
+
+    const payload = {
+      form_type: "contact",
+      name: nameInput.value.trim(),
+      phone: phoneInput.value.trim(),
+      email: emailInput.value.trim(),
+      message: messageInput.value.trim(),
+      submittedAt: new Date().toISOString(),
+      source: "contact.html",
+    };
+
+    const waMessage =
+      `Contact message — Chhotu Motorcycles\n` +
+      `Name: ${payload.name}\nPhone: ${payload.phone}\n` +
+      (payload.email ? `Email: ${payload.email}\n` : "") +
+      `Message: ${payload.message}`;
+    const waHref = buildWhatsAppLink(waMessage);
+
+    await submitToWebhook({
+      payload,
+      button: submitBtn,
+      successEl,
+      errorEl,
+      waFallbackHref: waHref,
+    });
+  });
+</script>
+</body>
+</html>

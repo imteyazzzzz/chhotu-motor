@@ -1,0 +1,305 @@
+/* =========================================================================
+   CHHOTU MOTORCYCLES WORKSHOP — SHARED STYLESHEET
+   Loaded by every page. Tailwind (CDN) handles layout utilities;
+   this file carries the brand system: color tokens, type, and the
+   signature "hazard-stripe / dashboard readout" motifs.
+   ========================================================================= */
+
+:root{
+  /* ---- Color tokens (garage-at-night palette) ---- */
+  --charcoal:      #14161A;   /* base background */
+  --charcoal-2:    #1B1E24;   /* raised panels / cards */
+  --charcoal-3:    #22262E;   /* hover / borders on dark */
+  --steel:         #3A3F49;   /* borders, dividers on dark */
+  --off-white:     #F4F1E8;   /* primary text on dark */
+  --off-white-dim: #B9B6AC;   /* secondary text on dark */
+  --orange:        #FF5A1F;   /* primary accent — safety orange */
+  --orange-dim:    #C7440F;   /* pressed / darker orange */
+  --yellow:        #FFC530;   /* emergency / hazard accent */
+  --ink:           #14161A;   /* text on light chips */
+
+  /* ---- Type ---- */
+  --font-display: 'Oswald', 'Arial Narrow', sans-serif;      /* condensed, industrial, headings */
+  --font-body:    'Work Sans', 'Segoe UI', sans-serif;        /* readable body copy */
+  --font-mono:    'JetBrains Mono', 'Courier New', monospace; /* dashboard-readout digits / labels */
+}
+
+*{ scroll-behavior: smooth; }
+
+body{
+  background: var(--charcoal);
+  color: var(--off-white);
+  font-family: var(--font-body);
+}
+
+h1,h2,h3,h4,.font-display{
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.font-mono{ font-family: var(--font-mono); }
+
+/* ---- Focus visibility (accessibility floor) ---- */
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, summary:focus-visible{
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+/* =========================================================================
+   SIGNATURE ELEMENT: hazard-stripe divider
+   A diagonal orange/black repeating stripe — the visual language of
+   workshop hazard tape / garage floor markings. Used sparingly as a
+   section divider and to frame emergency/urgent moments only.
+   ========================================================================= */
+.hazard-stripe{
+  height: 10px;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--orange) 0px, var(--orange) 18px,
+    #16181D 18px, #16181D 36px
+  );
+}
+.hazard-stripe--thin{ height: 6px; }
+
+/* =========================================================================
+   SIGNATURE ELEMENT: dashboard readout
+   Stat blocks styled like a bike's digital instrument cluster —
+   monospace glowing digits on a dark gauge face.
+   ========================================================================= */
+.gauge{
+  background: var(--charcoal-2);
+  border: 1px solid var(--steel);
+  border-radius: 6px;
+  padding: 1.25rem 1rem;
+  position: relative;
+  overflow: hidden;
+}
+.gauge::before{
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 140% at 50% -20%, rgba(255,90,31,0.10), transparent 60%);
+  pointer-events: none;
+}
+.gauge .readout{
+  font-family: var(--font-mono);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: var(--orange);
+  text-shadow: 0 0 18px rgba(255,90,31,0.35);
+  line-height: 1;
+}
+.gauge .label{
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--off-white-dim);
+  margin-top: 0.4rem;
+}
+
+/* ---- Buttons ---- */
+.btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.95rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: 4px;
+  transition: transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  min-height: 48px; /* large tap target for roadside/one-hand use */
+}
+.btn:active{ transform: translateY(1px); }
+.btn-primary{
+  background: var(--orange);
+  color: #14161A;
+  box-shadow: 0 6px 20px rgba(255,90,31,0.25);
+}
+.btn-primary:hover{ background: #ff6b37; }
+.btn-outline{
+  background: transparent;
+  color: var(--off-white);
+  border: 2px solid var(--steel);
+}
+.btn-outline:hover{ border-color: var(--orange); color: var(--orange); }
+.btn-call{
+  background: var(--yellow);
+  color: #14161A;
+}
+.btn-call:hover{ background: #ffd257; }
+
+/* ---- Nav ---- */
+.nav-link{
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.9rem;
+  color: var(--off-white-dim);
+  position: relative;
+  padding-bottom: 4px;
+}
+.nav-link:hover{ color: var(--off-white); }
+.nav-link.active{ color: var(--orange); }
+.nav-link.active::after{
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 2px;
+  background: var(--orange);
+}
+
+/* ---- Cards ---- */
+.card{
+  background: var(--charcoal-2);
+  border: 1px solid var(--steel);
+  border-radius: 8px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.card:hover{ border-color: var(--orange-dim); transform: translateY(-3px); }
+
+/* ---- Scroll reveal ---- */
+.reveal{
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.is-visible{
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce){
+  .reveal{ opacity: 1; transform: none; transition: none; }
+  *{ scroll-behavior: auto; }
+}
+
+/* ---- Emergency banner marquee-ish strip ---- */
+.emergency-strip{
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+/* ---- Floating WhatsApp button ---- */
+.fab-whatsapp{
+  position: fixed;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 50;
+  width: 58px; height: 58px;
+  border-radius: 999px;
+  background: #25D366;
+  color: #0b1f14;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 8px 24px rgba(37,211,102,0.35);
+}
+.fab-whatsapp::after{
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 999px;
+  box-shadow: 0 0 0 0 rgba(37,211,102,0.55);
+  animation: pulse-wa 2.2s infinite;
+}
+@keyframes pulse-wa{
+  0%{ box-shadow: 0 0 0 0 rgba(37,211,102,0.55); }
+  70%{ box-shadow: 0 0 0 16px rgba(37,211,102,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(37,211,102,0); }
+}
+
+/* ---- Floating Call button (mobile only) ---- */
+.fab-call{
+  position: fixed;
+  left: 1.1rem;
+  bottom: 1.1rem;
+  z-index: 50;
+  width: 58px; height: 58px;
+  border-radius: 999px;
+  background: var(--orange);
+  color: #14161A;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  box-shadow: 0 8px 24px rgba(255,90,31,0.35);
+}
+@media (min-width: 768px){
+  .fab-call{ display: none; }
+}
+
+/* ---- Back to top ---- */
+.back-to-top{
+  position: fixed;
+  right: 1.1rem;
+  bottom: 5.4rem;
+  z-index: 49;
+  width: 44px; height: 44px;
+  border-radius: 999px;
+  background: var(--charcoal-2);
+  border: 1px solid var(--steel);
+  color: var(--off-white);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  transform: translateY(8px);
+}
+.back-to-top.show{ opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+/* ---- Placeholder logo mark ----
+   No logo asset was supplied. This is an intentional placeholder:
+   a simple wordmark + wrench glyph built from CSS/inline SVG only.
+   Swap the <a class="brand"> contents in every page's navbar with a
+   real <img src="assets/logo.svg"> once branding is provided. */
+.brand-mark{
+  width: 34px; height: 34px;
+  border-radius: 6px;
+  background: var(--orange);
+  color: #14161A;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* ---- Form elements ---- */
+.field-input{
+  width: 100%;
+  background: var(--charcoal);
+  border: 1px solid var(--steel);
+  border-radius: 4px;
+  padding: 0.85rem 1rem;
+  color: var(--off-white);
+  font-family: var(--font-body);
+  min-height: 48px;
+}
+.field-input:focus{ border-color: var(--orange); }
+.field-label{
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--off-white-dim);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.field-error{
+  color: var(--orange);
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+  display: none;
+  font-family: var(--font-mono);
+}
+.field-error.show{ display: block; }
+.field-input.invalid{ border-color: var(--orange); }
+
+/* ---- Skeleton / lazy image placeholder ---- */
+img.lazy-ph{
+  background: linear-gradient(120deg, #1B1E24 25%, #22262E 37%, #1B1E24 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+@keyframes shimmer{
+  0%{ background-position: 100% 50%; }
+  100%{ background-position: 0 50%; }
+}

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Services | Motorcycle Repair Kathmandu — Chhotu Motorcycles Workshop</title>
+<meta name="description" content="Emergency roadside repair, home/office visits, and workshop appointments for motorcycles in Kathmandu. Response times, what's included, and how to book each service.">
+<meta property="og:title" content="Motorcycle Repair Services — Chhotu Motorcycles Workshop">
+<meta property="og:description" content="Three ways to get your bike fixed: emergency roadside, home/office visit, or a workshop appointment in Jorpati.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_NP">
+<link rel="icon" href="data:,">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="antialiased">
+
+<!-- =====================================================================
+     SHARED HEADER START — keep identical across all pages.
+     ===================================================================== -->
+<header class="sticky top-0 z-40 bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
+      <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-wrench"></i></span>
+      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU<span class="text-[#FF5A1F]">MOTORCYCLES</span></span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+      <a href="index.html" data-nav-link class="nav-link">Home</a>
+      <a href="about.html" data-nav-link class="nav-link">About</a>
+      <a href="services.html" data-nav-link class="nav-link">Services</a>
+      <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+      <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    </nav>
+
+    <div class="hidden md:flex items-center gap-3">
+      <a href="tel:+9779813691072" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-phone"></i> Call</a>
+      <a href="booking.html" class="btn btn-primary !py-2 !px-4 !text-xs">Book a Repair</a>
+    </div>
+
+    <button id="nav-toggle" class="md:hidden text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+<div id="mobile-menu" class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden" aria-hidden="true">
+  <div class="flex items-center justify-between h-16 px-4 border-b border-[#3A3F49]">
+    <span class="font-display text-sm">MENU</span>
+    <button id="nav-close" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <nav class="flex flex-col p-6 gap-6 text-lg" aria-label="Mobile Primary">
+    <a href="index.html" data-nav-link class="nav-link">Home</a>
+    <a href="about.html" data-nav-link class="nav-link">About</a>
+    <a href="services.html" data-nav-link class="nav-link">Services</a>
+    <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+    <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    <a href="tel:+9779813691072" class="btn btn-call mt-4"><i class="fa-solid fa-phone"></i> Call +977 981-369-1072</a>
+  </nav>
+</div>
+<!-- =====================================================================
+     SHARED HEADER END
+     ===================================================================== -->
+
+<main>
+
+  <!-- ============ PAGE HEADER ============ -->
+  <section class="border-b border-[#3A3F49] py-16 md:py-20">
+    <div class="max-w-4xl mx-auto px-4 md:px-8 text-center reveal">
+      <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">OUR SERVICES</p>
+      <h1 class="text-4xl md:text-5xl font-bold mb-5">THREE WAYS WE GET YOU BACK ON THE ROAD</h1>
+      <p class="text-[#B9B6AC] text-lg">Pick the service that fits your situation. Every booking links straight to the form, pre-selected for you.</p>
+    </div>
+  </section>
+
+  <!-- ============ SERVICE: EMERGENCY ============ -->
+  <section id="emergency" class="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-20">
+    <div class="grid md:grid-cols-5 gap-10 items-start">
+      <div class="md:col-span-2 reveal">
+        <div class="w-14 h-14 rounded-md bg-[#FF5A1F]/10 text-[#FF5A1F] flex items-center justify-center text-2xl mb-5"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-2">SERVICE 01</p>
+        <h2 class="text-3xl font-bold mb-4">Emergency Repair / Roadside Assistance</h2>
+        <p class="text-[#B9B6AC] mb-6">Stalled engine, flat tyre, dead battery, or anything else that leaves you stranded — a mechanic is dispatched to your exact location, 24 hours a day, every day of the year.</p>
+        <a href="booking.html?service=emergency" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i> Book This Service</a>
+      </div>
+      <div class="md:col-span-3 reveal" style="transition-delay:100ms">
+        <div class="grid sm:grid-cols-3 gap-4 mb-6">
+          <div class="gauge"><div class="readout"><span data-count="20">0</span>–<span data-count="35">0</span></div><div class="label">Min Response, In-City</div></div>
+          <div class="gauge"><div class="readout font-mono text-lg">24/7</div><div class="label">Availability</div></div>
+          <div class="gauge"><div class="readout font-mono text-base">Call-out +<br>parts</div><div class="label">Pricing Note</div></div>
+        </div>
+        <ul class="space-y-3 text-sm text-[#B9B6AC]">
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> On-the-spot fixes for common breakdowns: flat tyres, dead batteries, fuel issues, chain/belt problems, minor electrical faults.</li>
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> If the bike can't be fixed roadside, we tow or transport it to our Jorpati workshop.</li>
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Call-out fee plus parts/labor, quoted before any work begins.</li>
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Exact location required — GPS pin, landmark, or address all work.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="hazard-stripe hazard-stripe--thin"></div>
+
+  <!-- ============ SERVICE: HOME VISIT ============ -->
+  <section id="home-visit" class="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-20">
+    <div class="grid md:grid-cols-5 gap-10 items-start">
+      <div class="md:col-span-2 reveal">
+        <div class="w-14 h-14 rounded-md bg-[#FF5A1F]/10 text-[#FF5A1F] flex items-center justify-center text-2xl mb-5"><i class="fa-solid fa-house-chimney"></i></div>
+        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-2">SERVICE 02</p>
+        <h2 class="text-3xl font-bold mb-4">Scheduled Home / Office Visit</h2>
+        <p class="text-[#B9B6AC] mb-6">Routine servicing, oil changes, brake checks, or minor repairs — booked for a convenient time, done at your home or office so you skip the workshop queue.</p>
+        <a href="booking.html?service=home-visit" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i> Book This Service</a>
+      </div>
+      <div class="md:col-span-3 reveal" style="transition-delay:100ms">
+        <div class="grid sm:grid-cols-3 gap-4 mb-6">
+          <div class="gauge"><div class="readout font-mono text-lg">Same/<br>Next Day</div><div class="label">Typical Slot</div></div>
+          <div class="gauge"><div class="readout font-mono text-lg">9AM–7PM</div><div class="label">Visit Window</div></div>
+          <div class="gauge"><div class="readout font-mono text-base">Fixed +<br>parts</div><div class="label">Pricing Note</div></div>
+        </div>
+        <ul class="space-y-3 text-sm text-[#B9B6AC]">
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Routine service: oil, filters, brakes, chain adjustment, general inspection.</li>
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Minor repairs that don't need workshop equipment.</li>
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Pick a preferred date and time — we confirm by phone or WhatsApp.</li>
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Address required so the mechanic arrives with the right tools and parts.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="hazard-stripe hazard-stripe--thin"></div>
+
+  <!-- ============ SERVICE: WORKSHOP ============ -->
+  <section id="workshop" class="max-w-7xl mx-auto px-4 md:px-8 py-16 scroll-mt-20">
+    <div class="grid md:grid-cols-5 gap-10 items-start">
+      <div class="md:col-span-2 reveal">
+        <div class="w-14 h-14 rounded-md bg-[#FF5A1F]/10 text-[#FF5A1F] flex items-center justify-center text-2xl mb-5"><i class="fa-solid fa-motorcycle"></i></div>
+        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-2">SERVICE 03</p>
+        <h2 class="text-3xl font-bold mb-4">Workshop Visit / Appointment</h2>
+        <p class="text-[#B9B6AC] mb-6">Bring your bike to our Jorpati workshop for full diagnostics, engine overhauls, bodywork, or any job that needs the full toolset. Book a slot and skip the wait.</p>
+        <a href="booking.html?service=workshop" class="btn btn-primary"><i class="fa-solid fa-calendar-check"></i> Book This Service</a>
+      </div>
+      <div class="md:col-span-3 reveal" style="transition-delay:100ms">
+        <div class="grid sm:grid-cols-3 gap-4 mb-6">
+          <div class="gauge"><div class="readout font-mono text-lg">By<br>Appointment</div><div class="label">Booking Type</div></div>
+          <div class="gauge"><div class="readout font-mono text-lg">Mon–Sat</div><div class="label">Workshop Days</div></div>
+          <div class="gauge"><div class="readout font-mono text-base">Quoted<br>on inspection</div><div class="label">Pricing Note</div></div>
+        </div>
+        <ul class="space-y-3 text-sm text-[#B9B6AC]">
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Full diagnostics, engine and transmission overhauls, suspension, bodywork.</li>
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Pre-trip inspections and pre-purchase checks for used bikes.</li>
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Written quote before any billable work starts.</li>
+          <li class="flex gap-3"><i class="fa-solid fa-check text-[#FF5A1F] mt-1"></i> Warranty on labor for all workshop repairs — see our FAQ for details.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="bg-[#1B1E24] border-y border-[#3A3F49] py-20">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+      <div class="reveal mb-12 max-w-xl">
+        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">FROM BOOKING TO BACK ON THE ROAD</p>
+        <h2 class="text-3xl md:text-4xl font-bold">HOW IT WORKS</h2>
+      </div>
+      <ol class="grid md:grid-cols-4 gap-6">
+        <li class="reveal">
+          <div class="font-mono text-[#FF5A1F] text-sm mb-3">STEP 01</div>
+          <h3 class="font-display text-base mb-2">Choose a Service</h3>
+          <p class="text-[#B9B6AC] text-sm">Pick emergency, home visit, or workshop above, matched to your situation.</p>
+        </li>
+        <li class="reveal" style="transition-delay:80ms">
+          <div class="font-mono text-[#FF5A1F] text-sm mb-3">STEP 02</div>
+          <h3 class="font-display text-base mb-2">Fill the Booking Form</h3>
+          <p class="text-[#B9B6AC] text-sm">Bike model, location, and issue — takes under a minute.</p>
+        </li>
+        <li class="reveal" style="transition-delay:160ms">
+          <div class="font-mono text-[#FF5A1F] text-sm mb-3">STEP 03</div>
+          <h3 class="font-display text-base mb-2">We Confirm</h3>
+          <p class="text-[#B9B6AC] text-sm">A dispatcher confirms by phone or WhatsApp with an ETA or slot.</p>
+        </li>
+        <li class="reveal" style="transition-delay:240ms">
+          <div class="font-mono text-[#FF5A1F] text-sm mb-3">STEP 04</div>
+          <h3 class="font-display text-base mb-2">Bike Gets Fixed</h3>
+          <p class="text-[#B9B6AC] text-sm">Roadside, at your door, or in the workshop — you're back riding.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="relative border-t border-[#3A3F49] overflow-hidden">
+    <div class="hazard-stripe"></div>
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-16 text-center reveal">
+      <h2 class="text-3xl md:text-5xl font-bold mb-5">NOT SURE WHICH SERVICE FITS?</h2>
+      <p class="text-[#B9B6AC] mb-8 max-w-xl mx-auto">Message us on WhatsApp and we'll point you to the right one.</p>
+      <a href="#" data-wa-message="Hi Chhotu Motorcycles, I'm not sure which service I need. Can you help?" class="btn btn-primary text-base"><i class="fa-brands fa-whatsapp"></i> Ask on WhatsApp</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- =====================================================================
+     SHARED FOOTER START — keep identical across all pages.
+     ===================================================================== -->
+<footer class="bg-[#1B1E24] border-t border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 py-14 grid md:grid-cols-4 gap-10">
+    <div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-wrench"></i></span>
+        <span class="font-display font-semibold text-sm">CHHOTU MOTORCYCLES</span>
+      </div>
+      <p class="text-[#B9B6AC] text-sm">24/7 emergency roadside repair, home visits, and workshop appointments for every motorcycle in Kathmandu.</p>
+      <div class="flex gap-3 mt-5 text-lg">
+        <a href="#" aria-label="Facebook" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-facebook"></i></a>
+        <a href="#" aria-label="Instagram" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." aria-label="WhatsApp" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">QUICK LINKS</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="index.html" class="hover:text-[#F4F1E8]">Home</a></li>
+        <li><a href="about.html" class="hover:text-[#F4F1E8]">About</a></li>
+        <li><a href="services.html" class="hover:text-[#F4F1E8]">Services</a></li>
+        <li><a href="booking.html" class="hover:text-[#F4F1E8]">Booking</a></li>
+        <li><a href="contact.html" class="hover:text-[#F4F1E8]">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">SERVICES</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="services.html#emergency" class="hover:text-[#F4F1E8]">Emergency Repair</a></li>
+        <li><a href="services.html#home-visit" class="hover:text-[#F4F1E8]">Home / Office Visit</a></li>
+        <li><a href="services.html#workshop" class="hover:text-[#F4F1E8]">Workshop Appointment</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">CONTACT</h4>
+      <ul class="space-y-3 text-sm text-[#B9B6AC]">
+        <li class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-1"></i> Jorpati, Boudha Rd, Kathmandu 44600, Nepal</li>
+        <li class="flex items-center gap-2"><i class="fa-solid fa-phone"></i> <a href="tel:+9779813691072" class="hover:text-[#F4F1E8]">+977 981-369-1072</a></li>
+        <li class="flex items-center gap-2"><i class="fa-brands fa-whatsapp"></i> <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." class="hover:text-[#F4F1E8]">WhatsApp</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-[#3A3F49] py-5">
+    <p class="text-center text-xs text-[#B9B6AC]">© <span id="year"></span> Chhotu Motorcycles Workshop. All rights reserved.</p>
+  </div>
+</footer>
+<!-- =====================================================================
+     SHARED FOOTER END
+     ===================================================================== -->
+
+<a href="#" data-wa-message="Hi Chhotu Motorcycles, I'd like to know more." class="fab-whatsapp" aria-label="Chat on WhatsApp">
+  <i class="fa-brands fa-whatsapp"></i>
+</a>
+<a href="tel:+9779813691072" class="fab-call" aria-label="Call Chhotu Motorcycles">
+  <i class="fa-solid fa-phone"></i>
+</a>
+<button id="back-to-top" class="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script src="assets/main.js"></script>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+  function animateReadouts() {
+    document.querySelectorAll(".readout[data-count]").forEach((el) => {
+      const target = parseInt(el.getAttribute("data-count"), 10);
+      let current = 0;
+      const step = Math.max(1, Math.round(target / 40));
+      const tick = () => {
+        current = Math.min(target, current + step);
+        el.textContent = current;
+        if (current < target) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    window.addEventListener("load", animateReadouts);
+  } else {
+    document.querySelectorAll(".readout[data-count]").forEach((el) => {
+      el.textContent = el.getAttribute("data-count");
+    });
+  }
+</script>
+</body>
+</html>

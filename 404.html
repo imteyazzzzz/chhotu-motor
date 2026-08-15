@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page Not Found | Chhotu Motorcycles Workshop</title>
+<meta name="description" content="The page you're looking for doesn't exist. Head back to the homepage or book a repair.">
+<link rel="icon" href="data:,">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="antialiased">
+
+<header class="border-b border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center">
+    <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
+      <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-wrench"></i></span>
+      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU<span class="text-[#FF5A1F]">MOTORCYCLES</span></span>
+    </a>
+  </div>
+</header>
+
+<main class="min-h-[70vh] flex items-center justify-center px-4">
+  <div class="text-center max-w-lg">
+    <p class="font-mono text-[#FF5A1F] text-sm tracking-[0.2em] mb-4">ERROR 404</p>
+    <h1 class="text-5xl md:text-7xl font-bold mb-6 font-display">WRONG TURN</h1>
+    <p class="text-[#B9B6AC] mb-8">This page took a detour it shouldn't have. Head back to the homepage, or jump straight to booking a repair.</p>
+    <div class="flex flex-wrap gap-4 justify-center">
+      <a href="index.html" class="btn btn-primary"><i class="fa-solid fa-house"></i> Back to Home</a>
+      <a href="booking.html" class="btn btn-outline"><i class="fa-solid fa-calendar-check"></i> Book a Repair</a>
+    </div>
+  </div>
+</main>
+
+<div class="hazard-stripe"></div>
+
+<footer class="py-6">
+  <p class="text-center text-xs text-[#B9B6AC]">© <span id="year"></span> Chhotu Motorcycles Workshop. All rights reserved.</p>
+</footer>
+
+<script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+</body>
+</html>

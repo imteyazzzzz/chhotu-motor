@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chhotu Motorcycles Workshop | 24/7 Bike Repair &amp; Roadside Assistance, Kathmandu</title>
+<meta name="description" content="Chhotu Motorcycles Workshop in Jorpati, Boudha, Kathmandu offers 24/7 emergency roadside motorcycle repair, home/office visits, and workshop appointments. Call or WhatsApp now.">
+<meta property="og:title" content="Chhotu Motorcycles Workshop — 24/7 Roadside Motorcycle Repair, Kathmandu">
+<meta property="og:description" content="Stranded on the road? Book emergency repair, a home visit, or a workshop appointment in seconds.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_NP">
+<link rel="icon" href="data:,">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<!-- Tailwind (CDN, utility classes only — brand system lives in assets/style.css) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="antialiased">
+
+<!-- =====================================================================
+     SHARED HEADER START — keep identical across all pages.
+     ===================================================================== -->
+<header class="sticky top-0 z-40 bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
+      <!-- Placeholder logo mark (no logo asset supplied yet) -->
+      <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-wrench"></i></span>
+      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU<span class="text-[#FF5A1F]">MOTORCYCLES</span></span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+      <a href="index.html" data-nav-link class="nav-link">Home</a>
+      <a href="about.html" data-nav-link class="nav-link">About</a>
+      <a href="services.html" data-nav-link class="nav-link">Services</a>
+      <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+      <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    </nav>
+
+    <div class="hidden md:flex items-center gap-3">
+      <a href="tel:+9779813691072" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-phone"></i> Call</a>
+      <a href="booking.html" class="btn btn-primary !py-2 !px-4 !text-xs">Book a Repair</a>
+    </div>
+
+    <button id="nav-toggle" class="md:hidden text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile slide-in menu -->
+<div id="mobile-menu" class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden" aria-hidden="true">
+  <div class="flex items-center justify-between h-16 px-4 border-b border-[#3A3F49]">
+    <span class="font-display text-sm">MENU</span>
+    <button id="nav-close" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <nav class="flex flex-col p-6 gap-6 text-lg" aria-label="Mobile Primary">
+    <a href="index.html" data-nav-link class="nav-link">Home</a>
+    <a href="about.html" data-nav-link class="nav-link">About</a>
+    <a href="services.html" data-nav-link class="nav-link">Services</a>
+    <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+    <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    <a href="tel:+9779813691072" class="btn btn-call mt-4"><i class="fa-solid fa-phone"></i> Call +977 981-369-1072</a>
+  </nav>
+</div>
+<!-- =====================================================================
+     SHARED HEADER END
+     ===================================================================== -->
+
+<main>
+
+  <!-- ============ HERO ============ -->
+  <section class="relative overflow-hidden border-b border-[#3A3F49]">
+    <div class="absolute inset-0 bg-[radial-gradient(80%_60%_at_80%_0%,rgba(255,90,31,0.14),transparent)]" aria-hidden="true"></div>
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-28 relative grid md:grid-cols-2 gap-10 items-center">
+      <div class="reveal">
+        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-4">JORPATI · BOUDHA RD · KATHMANDU 44600</p>
+        <h1 class="text-4xl md:text-6xl font-bold leading-[1.05] mb-6">
+          BROKEN DOWN?<br>WE COME TO <span class="text-[#FF5A1F]">YOU.</span>
+        </h1>
+        <p class="text-[#B9B6AC] text-lg mb-8 max-w-md">
+          Chhotu Motorcycles Workshop runs round-the-clock roadside repair across Kathmandu, plus home visits and scheduled workshop appointments — for every make of motorcycle.
+        </p>
+        <div class="flex flex-wrap gap-4">
+          <a href="booking.html" class="btn btn-primary"><i class="fa-solid fa-screwdriver-wrench"></i> Book a Repair</a>
+          <a href="tel:+9779813691072" class="btn btn-call"><i class="fa-solid fa-phone"></i> Call Now</a>
+        </div>
+      </div>
+      <div class="reveal" style="transition-delay:120ms">
+        <div class="gauge">
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <div class="readout" data-count="24">0</div>
+              <div class="label">Hrs / 7 Days Emergency Line</div>
+            </div>
+            <div>
+              <div class="readout"><span data-count="20">0</span>–<span data-count="35">0</span></div>
+              <div class="label">Min Avg. Response, In-City</div>
+            </div>
+            <div>
+              <div class="readout" data-count="3">0</div>
+              <div class="label">Service Modes Available</div>
+            </div>
+            <div>
+              <div class="readout" data-count="100">0</div>
+              <div class="label">% Genuine Parts Promise</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EMERGENCY STRIP ============ -->
+  <section class="emergency-strip">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+      <p class="font-display font-semibold text-sm md:text-base flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation"></i> 24/7 ROADSIDE ASSISTANCE — STRANDED NOW?
+      </p>
+      <div class="flex gap-3">
+        <a href="tel:+9779813691072" class="font-mono text-sm font-bold underline underline-offset-2"><i class="fa-solid fa-phone"></i> +977 981-369-1072</a>
+        <a href="#" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: " class="font-mono text-sm font-bold underline underline-offset-2"><i class="fa-brands fa-whatsapp"></i> WhatsApp Us</a>
+      </div>
+    </div>
+  </section>
+  <div class="hazard-stripe hazard-stripe--thin"></div>
+
+  <!-- ============ SERVICES OVERVIEW ============ -->
+  <section class="max-w-7xl mx-auto px-4 md:px-8 py-20">
+    <div class="reveal mb-12 max-w-xl">
+      <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">WHAT WE FIX, AND HOW WE REACH YOU</p>
+      <h2 class="text-3xl md:text-4xl font-bold">THREE WAYS TO GET RUNNING AGAIN</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="card p-7 reveal">
+        <div class="w-12 h-12 rounded-md bg-[#FF5A1F]/10 text-[#FF5A1F] flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 class="font-display text-lg mb-2">Emergency Repair</h3>
+        <p class="text-[#B9B6AC] text-sm mb-5">Broken down on the road? Our nearest mechanic comes to your exact location, any hour, any day.</p>
+        <a href="services.html#emergency" class="text-[#FF5A1F] font-mono text-xs tracking-wide">VIEW DETAILS →</a>
+      </div>
+      <div class="card p-7 reveal" style="transition-delay:100ms">
+        <div class="w-12 h-12 rounded-md bg-[#FF5A1F]/10 text-[#FF5A1F] flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-house-chimney"></i></div>
+        <h3 class="font-display text-lg mb-2">Home / Office Visit</h3>
+        <p class="text-[#B9B6AC] text-sm mb-5">Routine service, minor repairs, or a pre-trip check — scheduled at your home or office, no workshop trip needed.</p>
+        <a href="services.html#home-visit" class="text-[#FF5A1F] font-mono text-xs tracking-wide">VIEW DETAILS →</a>
+      </div>
+      <div class="card p-7 reveal" style="transition-delay:200ms">
+        <div class="w-12 h-12 rounded-md bg-[#FF5A1F]/10 text-[#FF5A1F] flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-motorcycle"></i></div>
+        <h3 class="font-display text-lg mb-2">Workshop Appointment</h3>
+        <p class="text-[#B9B6AC] text-sm mb-5">Bring your bike in for full diagnostics, overhauls, or bigger jobs — book a slot, skip the wait.</p>
+        <a href="services.html#workshop" class="text-[#FF5A1F] font-mono text-xs tracking-wide">VIEW DETAILS →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHY CHOOSE US / STATS ============ -->
+  <section class="bg-[#1B1E24] border-y border-[#3A3F49] py-20">
+    <div class="max-w-7xl mx-auto px-4 md:px-8">
+      <div class="reveal max-w-xl mb-12">
+        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">WHY RIDERS CALL CHHOTU</p>
+        <h2 class="text-3xl md:text-4xl font-bold">BUILT FOR THE ROADSIDE, NOT JUST THE GARAGE</h2>
+      </div>
+      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
+        <div class="gauge reveal"><div class="readout" data-count="8">0</div><div class="label">Years Running</div></div>
+        <div class="gauge reveal" style="transition-delay:80ms"><div class="readout" data-count="4200">0</div><div class="label">Bikes Serviced</div></div>
+        <div class="gauge reveal" style="transition-delay:160ms"><div class="readout" data-count="6">0</div><div class="label">Mechanics On Team</div></div>
+        <div class="gauge reveal" style="transition-delay:240ms"><div class="readout" data-count="30">0</div><div class="label">Min Avg. Response</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIALS PREVIEW ============ -->
+  <section class="max-w-7xl mx-auto px-4 md:px-8 py-20">
+    <div class="reveal mb-12 flex items-end justify-between flex-wrap gap-4">
+      <div class="max-w-xl">
+        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">FROM RIDERS WE'VE HELPED</p>
+        <h2 class="text-3xl md:text-4xl font-bold">WHAT KATHMANDU RIDERS SAY</h2>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-3 gap-6">
+      <blockquote class="card p-7 reveal">
+        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
+        <p class="text-[#B9B6AC] text-sm mb-5">Bike died near Boudha at 11pm. Chhotu's mechanic reached me in under 25 minutes and had me riding home within the hour.</p>
+        <footer class="font-mono text-xs text-[#B9B6AC]">— Rejina T., Boudha</footer>
+      </blockquote>
+      <blockquote class="card p-7 reveal" style="transition-delay:100ms">
+        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
+        <p class="text-[#B9B6AC] text-sm mb-5">Booked a home visit for my scooter's annual service. Mechanic showed up on time, explained every part he replaced.</p>
+        <footer class="font-mono text-xs text-[#B9B6AC]">— Suman K., Jorpati</footer>
+      </blockquote>
+      <blockquote class="card p-7 reveal" style="transition-delay:200ms">
+        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
+        <p class="text-[#B9B6AC] text-sm mb-5">Took my bike in for a full overhaul before a long ride. Fair pricing, genuine parts, done a day early.</p>
+        <footer class="font-mono text-xs text-[#B9B6AC]">— Prakash D., Chabahil</footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="relative border-t border-[#3A3F49] overflow-hidden">
+    <div class="hazard-stripe"></div>
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-16 text-center reveal">
+      <h2 class="text-3xl md:text-5xl font-bold mb-5">DON'T PUSH YOUR BIKE. CALL CHHOTU.</h2>
+      <p class="text-[#B9B6AC] mb-8 max-w-xl mx-auto">Whichever service fits — emergency, home visit, or workshop — booking takes under a minute.</p>
+      <a href="booking.html" class="btn btn-primary text-base"><i class="fa-solid fa-calendar-check"></i> Book Now</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- =====================================================================
+     SHARED FOOTER START — keep identical across all pages.
+     ===================================================================== -->
+<footer class="bg-[#1B1E24] border-t border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 py-14 grid md:grid-cols-4 gap-10">
+    <div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="brand-mark" aria-hidden="true"><i class="fa-solid fa-wrench"></i></span>
+        <span class="font-display font-semibold text-sm">CHHOTU MOTORCYCLES</span>
+      </div>
+      <p class="text-[#B9B6AC] text-sm">24/7 emergency roadside repair, home visits, and workshop appointments for every motorcycle in Kathmandu.</p>
+      <div class="flex gap-3 mt-5 text-lg">
+        <a href="#" aria-label="Facebook" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-facebook"></i></a>
+        <a href="#" aria-label="Instagram" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." aria-label="WhatsApp" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">QUICK LINKS</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="index.html" class="hover:text-[#F4F1E8]">Home</a></li>
+        <li><a href="about.html" class="hover:text-[#F4F1E8]">About</a></li>
+        <li><a href="services.html" class="hover:text-[#F4F1E8]">Services</a></li>
+        <li><a href="booking.html" class="hover:text-[#F4F1E8]">Booking</a></li>
+        <li><a href="contact.html" class="hover:text-[#F4F1E8]">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">SERVICES</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="services.html#emergency" class="hover:text-[#F4F1E8]">Emergency Repair</a></li>
+        <li><a href="services.html#home-visit" class="hover:text-[#F4F1E8]">Home / Office Visit</a></li>
+        <li><a href="services.html#workshop" class="hover:text-[#F4F1E8]">Workshop Appointment</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">CONTACT</h4>
+      <ul class="space-y-3 text-sm text-[#B9B6AC]">
+        <li class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-1"></i> Jorpati, Boudha Rd, Kathmandu 44600, Nepal</li>
+        <li class="flex items-center gap-2"><i class="fa-solid fa-phone"></i> <a href="tel:+9779813691072" class="hover:text-[#F4F1E8]">+977 981-369-1072</a></li>
+        <li class="flex items-center gap-2"><i class="fa-brands fa-whatsapp"></i> <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." class="hover:text-[#F4F1E8]">WhatsApp</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-[#3A3F49] py-5">
+    <p class="text-center text-xs text-[#B9B6AC]">© <span id="year"></span> Chhotu Motorcycles Workshop. All rights reserved.</p>
+  </div>
+</footer>
+<!-- =====================================================================
+     SHARED FOOTER END
+     ===================================================================== -->
+
+<!-- Floating WhatsApp button (every page) -->
+<a href="#" data-wa-message="Hi Chhotu Motorcycles, I'd like to know more." class="fab-whatsapp" aria-label="Chat on WhatsApp">
+  <i class="fa-brands fa-whatsapp"></i>
+</a>
+<!-- Floating Call button (mobile only, every page) -->
+<a href="tel:+9779813691072" class="fab-call" aria-label="Call Chhotu Motorcycles">
+  <i class="fa-solid fa-phone"></i>
+</a>
+<!-- Back to top -->
+<button id="back-to-top" class="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script src="assets/main.js"></script>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Simple count-up animation for .readout[data-count] elements, triggered on scroll reveal
+  function animateReadouts() {
+    document.querySelectorAll(".readout[data-count]").forEach((el) => {
+      const target = parseInt(el.getAttribute("data-count"), 10);
+      let current = 0;
+      const step = Math.max(1, Math.round(target / 40));
+      const tick = () => {
+        current = Math.min(target, current + step);
+        el.textContent = current;
+        if (current < target) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    window.addEventListener("load", animateReadouts);
+  } else {
+    document.querySelectorAll(".readout[data-count]").forEach((el) => {
+      el.textContent = el.getAttribute("data-count");
+    });
+  }
+</script>
+</body>
+</html>
