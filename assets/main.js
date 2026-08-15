@@ -248,6 +248,67 @@ function initTestimonialAutoScroll() {
   });
 }
 
+/* ---- Emergency WhatsApp Auto Location Detection ---- */
+function initEmergencyWhatsApp() {
+  const btn = document.getElementById("emergency-wa-btn");
+  if (!btn) return;
+
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+
+    if (!navigator.geolocation) {
+      const baseMsg = btn.getAttribute("data-wa-message");
+      window.open(buildWhatsAppLink(baseMsg), "_blank");
+      return;
+    }
+
+    const originalText = btn.innerHTML;
+    btn.style.pointerEvents = "none";
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Detecting location...`;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        let locationStr = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+        
+        try {
+          // Reverse geocode via osm nominatim
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
+            headers: { "Accept-Language": "en" }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            if (data && data.display_name) {
+              locationStr = data.display_name;
+            }
+          }
+        } catch (err) {
+          console.error("Reverse geocoding failed for emergency WhatsApp", err);
+        } finally {
+          const finalMsg = `Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ${locationStr}`;
+          window.open(buildWhatsAppLink(finalMsg), "_blank");
+          btn.style.pointerEvents = "auto";
+          btn.innerHTML = originalText;
+        }
+      },
+      (error) => {
+        console.error("Emergency Geolocation error:", error);
+        let errorDesc = "Permission denied/unable to detect";
+        if (error.code === error.POSITION_UNAVAILABLE) {
+          errorDesc = "Position unavailable";
+        } else if (error.code === error.TIMEOUT) {
+          errorDesc = "Detection timed out";
+        }
+        const finalMsg = `Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: (${errorDesc})`;
+        window.open(buildWhatsAppLink(finalMsg), "_blank");
+        btn.style.pointerEvents = "auto";
+        btn.innerHTML = originalText;
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  });
+}
+
 /* ---- Emergency banner call/WhatsApp shortcuts already use tel: / wa.me directly in HTML ---- */
 
 /* ---- Bootstrap ---- */
@@ -260,4 +321,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initWhatsAppLinks();
   initFloatingButtonsVisibility();
   initTestimonialAutoScroll();
+  initEmergencyWhatsApp();
 });
