@@ -196,6 +196,7 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible{
   display: flex; align-items: center; justify-content: center;
   font-size: 1.6rem;
   box-shadow: 0 8px 24px rgba(37,211,102,0.35);
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 .fab-whatsapp::after{
   content: "";
@@ -213,8 +214,8 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible{
 /* ---- Floating Call button (mobile only) ---- */
 .fab-call{
   position: fixed;
-  left: 1.1rem;
-  bottom: 1.1rem;
+  right: 1.1rem;
+  bottom: 5.5rem;
   z-index: 50;
   width: 58px; height: 58px;
   border-radius: 999px;
@@ -223,6 +224,7 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible{
   display: flex; align-items: center; justify-content: center;
   font-size: 1.4rem;
   box-shadow: 0 8px 24px rgba(255,90,31,0.35);
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 @media (min-width: 768px){
   .fab-call{ display: none; }
@@ -232,7 +234,7 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible{
 .back-to-top{
   position: fixed;
   right: 1.1rem;
-  bottom: 5.4rem;
+  bottom: 9.8rem;
   z-index: 49;
   width: 44px; height: 44px;
   border-radius: 999px;
@@ -243,6 +245,11 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible{
   opacity: 0; pointer-events: none;
   transition: opacity 0.25s ease, transform 0.25s ease;
   transform: translateY(8px);
+}
+@media (min-width: 768px){
+  .back-to-top{
+    bottom: 5.4rem;
+  }
 }
 .back-to-top.show{ opacity: 1; pointer-events: auto; transform: translateY(0); }
 

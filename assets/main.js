@@ -128,6 +128,69 @@ function initWhatsAppLinks() {
   });
 }
 
+/* ---- Hide floating call and WhatsApp buttons when footer is visible ---- */
+function initFloatingButtonsVisibility() {
+  const whatsappBtn = document.querySelector(".fab-whatsapp");
+  const callBtn = document.querySelector(".fab-call");
+  const footer = document.querySelector("footer");
+
+  if (!whatsappBtn && !callBtn) return;
+
+  const hideButtons = () => {
+    if (whatsappBtn) {
+      whatsappBtn.style.opacity = "0";
+      whatsappBtn.style.visibility = "hidden";
+      whatsappBtn.style.pointerEvents = "none";
+    }
+    if (callBtn) {
+      callBtn.style.opacity = "0";
+      callBtn.style.visibility = "hidden";
+      callBtn.style.pointerEvents = "none";
+    }
+  };
+
+  const showButtons = () => {
+    if (whatsappBtn) {
+      whatsappBtn.style.opacity = "1";
+      whatsappBtn.style.visibility = "visible";
+      whatsappBtn.style.pointerEvents = "auto";
+    }
+    if (callBtn) {
+      callBtn.style.opacity = "1";
+      callBtn.style.visibility = "visible";
+      callBtn.style.pointerEvents = "auto";
+    }
+  };
+
+  if ("IntersectionObserver" in window && footer) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          hideButtons();
+        } else {
+          showButtons();
+        }
+      });
+    }, {
+      root: null,
+      threshold: 0, // Trigger as soon as the footer enters the viewport
+      rootMargin: "0px"
+    });
+    observer.observe(footer);
+  } else {
+    // Fallback scroll detection
+    window.addEventListener("scroll", () => {
+      if (!footer) return;
+      const footerRect = footer.getBoundingClientRect();
+      if (footerRect.top < window.innerHeight) {
+        hideButtons();
+      } else {
+        showButtons();
+      }
+    });
+  }
+}
+
 /* ---- Emergency banner call/WhatsApp shortcuts already use tel: / wa.me directly in HTML ---- */
 
 /* ---- Bootstrap ---- */
@@ -138,4 +201,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initBackToTop();
   initLazyImages();
   initWhatsAppLinks();
+  initFloatingButtonsVisibility();
 });
