@@ -292,7 +292,7 @@ function initEmergencyWhatsApp() {
           } catch (err) {
             console.error("Reverse geocoding failed for emergency WhatsApp", err);
           } finally {
-            const finalMsg = `Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ${locationStr}`;
+            const finalMsg = `Hi Chhotu Workshop, I need EMERGENCY roadside help right now. My location: ${locationStr} - Maps Link: https://www.google.com/maps?q=${latitude},${longitude}`;
             window.open(buildWhatsAppLink(finalMsg), "_blank");
             btn.style.pointerEvents = "auto";
             btn.innerHTML = originalText;
