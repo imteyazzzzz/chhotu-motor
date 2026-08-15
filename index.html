@@ -23,6 +23,7 @@
 </head>
 <body class="antialiased">
 
+<div class="sticky top-0 z-40">
   <!-- ============ EMERGENCY STRIP (ANNOUNCEMENT BAR) ============ -->
   <section class="emergency-strip">
     <div class="max-w-7xl mx-auto px-4 md:px-8 py-2 md:py-3 flex items-center justify-center md:justify-between gap-3 text-center">
@@ -35,12 +36,12 @@
       </div>
     </div>
   </section>
-  
+  <div class="hazard-stripe hazard-stripe--thin"></div>
 
 <!-- =====================================================================
      SHARED HEADER START — keep identical across all pages.
      ===================================================================== -->
-<header class="sticky top-0 z-40 bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
+<header class="bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
   <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
     <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
       <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU <span class="text-[#FF5A1F]">WORKSHOP</span></span>
@@ -72,6 +73,7 @@
     </div>
   </div>
 </header>
+</div>
 
 <!-- Mobile slide-in menu -->
 <div id="mobile-menu" class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden" aria-hidden="true">
