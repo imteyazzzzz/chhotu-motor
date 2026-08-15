@@ -147,9 +147,9 @@
             </div>
           </div>
 
-          <div>
-            <label class="field-label" for="b-issue">Issue Description *</label>
-            <textarea id="b-issue" name="issueDescription" rows="4" class="field-input" placeholder="What's wrong with the bike?" required></textarea>
+          <div id="b-issue-wrap">
+            <label class="field-label" for="b-issue">Issue Description <span id="b-issue-required">*</span></label>
+            <textarea id="b-issue" name="issueDescription" rows="4" class="field-input" placeholder="What's wrong with the bike?"></textarea>
             <p class="field-error" id="b-issue-error">Please describe the issue.</p>
           </div>
 
@@ -266,7 +266,11 @@
   const serviceSelect = document.getElementById("b-service");
   const locationInput = document.getElementById("b-location");
   const locationRequiredMark = document.getElementById("b-location-required");
+  const locationWrap = document.getElementById("b-location-wrap");
   const dateTimeWrap = document.getElementById("b-datetime-wrap");
+  const issueInput = document.getElementById("b-issue");
+  const issueWrap = document.getElementById("b-issue-wrap");
+  const issueRequiredMark = document.getElementById("b-issue-required");
 
   // ---- Prefill service type from ?service= query param (see services.html links) ----
   const params = new URLSearchParams(window.location.search);
@@ -278,17 +282,35 @@
   // ---- Toggle "location required" + date/time relevance based on service type ----
   function syncServiceUI() {
     const val = serviceSelect.value;
-    const locationRequired = val === "emergency" || val === "home-visit";
-    locationRequiredMark.style.display = locationRequired ? "inline" : "none";
-    locationInput.required = locationRequired;
     
-    // Date/time selection is hidden by default, shown only for scheduled services (home visit / workshop)
-    if (val === "home-visit" || val === "workshop") {
-      dateTimeWrap.style.display = "grid";
-    } else {
-      dateTimeWrap.style.display = "none";
+    // 1. Location visibility and required status
+    const locationRequired = val === "emergency" || val === "home-visit";
+    const showLocation = val === "emergency" || val === "home-visit";
+    
+    locationInput.required = locationRequired;
+    locationRequiredMark.style.display = locationRequired ? "inline" : "none";
+    locationWrap.style.display = showLocation ? "block" : "none";
+    if (!showLocation) {
+      locationInput.value = "";
+    }
+
+    // 2. Date and Time visibility
+    const showDateTime = val === "home-visit" || val === "workshop";
+    dateTimeWrap.style.display = showDateTime ? "grid" : "none";
+    if (!showDateTime) {
       document.getElementById("b-date").value = "";
       document.getElementById("b-time").value = "";
+    }
+
+    // 3. Issue visibility and required status
+    const issueRequired = val === "home-visit" || val === "workshop";
+    const showIssue = val === "home-visit" || val === "workshop";
+    
+    issueInput.required = issueRequired;
+    issueRequiredMark.style.display = issueRequired ? "inline" : "none";
+    issueWrap.style.display = showIssue ? "block" : "none";
+    if (!showIssue) {
+      issueInput.value = "";
     }
   }
   serviceSelect.addEventListener("change", syncServiceUI);
@@ -368,12 +390,16 @@
       { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: isValidPhone },
       { input: bikeInput, error: document.getElementById("b-bike-error"), required: true },
       { input: serviceSelect, error: document.getElementById("b-service-error"), required: true },
-      { input: issueInput, error: document.getElementById("b-issue-error"), required: true },
     ];
     if (locationInput.required) {
       rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true });
     } else {
       clearFieldError(locationInput, document.getElementById("b-location-error"));
+    }
+    if (issueInput.required) {
+      rules.push({ input: issueInput, error: document.getElementById("b-issue-error"), required: true });
+    } else {
+      clearFieldError(issueInput, document.getElementById("b-issue-error"));
     }
 
     if (!validateForm(rules)) return;
