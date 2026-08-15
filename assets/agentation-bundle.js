@@ -4975,7 +4975,7 @@ input[type=checkbox]:checked + .styles-module__customCheckbox___U39ax {
         ${Cd.map(s=>`--agentation-color-${s.id}: ${s.p3};`).join(`
 `)}
       }
-    }`].join(""),document.head.appendChild(i)};u7()});var f7=ha(()=>{var Tv=kn(Dl()),Rv=kn(Ob());Ev();var d7=window.location.hostname==="localhost"||window.location.hostname==="127.0.0.1"||window.location.protocol==="file:";d7&&(document.readyState==="loading"?document.addEventListener("DOMContentLoaded",Mv):Mv());function Mv(){if(document.getElementById("agentation-root"))return;let i=document.createElement("div");i.id="agentation-root",document.body.appendChild(i),(0,Rv.createRoot)(i).render(Tv.default.createElement(kv,{endpoint:"http://localhost:4747",onSessionCreated:u=>{console.log("Agentation session started:",u)}}))}});f7();})();
+    }`].join(""),document.head.appendChild(i)};u7()});var f7=ha(()=>{var Tv=kn(Dl()),Rv=kn(Ob());Ev();var d7=window.location.hostname==="localhost"||window.location.hostname==="127.0.0.1"||window.location.hostname.startsWith("172.")||window.location.hostname.startsWith("192.168.")||window.location.hostname.startsWith("10.")||window.location.protocol==="file:";d7&&(document.readyState==="loading"?document.addEventListener("DOMContentLoaded",Mv):Mv());function Mv(){if(document.getElementById("agentation-root"))return;let i=document.createElement("div");i.id="agentation-root",document.body.appendChild(i);let u=`http://${window.location.hostname||"localhost"}:4747`;(0,Rv.createRoot)(i).render(Tv.default.createElement(kv,{endpoint:u,onSessionCreated:h=>{console.log("Agentation session started:",h)}}))}});f7();})();
 /*! Bundled license information:
 
 react/cjs/react.development.js:
