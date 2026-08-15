@@ -257,8 +257,7 @@ function initEmergencyWhatsApp() {
     e.preventDefault();
 
     if (!navigator.geolocation) {
-      const baseMsg = btn.getAttribute("data-wa-message");
-      window.open(buildWhatsAppLink(baseMsg), "_blank");
+      alert("Geolocation is not supported by your browser.");
       return;
     }
 
@@ -293,18 +292,20 @@ function initEmergencyWhatsApp() {
       },
       (error) => {
         console.error("Emergency Geolocation error:", error);
-        let errorDesc = "Permission denied/unable to detect";
-        if (error.code === error.POSITION_UNAVAILABLE) {
-          errorDesc = "Position unavailable";
+        let errorDesc = "Unable to retrieve your location.";
+        if (error.code === error.PERMISSION_DENIED) {
+          errorDesc = "Location permission denied. Please allow location access to request emergency roadside assistance.";
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          errorDesc = "Location details unavailable. Please turn on your device's GPS/location services and try again.";
         } else if (error.code === error.TIMEOUT) {
-          errorDesc = "Detection timed out";
+          errorDesc = "Location request timed out. Please check your signal and try again.";
         }
-        const finalMsg = `Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: (${errorDesc})`;
-        window.open(buildWhatsAppLink(finalMsg), "_blank");
+        
+        alert(errorDesc);
         btn.style.pointerEvents = "auto";
         btn.innerHTML = originalText;
       },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   });
 }
