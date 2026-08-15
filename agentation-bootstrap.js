@@ -20,6 +20,45 @@ if (isLocal) {
   }
 }
 
+function copyToClipboardFallback(text) {
+  // Try modern Clipboard API first if it is a secure context
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text)
+      .then(() => console.log('Copied to clipboard (secure context)'))
+      .catch((err) => {
+        console.warn('navigator.clipboard failed, trying fallback copy...', err);
+        fallbackCopyToClipboard(text);
+      });
+  } else {
+    fallbackCopyToClipboard(text);
+  }
+}
+
+function fallbackCopyToClipboard(text) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  // Ensure the textarea is off-screen and invisible
+  textarea.style.position = 'fixed';
+  textarea.style.top = '0';
+  textarea.style.left = '0';
+  textarea.style.opacity = '0';
+  textarea.style.pointerEvents = 'none';
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) {
+      console.log('Copied to clipboard (fallback copy)');
+    } else {
+      console.error('Fallback copy execution failed');
+    }
+  } catch (err) {
+    console.error('Fallback copy failed', err);
+  }
+  document.body.removeChild(textarea);
+}
+
 function initAgentation() {
   // Prevent duplicate insertion
   if (document.getElementById('agentation-root')) return;
@@ -36,6 +75,10 @@ function initAgentation() {
   root.render(
     React.createElement(Agentation, {
       endpoint: endpoint,
+      copyToClipboard: false, // Turn off default copy to run our fallback onCopy handler
+      onCopy: (markdown) => {
+        copyToClipboardFallback(markdown);
+      },
       onSessionCreated: (sessionId) => {
         console.log("Agentation session started:", sessionId);
       }
