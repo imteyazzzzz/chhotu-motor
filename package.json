@@ -1,0 +1,31 @@
+{
+  "name": "chhotu-motor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:agentation": "esbuild agentation-bootstrap.js --bundle --minify --outfile=assets/agentation-bundle.js --define:process.env.NODE_ENV=\\\"development\\\"",
+    "watch:agentation": "esbuild agentation-bootstrap.js --bundle --watch --outfile=assets/agentation-bundle.js --define:process.env.NODE_ENV=\\\"development\\\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imteyazzzzz/chhotu-motor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/imteyazzzzz/chhotu-motor/issues"
+  },
+  "homepage": "https://github.com/imteyazzzzz/chhotu-motor#readme",
+  "devDependencies": {
+    "agentation": "^3.0.2",
+    "esbuild": "^0.28.2"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  }
+}
