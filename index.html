@@ -23,6 +23,20 @@
 </head>
 <body class="antialiased">
 
+  <!-- ============ EMERGENCY STRIP (ANNOUNCEMENT BAR) ============ -->
+  <section class="emergency-strip">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+      <p class="font-display font-semibold text-sm md:text-base flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation"></i> 24/7 ROADSIDE ASSISTANCE — STRANDED NOW?
+      </p>
+      <div class="flex gap-3">
+        <a href="tel:+9779813691072" class="font-mono text-sm font-bold underline underline-offset-2"><i class="fa-solid fa-phone"></i> +977 981-369-1072</a>
+        <a href="#" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: " class="font-mono text-sm font-bold underline underline-offset-2"><i class="fa-brands fa-whatsapp"></i> WhatsApp Us</a>
+      </div>
+    </div>
+  </section>
+  <div class="hazard-stripe hazard-stripe--thin"></div>
+
 <!-- =====================================================================
      SHARED HEADER START — keep identical across all pages.
      ===================================================================== -->
@@ -116,19 +130,6 @@
     </div>
   </section>
 
-  <!-- ============ EMERGENCY STRIP ============ -->
-  <section class="emergency-strip">
-    <div class="max-w-7xl mx-auto px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
-      <p class="font-display font-semibold text-sm md:text-base flex items-center gap-2">
-        <i class="fa-solid fa-triangle-exclamation"></i> 24/7 ROADSIDE ASSISTANCE — STRANDED NOW?
-      </p>
-      <div class="flex gap-3">
-        <a href="tel:+9779813691072" class="font-mono text-sm font-bold underline underline-offset-2"><i class="fa-solid fa-phone"></i> +977 981-369-1072</a>
-        <a href="#" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: " class="font-mono text-sm font-bold underline underline-offset-2"><i class="fa-brands fa-whatsapp"></i> WhatsApp Us</a>
-      </div>
-    </div>
-  </section>
-  <div class="hazard-stripe hazard-stripe--thin"></div>
 
   <!-- ============ SERVICES OVERVIEW ============ -->
   <section class="max-w-7xl mx-auto px-4 md:px-8 py-20">
@@ -182,7 +183,7 @@
         <h2 class="text-3xl md:text-4xl font-bold">WHAT KATHMANDU RIDERS SAY</h2>
       </div>
     </div>
-    <div class="grid md:grid-cols-3 gap-6">
+    <div class="testimonial-slider grid md:grid-cols-3 lg:grid-cols-5 gap-6">
       <blockquote class="card p-7 reveal">
         <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
         <p class="text-[#B9B6AC] text-sm mb-5">Bike died near Boudha at 11pm. Chhotu's mechanic reached me in under 25 minutes and had me riding home within the hour.</p>
@@ -198,11 +199,21 @@
         <p class="text-[#B9B6AC] text-sm mb-5">Took my bike in for a full overhaul before a long ride. Fair pricing, genuine parts, done a day early.</p>
         <footer class="font-mono text-xs text-[#B9B6AC]">— Prakash D., Chabahil</footer>
       </blockquote>
+      <blockquote class="card p-7 reveal" style="transition-delay:300ms">
+        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
+        <p class="text-[#B9B6AC] text-sm mb-5">Amazing roadside recovery! I was stuck in heavy rain with a punctured tire. They arrived fast and fixed it on the spot.</p>
+        <footer class="font-mono text-xs text-[#B9B6AC]">— Anish M., Kalanki</footer>
+      </blockquote>
+      <blockquote class="card p-7 reveal" style="transition-delay:400ms">
+        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
+        <p class="text-[#B9B6AC] text-sm mb-5">Highly recommend their home service. Very convenient for busy people. The mechanic was professional and knowledgeable.</p>
+        <footer class="font-mono text-xs text-[#B9B6AC]">— Prerna S., Lalitpur</footer>
+      </blockquote>
     </div>
   </section>
 
   <!-- ============ CTA ============ -->
-  <section class="relative border-t border-[#3A3F49] overflow-hidden">
+  <section class="cta-section relative border-t border-[#3A3F49] overflow-hidden">
     <div class="hazard-stripe"></div>
     <div class="max-w-7xl mx-auto px-4 md:px-8 py-16 text-center reveal">
       <h2 class="text-3xl md:text-5xl font-bold mb-5">DON'T PUSH YOUR BIKE. CALL CHHOTU.</h2>

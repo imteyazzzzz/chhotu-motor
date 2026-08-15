@@ -128,13 +128,13 @@ function initWhatsAppLinks() {
   });
 }
 
-/* ---- Hide floating call and WhatsApp buttons when footer is visible ---- */
+/* ---- Hide floating call and WhatsApp buttons when footer or cta-section is visible ---- */
 function initFloatingButtonsVisibility() {
   const whatsappBtn = document.querySelector(".fab-whatsapp");
   const callBtn = document.querySelector(".fab-call");
-  const footer = document.querySelector("footer");
+  const targets = document.querySelectorAll("footer, .cta-section");
 
-  if (!whatsappBtn && !callBtn) return;
+  if ((!whatsappBtn && !callBtn) || targets.length === 0) return;
 
   const hideButtons = () => {
     if (whatsappBtn) {
@@ -162,33 +162,90 @@ function initFloatingButtonsVisibility() {
     }
   };
 
-  if ("IntersectionObserver" in window && footer) {
+  if ("IntersectionObserver" in window) {
+    const targetStates = new Map();
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          hideButtons();
-        } else {
-          showButtons();
-        }
+        targetStates.set(entry.target, entry.isIntersecting);
       });
+
+      // Hide buttons if ANY observed target is intersecting
+      const shouldHide = Array.from(targetStates.values()).some((state) => state === true);
+      if (shouldHide) {
+        hideButtons();
+      } else {
+        showButtons();
+      }
     }, {
       root: null,
-      threshold: 0, // Trigger as soon as the footer enters the viewport
+      threshold: 0,
       rootMargin: "0px"
     });
-    observer.observe(footer);
+
+    targets.forEach((target) => {
+      targetStates.set(target, false);
+      observer.observe(target);
+    });
   } else {
     // Fallback scroll detection
     window.addEventListener("scroll", () => {
-      if (!footer) return;
-      const footerRect = footer.getBoundingClientRect();
-      if (footerRect.top < window.innerHeight) {
+      let shouldHide = false;
+      targets.forEach((target) => {
+        const rect = target.getBoundingClientRect();
+        if (rect.top < window.innerHeight) {
+          shouldHide = true;
+        }
+      });
+      if (shouldHide) {
         hideButtons();
       } else {
         showButtons();
       }
     });
   }
+}
+
+/* ---- Testimonial Auto Scroll (mobile only) ---- */
+function initTestimonialAutoScroll() {
+  const slider = document.querySelector(".testimonial-slider");
+  if (!slider) return;
+
+  let autoScrollInterval;
+
+  const startAutoScroll = () => {
+    // Only auto-scroll on mobile viewports (< 768px)
+    if (window.innerWidth >= 768) return;
+
+    autoScrollInterval = setInterval(() => {
+      const firstCard = slider.querySelector("blockquote");
+      if (!firstCard) return;
+
+      const cardWidth = firstCard.offsetWidth + 16; // card width + gap
+      const maxScroll = slider.scrollWidth - slider.clientWidth;
+
+      if (slider.scrollLeft >= maxScroll - 5) {
+        slider.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        slider.scrollBy({ left: cardWidth, behavior: "smooth" });
+      }
+    }, 4000);
+  };
+
+  const stopAutoScroll = () => {
+    clearInterval(autoScrollInterval);
+  };
+
+  startAutoScroll();
+
+  // Pause on touch interaction to keep UX clean
+  slider.addEventListener("touchstart", stopAutoScroll);
+  slider.addEventListener("touchend", startAutoScroll);
+
+  // Restart/re-evaluate on resize
+  window.addEventListener("resize", () => {
+    stopAutoScroll();
+    startAutoScroll();
+  });
 }
 
 /* ---- Emergency banner call/WhatsApp shortcuts already use tel: / wa.me directly in HTML ---- */
@@ -202,4 +259,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initLazyImages();
   initWhatsAppLinks();
   initFloatingButtonsVisibility();
+  initTestimonialAutoScroll();
 });

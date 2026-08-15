@@ -310,3 +310,27 @@ img.lazy-ph{
   0%{ background-position: 100% 50%; }
   100%{ background-position: 0 50%; }
 }
+
+/* ---- Testimonial Slider (mobile-only horizontal scroll) ---- */
+@media (max-width: 767px) {
+  .testimonial-slider {
+    display: flex !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: 1rem;
+    padding: 0.5rem 1rem 1.5rem 1rem;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+  }
+  .testimonial-slider::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
+  }
+  .testimonial-slider blockquote {
+    flex: 0 0 85% !important;
+    scroll-snap-align: center;
+    margin-bottom: 0 !important;
+  }
+}
