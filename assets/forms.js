@@ -63,7 +63,14 @@ async function submitToWebhook({ payload, button, successEl, errorEl, waFallback
   button.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Sending…`;
 
   if (successEl) successEl.classList.add("hidden");
-  if (errorEl) errorEl.classList.add("hidden");
+  if (errorEl) {
+    errorEl.classList.add("hidden");
+    const detailsEl = errorEl.querySelector(".error-details");
+    if (detailsEl) {
+      detailsEl.textContent = "";
+      detailsEl.classList.add("hidden");
+    }
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
@@ -77,7 +84,13 @@ async function submitToWebhook({ payload, button, successEl, errorEl, waFallback
     });
     clearTimeout(timeout);
 
-    if (!res.ok) throw new Error(`Webhook responded ${res.status}`);
+    if (!res.ok) {
+      let bodyText = "";
+      try {
+        bodyText = await res.text();
+      } catch (_) {}
+      throw new Error(`Server responded with status ${res.status}${bodyText ? ": " + bodyText.substring(0, 100) : ""}`);
+    }
 
     if (successEl) successEl.classList.remove("hidden");
     button.innerHTML = originalLabel;
@@ -88,6 +101,11 @@ async function submitToWebhook({ payload, button, successEl, errorEl, waFallback
     console.error("Webhook submission failed:", err);
     if (errorEl) {
       errorEl.classList.remove("hidden");
+      const detailsEl = errorEl.querySelector(".error-details");
+      if (detailsEl) {
+        detailsEl.textContent = `Error Details: ${err.message || err}`;
+        detailsEl.classList.remove("hidden");
+      }
       const waLink = errorEl.querySelector("[data-wa-fallback]");
       if (waLink && waFallbackHref) waLink.setAttribute("href", waFallbackHref);
     }

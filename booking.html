@@ -168,6 +168,7 @@
           <div id="b-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-5">
             <p class="font-display text-sm text-red-400 mb-2"><i class="fa-solid fa-triangle-exclamation"></i> SUBMISSION FAILED</p>
             <p class="text-[#B9B6AC] text-sm mb-4">Something went wrong sending your booking. Please try again, or send it to us directly on WhatsApp.</p>
+            <p class="error-details text-xs text-red-400 font-mono mb-4 hidden"></p>
             <a href="#" data-wa-fallback class="btn btn-outline !text-xs"><i class="fa-brands fa-whatsapp"></i> Send via WhatsApp Instead</a>
           </div>
         </form>
@@ -303,7 +304,7 @@
     }
 
     // 3. Issue visibility and required status
-    const issueRequired = val === "home-visit" || val === "workshop";
+    const issueRequired = val !== "";
     const showIssue = val !== "";
     
     issueInput.required = issueRequired;
