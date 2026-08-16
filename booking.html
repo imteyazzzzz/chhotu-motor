@@ -618,13 +618,9 @@
 
         const { data, error } = await window.supabaseClient
           .from('bookings')
-          .insert([insertData])
-          .select('id');
+          .insert([insertData]);
 
         if (error) throw error;
-        if (data && data.length > 0) {
-          supabaseBookingId = data[0].id;
-        }
       } catch (err) {
         console.error("Failed to save booking to Supabase:", err);
         alert("Failed to save booking to database: " + (err.message || err));
