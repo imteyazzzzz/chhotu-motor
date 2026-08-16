@@ -96,6 +96,7 @@
         <form id="booking-form" class="card p-6 md:p-8 space-y-6" novalidate>
           <input type="hidden" id="b-coords" name="coordinates" value="">
 
+          <!-- Full Name & Phone Number -->
           <div class="grid sm:grid-cols-2 gap-5">
             <div>
               <label class="field-label" for="b-name">Full Name *</label>
@@ -119,6 +120,19 @@
             </div>
           </div>
 
+          <!-- Service Type -->
+          <div id="b-service-wrap">
+            <label class="field-label" for="b-service">Service Type *</label>
+            <select id="b-service" name="serviceType" class="field-input" required>
+              <option value="">Select a service</option>
+              <option value="emergency">Emergency Repair / Roadside Assistance</option>
+              <option value="home-visit">Scheduled Home / Office Visit</option>
+              <option value="workshop">Workshop Visit / Appointment</option>
+            </select>
+            <p class="field-error" id="b-service-error">Please select a service type.</p>
+          </div>
+
+          <!-- Bike Brand & Bike Model -->
           <div class="grid sm:grid-cols-2 gap-5">
             <div>
               <label class="field-label" for="b-brand">Bike Brand *</label>
@@ -136,57 +150,51 @@
               </select>
               <p class="field-error" id="b-brand-error">Please select a brand.</p>
             </div>
-            <div id="b-location-wrap">
-              <label class="field-label" for="b-location">Location / Address <span id="b-location-required">*</span></label>
-              <div class="flex gap-2">
-                <input id="b-location" name="location" type="text" class="field-input flex-1" placeholder="Street, landmark, or GPS pin — required for Emergency &amp; Home Visit">
-                <button type="button" id="b-detect-location" class="btn btn-outline shrink-0 !py-0 !px-4" title="Auto-detect location">
-                  <i class="fa-solid fa-location-crosshairs text-[#FF5A1F]"></i>
-                  <span class="hidden sm:inline text-xs">Auto-Detect</span>
-                </button>
-              </div>
-              <p class="field-error" id="b-location-error">Location is required for this service.</p>
-            </div>
-          </div>
-
-          <div class="grid sm:grid-cols-2 gap-5" id="b-brand-detail-wrap">
-            <div id="b-brand-other-wrap" class="hidden">
-              <label class="field-label" for="b-brand-other">Specify Brand *</label>
-              <input id="b-brand-other" name="brandOther" type="text" class="field-input" placeholder="e.g. Vespa, Aprilia, Ducati">
-              <p class="field-error" id="b-brand-other-error">Please specify your bike brand.</p>
-            </div>
-            <div id="b-model-wrap" class="sm:col-span-2">
+            <div>
               <label class="field-label" for="b-bike">Bike Model *</label>
               <input id="b-bike" name="bikeModel" type="text" class="field-input" placeholder="e.g. Pulsar 150, Shine, FZ" required>
               <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
             </div>
           </div>
 
-          <div id="b-service-wrap">
-            <label class="field-label" for="b-service">Service Type *</label>
-            <select id="b-service" name="serviceType" class="field-input" required>
-              <option value="">Select a service</option>
-              <option value="emergency">Emergency Repair / Roadside Assistance</option>
-              <option value="home-visit">Scheduled Home / Office Visit</option>
-              <option value="workshop">Workshop Visit / Appointment</option>
-            </select>
-            <p class="field-error" id="b-service-error">Please select a service type.</p>
+          <!-- Specify Brand (Hidden by default) -->
+          <div id="b-brand-other-wrap" class="hidden">
+            <label class="field-label" for="b-brand-other">Specify Brand *</label>
+            <input id="b-brand-other" name="brandOther" type="text" class="field-input" placeholder="e.g. Vespa, Aprilia, Ducati">
+            <p class="field-error" id="b-brand-other-error">Please specify your bike brand.</p>
           </div>
 
+          <!-- Location / Address -->
+          <div id="b-location-wrap">
+            <label class="field-label" for="b-location">Location / Address <span id="b-location-required">*</span></label>
+            <div class="flex gap-2">
+              <input id="b-location" name="location" type="text" class="field-input flex-1" placeholder="Street, landmark, or GPS pin — required for Emergency &amp; Home Visit">
+              <button type="button" id="b-detect-location" class="btn btn-outline shrink-0 !py-0 !px-4" title="Auto-detect location">
+                <i class="fa-solid fa-location-crosshairs text-[#FF5A1F]"></i>
+                <span class="hidden sm:inline text-xs">Auto-Detect</span>
+              </button>
+            </div>
+            <p class="field-error" id="b-location-error">Location is required for this service.</p>
+          </div>
+
+          <!-- Preferred Date & Time -->
           <div class="grid sm:grid-cols-2 gap-5" id="b-datetime-wrap">
             <div>
-              <label class="field-label" for="b-date">Preferred Date</label>
+              <label class="field-label" for="b-date">Preferred Date *</label>
               <input id="b-date" name="preferredDate" type="date" class="field-input">
+              <p class="field-error" id="b-date-error">Preferred date is required for this service.</p>
             </div>
             <div>
-              <label class="field-label" for="b-time">Preferred Time</label>
+              <label class="field-label" for="b-time">Preferred Time *</label>
               <input id="b-time" name="preferredTime" type="time" class="field-input">
+              <p class="field-error" id="b-time-error">Preferred time is required for this service.</p>
             </div>
           </div>
 
+          <!-- Issue Description -->
           <div id="b-issue-wrap">
-            <label class="field-label" for="b-issue">Issue Description <span id="b-issue-required">*</span></label>
-            <textarea id="b-issue" name="issueDescription" rows="4" class="field-input" placeholder="What's wrong with the bike?"></textarea>
+            <label class="field-label" for="b-issue">Issue Description *</label>
+            <textarea id="b-issue" name="issueDescription" rows="4" class="field-input" placeholder="What's wrong with the bike?" required></textarea>
             <p class="field-error" id="b-issue-error">Please describe the issue.</p>
           </div>
 
@@ -439,19 +447,15 @@
   const brandSelect = document.getElementById("b-brand");
   const brandOtherWrap = document.getElementById("b-brand-other-wrap");
   const brandOtherInput = document.getElementById("b-brand-other");
-  const modelWrap = document.getElementById("b-model-wrap");
-
   function syncBrandUI() {
     const isOther = brandSelect.value === "Other";
     if (isOther) {
       brandOtherWrap.classList.remove("hidden");
       brandOtherInput.required = true;
-      modelWrap.classList.remove("sm:col-span-2");
     } else {
       brandOtherWrap.classList.add("hidden");
       brandOtherInput.required = false;
       brandOtherInput.value = "";
-      modelWrap.classList.add("sm:col-span-2");
       if (typeof clearFieldError === "function") {
         clearFieldError(brandOtherInput, document.getElementById("b-brand-other-error"));
       }
@@ -521,24 +525,35 @@
     const rules = [
       { input: nameInput, error: document.getElementById("b-name-error"), required: true },
       { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value) },
+      { input: serviceSelect, error: document.getElementById("b-service-error"), required: true },
       { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true },
       { input: bikeInput, error: document.getElementById("b-bike-error"), required: true },
-      { input: serviceSelect, error: document.getElementById("b-service-error"), required: true },
+      { input: issueInput, error: document.getElementById("b-issue-error"), required: true }
     ];
+
     if (brandSelectEl.value === "Other") {
       rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true });
     } else {
       clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
     }
+
+    const val = serviceSelect.value;
     if (locationInput.required) {
       rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true });
     } else {
       clearFieldError(locationInput, document.getElementById("b-location-error"));
     }
-    if (issueInput.required) {
-      rules.push({ input: issueInput, error: document.getElementById("b-issue-error"), required: true });
+
+    const isDateTimeRequired = val === "home-visit" || val === "workshop";
+    const dateInput = document.getElementById("b-date");
+    const timeInput = document.getElementById("b-time");
+
+    if (isDateTimeRequired) {
+      rules.push({ input: dateInput, error: document.getElementById("b-date-error"), required: true });
+      rules.push({ input: timeInput, error: document.getElementById("b-time-error"), required: true });
     } else {
-      clearFieldError(issueInput, document.getElementById("b-issue-error"));
+      clearFieldError(dateInput, document.getElementById("b-date-error"));
+      clearFieldError(timeInput, document.getElementById("b-time-error"));
     }
 
     if (!validateForm(rules)) return;
