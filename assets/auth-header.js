@@ -1,6 +1,6 @@
 // =========================================================================
 // CHHOTU MOTORCYCLES WORKSHOP — AUTH HEADER HELPER
-// Handles dynamic sign-in/sign-out visual states in the header.
+// Handles dynamic sign-in/sign-out visual states in the header buttons.
 // =========================================================================
 
 async function updateAuthHeader() {
@@ -9,96 +9,83 @@ async function updateAuthHeader() {
   try {
     const { data: { session } } = await window.supabaseClient.auth.getSession();
     
-    // Find desktop nav container
-    const nav = document.querySelector("nav[aria-label='Primary']");
-    const mobileNav = document.querySelector("nav[aria-label='Mobile Primary']");
-
-    if (!nav || !mobileNav) return;
+    const dBtnAuth = document.getElementById("d-btn-auth");
+    const dBtnTrack = document.getElementById("d-btn-track");
+    const mBtnAuth = document.getElementById("m-btn-auth");
+    const mBtnTrack = document.getElementById("m-btn-track");
 
     if (session && session.user) {
-      // 1. Desktop Nav Update
-      // Add "My Repairs" tracking link if it doesn't exist
-      if (!document.getElementById("nav-tracking")) {
-        const trackLink = document.createElement("a");
-        trackLink.id = "nav-tracking";
-        trackLink.href = "tracking.html";
-        trackLink.className = "nav-link";
-        trackLink.setAttribute("data-nav-link", "");
-        trackLink.textContent = "My Repairs";
-        nav.appendChild(trackLink);
-      }
+      // USER IS LOGGED IN
       
-      // Add "Sign Out" button/link
-      if (!document.getElementById("nav-signout")) {
-        const signoutLink = document.createElement("a");
-        signoutLink.id = "nav-signout";
-        signoutLink.href = "#";
-        signoutLink.className = "nav-link !text-red-400 hover:!text-red-300";
-        signoutLink.textContent = "Sign Out";
-        signoutLink.addEventListener("click", async (e) => {
+      // 1. Desktop Buttons
+      if (dBtnAuth) {
+        dBtnAuth.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
+        dBtnAuth.href = "#";
+        dBtnAuth.className = "btn btn-outline !py-2 !px-4 !text-xs !text-red-400 border-red-500/40 hover:!text-red-300 hover:bg-red-500/10";
+        dBtnAuth.onclick = async (e) => {
           e.preventDefault();
           const { error } = await window.supabaseClient.auth.signOut();
           if (error) alert("Error signing out: " + error.message);
           window.location.reload();
-        });
-        nav.appendChild(signoutLink);
+        };
+      }
+      if (dBtnTrack) {
+        dBtnTrack.innerHTML = `<i class="fa-solid fa-route"></i> My Repairs`;
+        dBtnTrack.href = "tracking.html";
+        dBtnTrack.className = "btn btn-primary !py-2 !px-4 !text-xs";
       }
 
-      // 2. Mobile Nav Update
-      if (!document.getElementById("m-nav-tracking")) {
-        const mTrackLink = document.createElement("a");
-        mTrackLink.id = "m-nav-tracking";
-        mTrackLink.href = "tracking.html";
-        mTrackLink.className = "nav-link";
-        mTrackLink.textContent = "My Repairs";
-        mobileNav.insertBefore(mTrackLink, mobileNav.querySelector(".btn-call"));
-      }
-
-      if (!document.getElementById("m-nav-signout")) {
-        const mSignoutLink = document.createElement("a");
-        mSignoutLink.id = "m-nav-signout";
-        mSignoutLink.href = "#";
-        mSignoutLink.className = "nav-link !text-red-400";
-        mSignoutLink.textContent = "Sign Out";
-        mSignoutLink.addEventListener("click", async (e) => {
+      // 2. Mobile Buttons
+      if (mBtnAuth) {
+        mBtnAuth.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
+        mBtnAuth.href = "#";
+        mBtnAuth.className = "btn btn-outline w-full text-center !text-red-400 border-red-500/40 hover:bg-red-500/10";
+        mBtnAuth.onclick = async (e) => {
           e.preventDefault();
-          await window.supabaseClient.auth.signOut();
+          const { error } = await window.supabaseClient.auth.signOut();
+          if (error) alert("Error signing out: " + error.message);
           window.location.reload();
-        });
-        mobileNav.insertBefore(mSignoutLink, mobileNav.querySelector(".btn-call"));
+        };
+      }
+      if (mBtnTrack) {
+        mBtnTrack.innerHTML = `<i class="fa-solid fa-route"></i> My Repairs`;
+        mBtnTrack.href = "tracking.html";
+        mBtnTrack.className = "btn btn-primary w-full text-center";
       }
 
-      // If we are on auth.html, redirect logged-in users
+      // Redirect logged-in users away from the auth page
       if (window.location.pathname.endsWith("auth.html")) {
         window.location.href = "booking.html";
       }
 
     } else {
-      // User is guest
-      // Add "Sign In" link
-      if (!document.getElementById("nav-signin")) {
-        const signinLink = document.createElement("a");
-        signinLink.id = "nav-signin";
-        signinLink.href = "auth.html";
-        signinLink.className = "nav-link";
-        signinLink.setAttribute("data-nav-link", "");
-        signinLink.textContent = "Sign In";
-        nav.appendChild(signinLink);
+      // USER IS GUEST / LOGGED OUT
+      
+      // 1. Desktop Buttons
+      if (dBtnAuth) {
+        dBtnAuth.innerHTML = `<i class="fa-solid fa-user-plus"></i> Sign In / Sign Up`;
+        dBtnAuth.href = "auth.html";
+        dBtnAuth.className = "btn btn-outline !py-2 !px-4 !text-xs";
+        dBtnAuth.onclick = null;
+      }
+      if (dBtnTrack) {
+        dBtnTrack.innerHTML = `<i class="fa-solid fa-route"></i> Track Booking`;
+        dBtnTrack.href = "tracking.html";
+        dBtnTrack.className = "btn btn-primary !py-2 !px-4 !text-xs";
       }
 
-      if (!document.getElementById("m-nav-signin")) {
-        const mSigninLink = document.createElement("a");
-        mSigninLink.id = "m-nav-signin";
-        mSigninLink.href = "auth.html";
-        mSigninLink.className = "nav-link";
-        mSigninLink.textContent = "Sign In";
-        mobileNav.insertBefore(mSigninLink, mobileNav.querySelector(".btn-call"));
+      // 2. Mobile Buttons
+      if (mBtnAuth) {
+        mBtnAuth.innerHTML = `<i class="fa-solid fa-user-plus"></i> Sign In / Sign Up`;
+        mBtnAuth.href = "auth.html";
+        mBtnAuth.className = "btn btn-primary w-full text-center";
+        mBtnAuth.onclick = null;
       }
-    }
-
-    // Run nav active-highlighting again to account for newly added links
-    if (typeof initActiveNav === "function") {
-      initActiveNav();
+      if (mBtnTrack) {
+        mBtnTrack.innerHTML = `<i class="fa-solid fa-route"></i> Track Booking`;
+        mBtnTrack.href = "tracking.html";
+        mBtnTrack.className = "btn btn-outline w-full text-center";
+      }
     }
 
   } catch (err) {
