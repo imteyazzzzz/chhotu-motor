@@ -334,34 +334,3 @@ img.lazy-ph{
     margin-bottom: 0 !important;
   }
 }
-
-/* ---- Brand Chip Selection Grid ---- */
-.brand-chip {
-  background: var(--charcoal-2);
-  border: 1px solid var(--steel);
-  color: var(--off-white-dim);
-  font-family: var(--font-display);
-  text-transform: uppercase;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  border-radius: 4px;
-  padding: 0.5rem 0.85rem;
-  text-align: center;
-  transition: all 0.15s ease;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 38px;
-}
-.brand-chip:hover {
-  border-color: var(--orange-dim);
-  color: var(--off-white);
-}
-.brand-chip.active {
-  border-color: var(--orange);
-  background: rgba(255, 90, 31, 0.12);
-  color: var(--orange);
-  box-shadow: 0 0 12px rgba(255, 90, 31, 0.15);
-}
-

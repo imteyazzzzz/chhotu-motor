@@ -108,21 +108,20 @@
 
           <div class="grid sm:grid-cols-2 gap-5">
             <div>
-              <label class="field-label" for="b-bike">Bike Model *</label>
-              <p class="text-[10px] font-mono uppercase tracking-wider text-[#B9B6AC] mb-1.5">Popular Brands:</p>
-              <div class="flex flex-wrap gap-1.5 mb-3" id="brand-grid">
-                <button type="button" class="brand-chip" data-brand="Bajaj">Bajaj</button>
-                <button type="button" class="brand-chip" data-brand="Honda">Honda</button>
-                <button type="button" class="brand-chip" data-brand="Yamaha">Yamaha</button>
-                <button type="button" class="brand-chip" data-brand="Hero">Hero</button>
-                <button type="button" class="brand-chip" data-brand="TVS">TVS</button>
-                <button type="button" class="brand-chip" data-brand="Royal Enfield">Royal Enfield</button>
-                <button type="button" class="brand-chip" data-brand="Suzuki">Suzuki</button>
-                <button type="button" class="brand-chip" data-brand="KTM">KTM</button>
-                <button type="button" class="brand-chip" data-brand="Other">Other</button>
-              </div>
-              <input id="b-bike" name="bikeModel" type="text" class="field-input" placeholder="e.g. Bajaj Pulsar 150" required>
-              <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
+              <label class="field-label" for="b-brand">Bike Brand *</label>
+              <select id="b-brand" name="bikeBrand" class="field-input" required>
+                <option value="">Select Brand</option>
+                <option value="Bajaj">Bajaj</option>
+                <option value="Honda">Honda</option>
+                <option value="Yamaha">Yamaha</option>
+                <option value="Hero">Hero</option>
+                <option value="TVS">TVS</option>
+                <option value="Royal Enfield">Royal Enfield</option>
+                <option value="Suzuki">Suzuki</option>
+                <option value="KTM">KTM</option>
+                <option value="Other">Other Brand</option>
+              </select>
+              <p class="field-error" id="b-brand-error">Please select a brand.</p>
             </div>
             <div>
               <label class="field-label" for="b-service">Service Type *</label>
@@ -133,6 +132,19 @@
                 <option value="workshop">Workshop Visit / Appointment</option>
               </select>
               <p class="field-error" id="b-service-error">Please select a service type.</p>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-5" id="b-brand-detail-wrap">
+            <div id="b-brand-other-wrap" class="hidden">
+              <label class="field-label" for="b-brand-other">Specify Brand *</label>
+              <input id="b-brand-other" name="brandOther" type="text" class="field-input" placeholder="e.g. Vespa, Aprilia, Ducati">
+              <p class="field-error" id="b-brand-other-error">Please specify your bike brand.</p>
+            </div>
+            <div id="b-model-wrap" class="sm:col-span-2">
+              <label class="field-label" for="b-bike">Bike Model *</label>
+              <input id="b-bike" name="bikeModel" type="text" class="field-input" placeholder="e.g. Pulsar 150, Shine, FZ" required>
+              <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
             </div>
           </div>
 
@@ -383,97 +395,31 @@
       );
     });
   }
-  // ---- Popular Brand Selection Logic ----
-  const brandChips = document.querySelectorAll(".brand-chip");
-  const bikeInput = document.getElementById("b-bike");
-  const popularBrands = ["Bajaj", "Honda", "Yamaha", "Hero", "TVS", "Royal Enfield", "Suzuki", "KTM"];
+  // ---- Brand select toggle logic ----
+  const brandSelect = document.getElementById("b-brand");
+  const brandOtherWrap = document.getElementById("b-brand-other-wrap");
+  const brandOtherInput = document.getElementById("b-brand-other");
+  const modelWrap = document.getElementById("b-model-wrap");
 
-  function clearActiveChips() {
-    brandChips.forEach(chip => chip.classList.remove("active"));
-  }
-
-  function setActiveChip(brandName) {
-    clearActiveChips();
-    brandChips.forEach(chip => {
-      if (chip.getAttribute("data-brand").toLowerCase() === brandName.toLowerCase()) {
-        chip.classList.add("active");
-      }
-    });
-  }
-
-  brandChips.forEach(chip => {
-    chip.addEventListener("click", () => {
-      const brand = chip.getAttribute("data-brand");
-      
-      if (brand === "Other") {
-        setActiveChip("Other");
-        // Clear any popular brand prefix if present
-        let val = bikeInput.value.trim();
-        let matchedBrand = null;
-        for (const b of popularBrands) {
-          if (val.toLowerCase().startsWith(b.toLowerCase())) {
-            matchedBrand = b;
-            break;
-          }
-        }
-        if (matchedBrand) {
-          bikeInput.value = val.substring(matchedBrand.length).trim();
-        }
-        bikeInput.focus();
-      } else {
-        setActiveChip(brand);
-        
-        let currentValue = bikeInput.value.trim();
-        let matchedBrand = null;
-        for (const b of popularBrands) {
-          if (currentValue.toLowerCase().startsWith(b.toLowerCase())) {
-            matchedBrand = b;
-            break;
-          }
-        }
-
-        if (matchedBrand) {
-          // Replace matching brand prefix
-          bikeInput.value = bikeInput.value.replace(new RegExp('^' + matchedBrand, 'i'), brand);
-        } else {
-          // Prepend brand name
-          if (currentValue === "") {
-            bikeInput.value = brand + " ";
-          } else {
-            bikeInput.value = brand + " " + currentValue;
-          }
-        }
-        bikeInput.focus();
-      }
-      
-      // Trigger input event to clear validation styling if present
+  function syncBrandUI() {
+    const isOther = brandSelect.value === "Other";
+    if (isOther) {
+      brandOtherWrap.classList.remove("hidden");
+      brandOtherInput.required = true;
+      modelWrap.classList.remove("sm:col-span-2");
+    } else {
+      brandOtherWrap.classList.add("hidden");
+      brandOtherInput.required = false;
+      brandOtherInput.value = "";
+      modelWrap.classList.add("sm:col-span-2");
       if (typeof clearFieldError === "function") {
-        clearFieldError(bikeInput, document.getElementById("b-bike-error"));
+        clearFieldError(brandOtherInput, document.getElementById("b-brand-other-error"));
       }
-    });
-  });
+    }
+  }
 
-  // Sync text input edits back to chips
-  bikeInput.addEventListener("input", () => {
-    const value = bikeInput.value.trim().toLowerCase();
-    if (value === "") {
-      clearActiveChips();
-      return;
-    }
-    
-    let matched = false;
-    for (const b of popularBrands) {
-      if (value.startsWith(b.toLowerCase())) {
-        setActiveChip(b);
-        matched = true;
-        break;
-      }
-    }
-    
-    if (!matched) {
-      setActiveChip("Other");
-    }
-  });
+  brandSelect.addEventListener("change", syncBrandUI);
+  syncBrandUI();
 
   // ---- Form validation + webhook submission ----
   const form = document.getElementById("booking-form");
@@ -486,15 +432,23 @@
 
     const nameInput = document.getElementById("b-name");
     const phoneInput = document.getElementById("b-phone");
+    const brandSelectEl = document.getElementById("b-brand");
+    const brandOtherInputEl = document.getElementById("b-brand-other");
     const bikeInput = document.getElementById("b-bike");
     const issueInput = document.getElementById("b-issue");
 
     const rules = [
       { input: nameInput, error: document.getElementById("b-name-error"), required: true },
       { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: isValidPhone },
+      { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true },
       { input: bikeInput, error: document.getElementById("b-bike-error"), required: true },
       { input: serviceSelect, error: document.getElementById("b-service-error"), required: true },
     ];
+    if (brandSelectEl.value === "Other") {
+      rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true });
+    } else {
+      clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
+    }
     if (locationInput.required) {
       rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true });
     } else {
@@ -508,11 +462,17 @@
 
     if (!validateForm(rules)) return;
 
+    // Combine brand and model names
+    const brandVal = brandSelectEl.value;
+    const brandOtherVal = brandOtherInputEl.value.trim();
+    const modelVal = bikeInput.value.trim();
+    const combinedBikeModel = brandVal === "Other" ? `${brandOtherVal} ${modelVal}`.trim() : `${brandVal} ${modelVal}`.trim();
+
     const payload = {
       form_type: "booking",
       name: nameInput.value.trim(),
       phone: phoneInput.value.trim(),
-      bikeModel: bikeInput.value.trim(),
+      bikeModel: combinedBikeModel,
       serviceType: serviceSelect.value,
       location: locationInput.value.trim(),
       preferredDate: document.getElementById("b-date").value,
