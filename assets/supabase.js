@@ -4,8 +4,8 @@
 // =========================================================================
 
 // REPLACE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS
-const SUPABASE_URL = "https://your-supabase-url.supabase.co";
-const SUPABASE_ANON_KEY = "your-supabase-anon-key";
+const SUPABASE_URL = "https://qvnjjvbmethdvmlzeoow.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_JHxEhYkcEdn6zNs3cEIp3g_p69o5_4k";
 
 let supabaseClient = null;
 
