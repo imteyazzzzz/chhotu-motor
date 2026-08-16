@@ -1,609 +1,645 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book a Repair | Chhotu Motorcycles Workshop, Kathmandu</title>
-<meta name="description" content="Book emergency roadside assistance, a home/office visit, or a workshop appointment with Chhotu Motorcycles Workshop in Kathmandu. Confirmed by phone or WhatsApp.">
-<meta property="og:title" content="Book a Motorcycle Repair — Chhotu Motorcycles Workshop">
-<meta property="og:description" content="Emergency, home visit, or workshop appointment — book in under a minute.">
-<meta property="og:type" content="website">
-<meta property="og:locale" content="en_NP">
-<link rel="icon" href="data:,">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="assets/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/supabase.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book a Repair | Chhotu Motorcycles Workshop, Kathmandu</title>
+  <meta name="description"
+    content="Book emergency roadside assistance, a home/office visit, or a workshop appointment with Chhotu Motorcycles Workshop in Kathmandu. Confirmed by phone or WhatsApp.">
+  <meta property="og:title" content="Book a Motorcycle Repair — Chhotu Motorcycles Workshop">
+  <meta property="og:description" content="Emergency, home visit, or workshop appointment — book in under a minute.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_NP">
+  <link rel="icon" href="data:,">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
 </head>
+
 <body class="antialiased">
 
-<!-- =====================================================================
+  <!-- =====================================================================
      SHARED HEADER START — keep identical across all pages.
      ===================================================================== -->
-<header class="sticky top-0 z-40 bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
-  <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-    <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
-      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU <span class="text-[#FF5A1F]">WORKSHOP</span></span>
-    </a>
+  <header class="sticky top-0 z-40 bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
+        <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU <span
+            class="text-[#FF5A1F]">WORKSHOP</span></span>
+      </a>
 
-    <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+      <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+        <a href="index.html" data-nav-link class="nav-link">Home</a>
+        <a href="about.html" data-nav-link class="nav-link">About</a>
+        <a href="services.html" data-nav-link class="nav-link">Services</a>
+        <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+        <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+      </nav>
+
+      <div class="hidden md:flex items-center gap-3">
+        <a href="tel:+9779813691072" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-phone"></i>
+          Call</a>
+        <a href="booking.html" class="btn btn-primary !py-2 !px-4 !text-xs">Book a Repair</a>
+      </div>
+
+      <div class="flex items-center gap-1 md:hidden">
+        <!-- Mobile-only WhatsApp button next to hamburger menu -->
+        <a href="#" class="emergency-wa-trigger flex items-center justify-center text-[#25D366] text-2xl w-11 h-11"
+          title="Emergency WhatsApp"
+          data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ">
+          <i class="fa-brands fa-whatsapp"></i>
+        </a>
+
+        <!-- Hamburger menu toggle -->
+        <button id="nav-toggle" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu"
+          aria-expanded="false" aria-controls="mobile-menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="mobile-menu"
+    class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden"
+    aria-hidden="true">
+    <div class="flex items-center justify-between h-16 px-4 border-b border-[#3A3F49]">
+      <span class="font-display text-sm">MENU</span>
+      <button id="nav-close" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Close menu">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <nav class="flex flex-col p-6 gap-6 text-lg" aria-label="Mobile Primary">
       <a href="index.html" data-nav-link class="nav-link">Home</a>
       <a href="about.html" data-nav-link class="nav-link">About</a>
       <a href="services.html" data-nav-link class="nav-link">Services</a>
       <a href="booking.html" data-nav-link class="nav-link">Booking</a>
       <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+      <a href="tel:+9779813691072" class="btn btn-call mt-4"><i class="fa-solid fa-phone"></i> Call +977
+        981-369-1072</a>
     </nav>
-
-    <div class="hidden md:flex items-center gap-3">
-      <a href="tel:+9779813691072" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-phone"></i> Call</a>
-      <a href="booking.html" class="btn btn-primary !py-2 !px-4 !text-xs">Book a Repair</a>
-    </div>
-
-    <div class="flex items-center gap-1 md:hidden">
-      <!-- Mobile-only WhatsApp button next to hamburger menu -->
-      <a href="#" class="emergency-wa-trigger flex items-center justify-center text-[#25D366] text-2xl w-11 h-11" title="Emergency WhatsApp" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ">
-        <i class="fa-brands fa-whatsapp"></i>
-      </a>
-      
-      <!-- Hamburger menu toggle -->
-      <button id="nav-toggle" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-    </div>
   </div>
-</header>
-
-<div id="mobile-menu" class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden" aria-hidden="true">
-  <div class="flex items-center justify-between h-16 px-4 border-b border-[#3A3F49]">
-    <span class="font-display text-sm">MENU</span>
-    <button id="nav-close" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Close menu">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
-  </div>
-  <nav class="flex flex-col p-6 gap-6 text-lg" aria-label="Mobile Primary">
-    <a href="index.html" data-nav-link class="nav-link">Home</a>
-    <a href="about.html" data-nav-link class="nav-link">About</a>
-    <a href="services.html" data-nav-link class="nav-link">Services</a>
-    <a href="booking.html" data-nav-link class="nav-link">Booking</a>
-    <a href="contact.html" data-nav-link class="nav-link">Contact</a>
-    <a href="tel:+9779813691072" class="btn btn-call mt-4"><i class="fa-solid fa-phone"></i> Call +977 981-369-1072</a>
-  </nav>
-</div>
-<!-- =====================================================================
+  <!-- =====================================================================
      SHARED HEADER END
      ===================================================================== -->
 
-<main>
+  <main>
 
-  <section class="border-b border-[#3A3F49] py-14">
-    <div class="max-w-4xl mx-auto px-4 md:px-8 text-center reveal">
-      <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">BOOK A REPAIR</p>
-      <h1 class="text-4xl md:text-5xl font-bold mb-4">TELL US WHERE, WE'LL COME TO YOU</h1>
-      <p class="text-[#B9B6AC]">Emergency? Call us directly instead — the form is fastest for home visits and workshop appointments.</p>
-    </div>
-  </section>
-
-  <section class="max-w-7xl mx-auto px-4 md:px-8 py-16">
-    <div class="grid lg:grid-cols-3 gap-10">
-
-      <!-- ============ BOOKING FORM ============ -->
-      <div class="lg:col-span-2 reveal">
-        <form id="booking-form" class="card p-6 md:p-8 space-y-6" novalidate>
-          <input type="hidden" id="b-coords" name="coordinates" value="">
-
-          <!-- Full Name & Phone Number -->
-          <div class="grid sm:grid-cols-2 gap-5">
-            <div>
-              <label class="field-label" for="b-name">Full Name *</label>
-              <input id="b-name" name="name" type="text" class="field-input" placeholder="Your name" required>
-              <p class="field-error" id="b-name-error">Please enter your name.</p>
-            </div>
-            <div>
-              <label class="field-label" for="b-phone">Phone Number *</label>
-              <div class="flex gap-2">
-                <select id="b-phone-code" name="phoneCode" class="field-input !w-[100px] shrink-0" required>
-                  <option value="+977">+977 (NP)</option>
-                  <option value="+91">+91 (IN)</option>
-                  <option value="+1">+1 (US)</option>
-                  <option value="+44">+44 (UK)</option>
-                  <option value="+61">+61 (AU)</option>
-                  <option value="+971">+971 (AE)</option>
-                </select>
-                <input id="b-phone" name="phone" type="tel" class="field-input flex-1" placeholder="98XXXXXXXX" required>
-              </div>
-              <p class="field-error" id="b-phone-error">Please enter a valid phone number.</p>
-            </div>
-          </div>
-
-          <!-- Service Type -->
-          <div id="b-service-wrap">
-            <label class="field-label" for="b-service">Service Type *</label>
-            <select id="b-service" name="serviceType" class="field-input" required>
-              <option value="">Select a service</option>
-              <option value="emergency">Emergency Repair / Roadside Assistance</option>
-              <option value="home-visit">Scheduled Home / Office Visit</option>
-              <option value="workshop">Workshop Visit / Appointment</option>
-            </select>
-            <p class="field-error" id="b-service-error">Please select a service type.</p>
-          </div>
-
-          <!-- Bike Brand & Bike Model -->
-          <div class="grid sm:grid-cols-2 gap-5">
-            <div>
-              <label class="field-label" for="b-brand">Bike Brand *</label>
-              <select id="b-brand" name="bikeBrand" class="field-input" required>
-                <option value="">Select Brand</option>
-                <option value="Bajaj">Bajaj</option>
-                <option value="Honda">Honda</option>
-                <option value="Yamaha">Yamaha</option>
-                <option value="Hero">Hero</option>
-                <option value="TVS">TVS</option>
-                <option value="Royal Enfield">Royal Enfield</option>
-                <option value="Suzuki">Suzuki</option>
-                <option value="KTM">KTM</option>
-                <option value="Other">Other Brand</option>
-              </select>
-              <p class="field-error" id="b-brand-error">Please select a brand.</p>
-            </div>
-            <div>
-              <label class="field-label" for="b-bike">Bike Model *</label>
-              <input id="b-bike" name="bikeModel" type="text" class="field-input" placeholder="e.g. Pulsar 150, Shine, FZ" required>
-              <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
-            </div>
-          </div>
-
-          <!-- Specify Brand (Hidden by default) -->
-          <div id="b-brand-other-wrap" class="hidden">
-            <label class="field-label" for="b-brand-other">Specify Brand *</label>
-            <input id="b-brand-other" name="brandOther" type="text" class="field-input" placeholder="e.g. Vespa, Aprilia, Ducati">
-            <p class="field-error" id="b-brand-other-error">Please specify your bike brand.</p>
-          </div>
-
-          <!-- Location / Address -->
-          <div id="b-location-wrap">
-            <label class="field-label" for="b-location">Location / Address <span id="b-location-required">*</span></label>
-            <div class="flex gap-2">
-              <input id="b-location" name="location" type="text" class="field-input flex-1" placeholder="Street, landmark, or GPS pin — required for Emergency &amp; Home Visit">
-              <button type="button" id="b-detect-location" class="btn btn-outline shrink-0 !py-0 !px-4" title="Auto-detect location">
-                <i class="fa-solid fa-location-crosshairs text-[#FF5A1F]"></i>
-                <span class="hidden sm:inline text-xs">Auto-Detect</span>
-              </button>
-            </div>
-            <p class="field-error" id="b-location-error">Location is required for this service.</p>
-          </div>
-
-          <!-- Preferred Date & Time -->
-          <div class="grid sm:grid-cols-2 gap-5" id="b-datetime-wrap">
-            <div>
-              <label class="field-label" for="b-date">Preferred Date *</label>
-              <input id="b-date" name="preferredDate" type="date" class="field-input">
-              <p class="field-error" id="b-date-error">Preferred date is required for this service.</p>
-            </div>
-            <div>
-              <label class="field-label" for="b-time">Preferred Time *</label>
-              <input id="b-time" name="preferredTime" type="time" class="field-input">
-              <p class="field-error" id="b-time-error">Preferred time is required for this service.</p>
-            </div>
-          </div>
-
-          <!-- Issue Description -->
-          <div id="b-issue-wrap">
-            <label class="field-label" for="b-issue">Issue Description <span id="b-issue-required">*</span></label>
-            <textarea id="b-issue" name="issueDescription" rows="4" class="field-input" placeholder="What's wrong with the bike?" required></textarea>
-            <p class="field-error" id="b-issue-error">Please describe the issue.</p>
-          </div>
-
-          <button type="submit" id="b-submit" class="btn btn-primary w-full sm:w-auto">
-            <i class="fa-solid fa-paper-plane"></i> Submit Booking
-          </button>
-
-          <!-- Success state -->
-          <div id="b-success" class="hidden bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-5">
-            <p class="font-display text-sm text-[#FF5A1F] mb-2"><i class="fa-solid fa-circle-check"></i> BOOKING RECEIVED</p>
-            <p class="text-[#B9B6AC] text-sm mb-4">We've got your details — a dispatcher will confirm by phone or WhatsApp shortly. For anything urgent, message us directly.</p>
-            <div class="flex flex-wrap gap-3 mt-2">
-              <a href="#" id="b-success-wa" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-brands fa-whatsapp"></i> Confirm via WhatsApp</a>
-              <a href="tracking.html" id="b-track-link" class="btn btn-primary !py-2 !px-4 !text-xs"><i class="fa-solid fa-route"></i> Track Repair Status</a>
-            </div>
-          </div>
-
-          <!-- Error state -->
-          <div id="b-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-5">
-            <p class="font-display text-sm text-red-400 mb-2"><i class="fa-solid fa-triangle-exclamation"></i> SUBMISSION FAILED</p>
-            <p class="text-[#B9B6AC] text-sm mb-4">Something went wrong sending your booking. Please try again, or send it to us directly on WhatsApp.</p>
-            <p class="error-details text-xs text-red-400 font-mono mb-4 hidden"></p>
-            <a href="#" data-wa-fallback class="btn btn-outline !text-xs"><i class="fa-brands fa-whatsapp"></i> Send via WhatsApp Instead</a>
-          </div>
-        </form>
+    <section class="border-b border-[#3A3F49] py-14">
+      <div class="max-w-4xl mx-auto px-4 md:px-8 text-center reveal">
+        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">BOOK A REPAIR</p>
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">TELL US WHERE, WE'LL COME TO YOU</h1>
+        <p class="text-[#B9B6AC]">Emergency? Call us directly instead — the form is fastest for home visits and workshop
+          appointments.</p>
       </div>
+    </section>
 
-      <!-- ============ SIDEBAR ============ -->
-      <aside class="reveal space-y-5" style="transition-delay:100ms">
-        <div class="gauge">
-          <div class="readout font-mono text-lg">24/7</div>
-          <div class="label">Emergency Hours</div>
+    <section class="max-w-7xl mx-auto px-4 md:px-8 py-16">
+      <div class="grid lg:grid-cols-3 gap-10">
+
+        <!-- ============ BOOKING FORM ============ -->
+        <div class="lg:col-span-2 reveal">
+          <form id="booking-form" class="card p-6 md:p-8 space-y-6" novalidate>
+            <input type="hidden" id="b-coords" name="coordinates" value="">
+
+            <!-- Full Name & Phone Number -->
+            <div class="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label class="field-label" for="b-name">Full Name *</label>
+                <input id="b-name" name="name" type="text" class="field-input" placeholder="Your name" required>
+                <p class="field-error" id="b-name-error">Please enter your name.</p>
+              </div>
+              <div>
+                <label class="field-label" for="b-phone">Phone Number *</label>
+                <div class="flex gap-2">
+                  <select id="b-phone-code" name="phoneCode" class="field-input !w-[100px] shrink-0" required>
+                    <option value="+977">+977 (NP)</option>
+                    <option value="+91">+91 (IN)</option>
+                    <option value="+1">+1 (US)</option>
+                    <option value="+44">+44 (UK)</option>
+                    <option value="+61">+61 (AU)</option>
+                    <option value="+971">+971 (AE)</option>
+                  </select>
+                  <input id="b-phone" name="phone" type="tel" class="field-input flex-1" placeholder="98XXXXXXXX"
+                    required>
+                </div>
+                <p class="field-error" id="b-phone-error">Please enter a valid phone number.</p>
+              </div>
+            </div>
+
+            <!-- Service Type -->
+            <div id="b-service-wrap">
+              <label class="field-label" for="b-service">Service Type *</label>
+              <select id="b-service" name="serviceType" class="field-input" required>
+                <option value="">Select a service</option>
+                <option value="emergency">Emergency Repair / Roadside Assistance</option>
+                <option value="home-visit">Scheduled Home / Office Visit</option>
+                <option value="workshop">Workshop Visit / Appointment</option>
+              </select>
+              <p class="field-error" id="b-service-error">Please select a service type.</p>
+            </div>
+
+            <!-- Bike Brand & Bike Model -->
+            <div class="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label class="field-label" for="b-brand">Bike Brand *</label>
+                <select id="b-brand" name="bikeBrand" class="field-input" required>
+                  <option value="">Select Brand</option>
+                  <option value="Bajaj">Bajaj</option>
+                  <option value="Honda">Honda</option>
+                  <option value="Yamaha">Yamaha</option>
+                  <option value="Hero">Hero</option>
+                  <option value="TVS">TVS</option>
+                  <option value="Royal Enfield">Royal Enfield</option>
+                  <option value="Suzuki">Suzuki</option>
+                  <option value="KTM">KTM</option>
+                  <option value="Other">Other Brand</option>
+                </select>
+                <p class="field-error" id="b-brand-error">Please select a brand.</p>
+              </div>
+              <div>
+                <label class="field-label" for="b-bike">Bike Model *</label>
+                <input id="b-bike" name="bikeModel" type="text" class="field-input"
+                  placeholder="e.g. Pulsar 150, Shine, FZ" required>
+                <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
+              </div>
+            </div>
+
+            <!-- Specify Brand (Hidden by default) -->
+            <div id="b-brand-other-wrap" class="hidden">
+              <label class="field-label" for="b-brand-other">Specify Brand *</label>
+              <input id="b-brand-other" name="brandOther" type="text" class="field-input"
+                placeholder="e.g. Vespa, Aprilia, Ducati">
+              <p class="field-error" id="b-brand-other-error">Please specify your bike brand.</p>
+            </div>
+
+            <!-- Location / Address -->
+            <div id="b-location-wrap">
+              <label class="field-label" for="b-location">Location / Address <span
+                  id="b-location-required">*</span></label>
+              <div class="flex gap-2">
+                <input id="b-location" name="location" type="text" class="field-input flex-1"
+                  placeholder="Street, landmark, or GPS pin — required for Emergency &amp; Home Visit">
+                <button type="button" id="b-detect-location" class="btn btn-outline shrink-0 !py-0 !px-4"
+                  title="Auto-detect location">
+                  <i class="fa-solid fa-location-crosshairs text-[#FF5A1F]"></i>
+                  <span class="hidden sm:inline text-xs">Auto-Detect</span>
+                </button>
+              </div>
+              <p class="field-error" id="b-location-error">Location is required for this service.</p>
+            </div>
+
+            <!-- Preferred Date & Time -->
+            <div class="grid sm:grid-cols-2 gap-5" id="b-datetime-wrap">
+              <div>
+                <label class="field-label" for="b-date">Preferred Date *</label>
+                <input id="b-date" name="preferredDate" type="date" class="field-input">
+                <p class="field-error" id="b-date-error">Preferred date is required for this service.</p>
+              </div>
+              <div>
+                <label class="field-label" for="b-time">Preferred Time *</label>
+                <input id="b-time" name="preferredTime" type="time" class="field-input">
+                <p class="field-error" id="b-time-error">Preferred time is required for this service.</p>
+              </div>
+            </div>
+
+            <!-- Issue Description -->
+            <div id="b-issue-wrap">
+              <label class="field-label" for="b-issue">Issue Description <span id="b-issue-required">*</span></label>
+              <textarea id="b-issue" name="issueDescription" rows="4" class="field-input"
+                placeholder="What's wrong with the bike?" required></textarea>
+              <p class="field-error" id="b-issue-error">Please describe the issue.</p>
+            </div>
+
+            <button type="submit" id="b-submit" class="btn btn-primary w-full sm:w-auto">
+              <i class="fa-solid fa-paper-plane"></i> Submit Booking
+            </button>
+
+            <!-- Success state -->
+            <div id="b-success" class="hidden bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-5">
+              <p class="font-display text-sm text-[#FF5A1F] mb-2"><i class="fa-solid fa-circle-check"></i> BOOKING
+                RECEIVED</p>
+              <p class="text-[#B9B6AC] text-sm mb-4">We've got your details — a dispatcher will confirm by phone or
+                WhatsApp shortly. For anything urgent, message us directly.</p>
+              <div class="flex flex-wrap gap-3 mt-2">
+                <a href="#" id="b-success-wa" class="btn btn-outline !py-2 !px-4 !text-xs"><i
+                    class="fa-brands fa-whatsapp"></i> Confirm via WhatsApp</a>
+                <a href="tracking.html" id="b-track-link" class="btn btn-primary !py-2 !px-4 !text-xs"><i
+                    class="fa-solid fa-route"></i> Track Repair Status</a>
+              </div>
+            </div>
+
+            <!-- Error state -->
+            <div id="b-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-5">
+              <p class="font-display text-sm text-red-400 mb-2"><i class="fa-solid fa-triangle-exclamation"></i>
+                SUBMISSION FAILED</p>
+              <p class="text-[#B9B6AC] text-sm mb-4">Something went wrong sending your booking. Please try again, or
+                send it to us directly on WhatsApp.</p>
+              <p class="error-details text-xs text-red-400 font-mono mb-4 hidden"></p>
+              <a href="#" data-wa-fallback class="btn btn-outline !text-xs"><i class="fa-brands fa-whatsapp"></i> Send
+                via WhatsApp Instead</a>
+            </div>
+          </form>
         </div>
-        <div class="card p-6">
-          <h3 class="font-display text-sm mb-3 text-[#FF5A1F]">SERVICE AREA</h3>
-          <p class="text-[#B9B6AC] text-sm mb-3">Jorpati, Boudha, Chabahil, and the greater Kathmandu Valley. Outside this area? WhatsApp us your location and we'll confirm coverage.</p>
-          <ul class="text-sm text-[#B9B6AC] space-y-2">
-            <li class="flex gap-2"><i class="fa-solid fa-location-dot text-[#FF5A1F] mt-1"></i> Workshop: Jorpati, Boudha Rd, Kathmandu 44600</li>
-          </ul>
-        </div>
-        <div class="card p-6">
-          <h3 class="font-display text-sm mb-3 text-[#FF5A1F]">NEED IT FASTER?</h3>
-          <p class="text-[#B9B6AC] text-sm mb-4">For true emergencies, calling is faster than the form.</p>
-          <a href="tel:+9779813691072" class="btn btn-call w-full mb-3"><i class="fa-solid fa-phone"></i> Call +977 981-369-1072</a>
-          <a href="#" data-wa-message="Hi Chhotu Motorcycles, I need help booking a repair." class="btn btn-outline w-full"><i class="fa-brands fa-whatsapp"></i> WhatsApp Instead</a>
-        </div>
-      </aside>
 
-    </div>
-  </section>
+        <!-- ============ SIDEBAR ============ -->
+        <aside class="reveal space-y-5" style="transition-delay:100ms">
+          <div class="gauge">
+            <div class="readout font-mono text-lg">24/7</div>
+            <div class="label">Emergency Hours</div>
+          </div>
+          <div class="card p-6">
+            <h3 class="font-display text-sm mb-3 text-[#FF5A1F]">SERVICE AREA</h3>
+            <p class="text-[#B9B6AC] text-sm mb-3">Jorpati, Boudha, Chabahil, and the greater Kathmandu Valley. Outside
+              this area? WhatsApp us your location and we'll confirm coverage.</p>
+            <ul class="text-sm text-[#B9B6AC] space-y-2">
+              <li class="flex gap-2"><i class="fa-solid fa-location-dot text-[#FF5A1F] mt-1"></i> Workshop: Jorpati,
+                Boudha Rd, Kathmandu 44600</li>
+            </ul>
+          </div>
+          <div class="card p-6">
+            <h3 class="font-display text-sm mb-3 text-[#FF5A1F]">NEED IT FASTER?</h3>
+            <p class="text-[#B9B6AC] text-sm mb-4">For true emergencies, calling is faster than the form.</p>
+            <a href="tel:+9779813691072" class="btn btn-call w-full mb-3"><i class="fa-solid fa-phone"></i> Call +977
+              981-369-1072</a>
+            <a href="#" data-wa-message="Hi Chhotu Motorcycles, I need help booking a repair."
+              class="btn btn-outline w-full"><i class="fa-brands fa-whatsapp"></i> WhatsApp Instead</a>
+          </div>
+        </aside>
 
-</main>
+      </div>
+    </section>
 
-<!-- =====================================================================
+  </main>
+
+  <!-- =====================================================================
      SHARED FOOTER START — keep identical across all pages.
      ===================================================================== -->
-<footer class="bg-[#1B1E24] border-t border-[#3A3F49]">
-  <div class="max-w-7xl mx-auto px-4 md:px-8 py-14 grid md:grid-cols-4 gap-10">
-    <div>
-      <div class="flex items-center gap-2 mb-4">
-        <span class="font-display font-semibold text-sm">CHHOTU WORKSHOP</span>
+  <footer class="bg-[#1B1E24] border-t border-[#3A3F49]">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-14 grid md:grid-cols-4 gap-10">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="font-display font-semibold text-sm">CHHOTU WORKSHOP</span>
+        </div>
+        <p class="text-[#B9B6AC] text-sm">24/7 emergency roadside repair, home visits, and workshop appointments for
+          every motorcycle in Kathmandu.</p>
+        <div class="flex gap-3 mt-5 text-lg">
+          <a href="#" aria-label="Facebook" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i
+              class="fa-brands fa-facebook"></i></a>
+          <a href="#" aria-label="Instagram" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i
+              class="fa-brands fa-instagram"></i></a>
+          <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." aria-label="WhatsApp"
+            class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
       </div>
-      <p class="text-[#B9B6AC] text-sm">24/7 emergency roadside repair, home visits, and workshop appointments for every motorcycle in Kathmandu.</p>
-      <div class="flex gap-3 mt-5 text-lg">
-        <a href="#" aria-label="Facebook" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-facebook"></i></a>
-        <a href="#" aria-label="Instagram" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-instagram"></i></a>
-        <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." aria-label="WhatsApp" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-whatsapp"></i></a>
+      <div>
+        <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">QUICK LINKS</h4>
+        <ul class="space-y-2 text-sm text-[#B9B6AC]">
+          <li><a href="index.html" class="hover:text-[#F4F1E8]">Home</a></li>
+          <li><a href="about.html" class="hover:text-[#F4F1E8]">About</a></li>
+          <li><a href="services.html" class="hover:text-[#F4F1E8]">Services</a></li>
+          <li><a href="booking.html" class="hover:text-[#F4F1E8]">Booking</a></li>
+          <li><a href="contact.html" class="hover:text-[#F4F1E8]">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">SERVICES</h4>
+        <ul class="space-y-2 text-sm text-[#B9B6AC]">
+          <li><a href="services.html#emergency" class="hover:text-[#F4F1E8]">Emergency Repair</a></li>
+          <li><a href="services.html#home-visit" class="hover:text-[#F4F1E8]">Home / Office Visit</a></li>
+          <li><a href="services.html#workshop" class="hover:text-[#F4F1E8]">Workshop Appointment</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">CONTACT</h4>
+        <ul class="space-y-3 text-sm text-[#B9B6AC]">
+          <li class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-1"></i> Jorpati, Boudha Rd, Kathmandu
+            44600, Nepal</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-phone"></i> <a href="tel:+9779813691072"
+              class="hover:text-[#F4F1E8]">+977 981-369-1072</a></li>
+          <li class="flex items-center gap-2"><i class="fa-brands fa-whatsapp"></i> <a href="#"
+              data-wa-message="Hi Chhotu Motorcycles, I have a question." class="hover:text-[#F4F1E8]">WhatsApp</a></li>
+        </ul>
       </div>
     </div>
-    <div>
-      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">QUICK LINKS</h4>
-      <ul class="space-y-2 text-sm text-[#B9B6AC]">
-        <li><a href="index.html" class="hover:text-[#F4F1E8]">Home</a></li>
-        <li><a href="about.html" class="hover:text-[#F4F1E8]">About</a></li>
-        <li><a href="services.html" class="hover:text-[#F4F1E8]">Services</a></li>
-        <li><a href="booking.html" class="hover:text-[#F4F1E8]">Booking</a></li>
-        <li><a href="contact.html" class="hover:text-[#F4F1E8]">Contact</a></li>
-      </ul>
+    <div class="border-t border-[#3A3F49] py-5">
+      <p class="text-center text-xs text-[#B9B6AC]">© <span id="year"></span> Chhotu Motorcycles Workshop. All rights
+        reserved.</p>
     </div>
-    <div>
-      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">SERVICES</h4>
-      <ul class="space-y-2 text-sm text-[#B9B6AC]">
-        <li><a href="services.html#emergency" class="hover:text-[#F4F1E8]">Emergency Repair</a></li>
-        <li><a href="services.html#home-visit" class="hover:text-[#F4F1E8]">Home / Office Visit</a></li>
-        <li><a href="services.html#workshop" class="hover:text-[#F4F1E8]">Workshop Appointment</a></li>
-      </ul>
-    </div>
-    <div>
-      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">CONTACT</h4>
-      <ul class="space-y-3 text-sm text-[#B9B6AC]">
-        <li class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-1"></i> Jorpati, Boudha Rd, Kathmandu 44600, Nepal</li>
-        <li class="flex items-center gap-2"><i class="fa-solid fa-phone"></i> <a href="tel:+9779813691072" class="hover:text-[#F4F1E8]">+977 981-369-1072</a></li>
-        <li class="flex items-center gap-2"><i class="fa-brands fa-whatsapp"></i> <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." class="hover:text-[#F4F1E8]">WhatsApp</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="border-t border-[#3A3F49] py-5">
-    <p class="text-center text-xs text-[#B9B6AC]">© <span id="year"></span> Chhotu Motorcycles Workshop. All rights reserved.</p>
-  </div>
-</footer>
-<!-- =====================================================================
+  </footer>
+  <!-- =====================================================================
      SHARED FOOTER END
      ===================================================================== -->
 
-<a href="#" data-wa-message="Hi Chhotu Motorcycles, I'd like to book a repair." class="fab-whatsapp" aria-label="Chat on WhatsApp">
-  <i class="fa-brands fa-whatsapp"></i>
-</a>
-<a href="tel:+9779813691072" class="fab-call" aria-label="Call Chhotu Motorcycles">
-  <i class="fa-solid fa-phone"></i>
-</a>
-<button id="back-to-top" class="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+  <a href="#" data-wa-message="Hi Chhotu Motorcycles, I'd like to book a repair." class="fab-whatsapp"
+    aria-label="Chat on WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+  <a href="tel:+9779813691072" class="fab-call" aria-label="Call Chhotu Motorcycles">
+    <i class="fa-solid fa-phone"></i>
+  </a>
+  <button id="back-to-top" class="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<script src="assets/main.js"></script>
-<script src="assets/forms.js"></script>
-<script src="assets/auth-header.js"></script>
-<script>
-  document.getElementById("year").textContent = new Date().getFullYear();
+  <script src="assets/main.js"></script>
+  <script src="assets/forms.js"></script>
+  <script src="assets/auth-header.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
 
-  const serviceSelect = document.getElementById("b-service");
-  const locationInput = document.getElementById("b-location");
-  const locationRequiredMark = document.getElementById("b-location-required");
-  const locationWrap = document.getElementById("b-location-wrap");
-  const dateTimeWrap = document.getElementById("b-datetime-wrap");
-  const issueInput = document.getElementById("b-issue");
-  const issueWrap = document.getElementById("b-issue-wrap");
-  const issueRequiredMark = document.getElementById("b-issue-required");
+    const serviceSelect = document.getElementById("b-service");
+    const locationInput = document.getElementById("b-location");
+    const locationRequiredMark = document.getElementById("b-location-required");
+    const locationWrap = document.getElementById("b-location-wrap");
+    const dateTimeWrap = document.getElementById("b-datetime-wrap");
+    const issueInput = document.getElementById("b-issue");
+    const issueWrap = document.getElementById("b-issue-wrap");
+    const issueRequiredMark = document.getElementById("b-issue-required");
 
-  // ---- Prefill service type from ?service= query param (see services.html links) ----
-  const params = new URLSearchParams(window.location.search);
-  const serviceParam = params.get("service");
-  if (serviceParam && ["emergency", "home-visit", "workshop"].includes(serviceParam)) {
-    serviceSelect.value = serviceParam;
-  }
-
-  // ---- Toggle "location required" + date/time relevance based on service type ----
-  function syncServiceUI() {
-    if (!serviceSelect) return;
-    const val = serviceSelect.value;
-    
-    // 1. Location visibility and required status
-    const locationRequired = val === "emergency" || val === "home-visit";
-    const showLocation = val === "emergency" || val === "home-visit";
-    
-    if (locationInput) locationInput.required = locationRequired;
-    if (locationRequiredMark) locationRequiredMark.style.display = locationRequired ? "inline" : "none";
-    if (locationWrap) locationWrap.style.display = showLocation ? "block" : "none";
-    if (!showLocation && locationInput) {
-      locationInput.value = "";
+    // ---- Prefill service type from ?service= query param (see services.html links) ----
+    const params = new URLSearchParams(window.location.search);
+    const serviceParam = params.get("service");
+    if (serviceParam && ["emergency", "home-visit", "workshop"].includes(serviceParam)) {
+      serviceSelect.value = serviceParam;
     }
 
-    // 2. Date and Time visibility
-    const showDateTime = val === "home-visit" || val === "workshop";
-    if (dateTimeWrap) dateTimeWrap.style.display = showDateTime ? "grid" : "none";
-    if (!showDateTime) {
-      const dateEl = document.getElementById("b-date");
-      const timeEl = document.getElementById("b-time");
-      if (dateEl) dateEl.value = "";
-      if (timeEl) timeEl.value = "";
-    }
+    // ---- Toggle "location required" + date/time relevance based on service type ----
+    function syncServiceUI() {
+      if (!serviceSelect) return;
+      const val = serviceSelect.value;
 
-    // 3. Issue visibility and required status
-    const issueRequired = val !== "";
-    const showIssue = val !== "";
-    
-    if (issueInput) issueInput.required = issueRequired;
-    if (issueRequiredMark) issueRequiredMark.style.display = issueRequired ? "inline" : "none";
-    if (issueWrap) issueWrap.style.display = showIssue ? "block" : "none";
-    if (!showIssue && issueInput) {
-      issueInput.value = "";
-    }
-  }
-  serviceSelect.addEventListener("change", syncServiceUI);
-  syncServiceUI();
+      // 1. Location visibility and required status
+      const locationRequired = val === "emergency" || val === "home-visit";
+      const showLocation = val === "emergency" || val === "home-visit";
 
-  // ---- Auto-detect location feature ----
-  const detectBtn = document.getElementById("b-detect-location");
-  
-  async function performAutoLocation(isManual) {
-    if (!navigator.geolocation) {
-      if (isManual) alert("Geolocation is not supported by your browser.");
-      return;
+      if (locationInput) locationInput.required = locationRequired;
+      if (locationRequiredMark) locationRequiredMark.style.display = locationRequired ? "inline" : "none";
+      if (locationWrap) locationWrap.style.display = showLocation ? "block" : "none";
+      if (!showLocation && locationInput) {
+        locationInput.value = "";
+      }
+
+      // 2. Date and Time visibility
+      const showDateTime = val === "home-visit" || val === "workshop";
+      if (dateTimeWrap) dateTimeWrap.style.display = showDateTime ? "grid" : "none";
+      if (!showDateTime) {
+        const dateEl = document.getElementById("b-date");
+        const timeEl = document.getElementById("b-time");
+        if (dateEl) dateEl.value = "";
+        if (timeEl) timeEl.value = "";
+      }
+
+      // 3. Issue visibility and required status
+      const issueRequired = val !== "";
+      const showIssue = val !== "";
+
+      if (issueInput) issueInput.required = issueRequired;
+      if (issueRequiredMark) issueRequiredMark.style.display = issueRequired ? "inline" : "none";
+      if (issueWrap) issueWrap.style.display = showIssue ? "block" : "none";
+      if (!showIssue && issueInput) {
+        issueInput.value = "";
+      }
     }
-    
-    let originalText = "";
-    if (detectBtn) {
-      originalText = detectBtn.innerHTML;
-      detectBtn.disabled = true;
-      detectBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-[#FF5A1F]"></i><span class="hidden sm:inline text-xs">Detecting...</span>`;
-    }
-    
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        document.getElementById("b-coords").value = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
-        locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-        
-        try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
-            headers: { "Accept-Language": "en" }
-          });
-          if (response.ok) {
-            const data = await response.json();
-            if (data && data.display_name) {
-              locationInput.value = data.display_name;
+    serviceSelect.addEventListener("change", syncServiceUI);
+    syncServiceUI();
+
+    // ---- Auto-detect location feature ----
+    const detectBtn = document.getElementById("b-detect-location");
+
+    async function performAutoLocation(isManual) {
+      if (!navigator.geolocation) {
+        if (isManual) alert("Geolocation is not supported by your browser.");
+        return;
+      }
+
+      let originalText = "";
+      if (detectBtn) {
+        originalText = detectBtn.innerHTML;
+        detectBtn.disabled = true;
+        detectBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-[#FF5A1F]"></i><span class="hidden sm:inline text-xs">Detecting...</span>`;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          document.getElementById("b-coords").value = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+          locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+
+          try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
+              headers: { "Accept-Language": "en" }
+            });
+            if (response.ok) {
+              const data = await response.json();
+              if (data && data.display_name) {
+                locationInput.value = data.display_name;
+              }
+            }
+          } catch (err) {
+            console.error("Reverse geocoding failed, using raw coordinates.", err);
+          } finally {
+            if (detectBtn) {
+              detectBtn.disabled = false;
+              detectBtn.innerHTML = originalText;
+            }
+            if (typeof clearFieldError === "function") {
+              clearFieldError(locationInput, document.getElementById("b-location-error"));
             }
           }
-        } catch (err) {
-          console.error("Reverse geocoding failed, using raw coordinates.", err);
-        } finally {
+        },
+        (error) => {
+          console.warn("Geolocation failed or declined:", error);
+          if (isManual) {
+            let errMsg = "Unable to retrieve location.";
+            if (error.code === error.PERMISSION_DENIED) {
+              errMsg = "Location permission denied by user.";
+            }
+            alert(errMsg);
+          }
           if (detectBtn) {
             detectBtn.disabled = false;
             detectBtn.innerHTML = originalText;
           }
-          if (typeof clearFieldError === "function") {
-            clearFieldError(locationInput, document.getElementById("b-location-error"));
-          }
-        }
-      },
-      (error) => {
-        console.warn("Geolocation failed or declined:", error);
-        if (isManual) {
-          let errMsg = "Unable to retrieve location.";
-          if (error.code === error.PERMISSION_DENIED) {
-            errMsg = "Location permission denied by user.";
-          }
-          alert(errMsg);
-        }
-        if (detectBtn) {
-          detectBtn.disabled = false;
-          detectBtn.innerHTML = originalText;
-        }
-      },
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-    );
-  }
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+      );
+    }
 
-  if (detectBtn) {
-    detectBtn.addEventListener("click", () => performAutoLocation(true));
-  }
+    if (detectBtn) {
+      detectBtn.addEventListener("click", () => performAutoLocation(true));
+    }
 
-  // Automatically trigger auto-detect on page load
-  window.addEventListener("DOMContentLoaded", () => {
-    setTimeout(() => {
-      performAutoLocation(false);
-    }, 600);
-  });
+    // Automatically trigger auto-detect on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        performAutoLocation(false);
+      }, 600);
+    });
 
-  // Clear coordinates if user types manually in the location field
-  locationInput.addEventListener("input", () => {
-    document.getElementById("b-coords").value = "";
-  });
-  // ---- Brand select toggle logic ----
-  const brandSelect = document.getElementById("b-brand");
-  const brandOtherWrap = document.getElementById("b-brand-other-wrap");
-  const brandOtherInput = document.getElementById("b-brand-other");
-  function syncBrandUI() {
-    const isOther = brandSelect.value === "Other";
-    if (isOther) {
-      brandOtherWrap.classList.remove("hidden");
-      brandOtherInput.required = true;
-    } else {
-      brandOtherWrap.classList.add("hidden");
-      brandOtherInput.required = false;
-      brandOtherInput.value = "";
-      if (typeof clearFieldError === "function") {
-        clearFieldError(brandOtherInput, document.getElementById("b-brand-other-error"));
+    // Clear coordinates if user types manually in the location field
+    locationInput.addEventListener("input", () => {
+      document.getElementById("b-coords").value = "";
+    });
+    // ---- Brand select toggle logic ----
+    const brandSelect = document.getElementById("b-brand");
+    const brandOtherWrap = document.getElementById("b-brand-other-wrap");
+    const brandOtherInput = document.getElementById("b-brand-other");
+    function syncBrandUI() {
+      const isOther = brandSelect.value === "Other";
+      if (isOther) {
+        brandOtherWrap.classList.remove("hidden");
+        brandOtherInput.required = true;
+      } else {
+        brandOtherWrap.classList.add("hidden");
+        brandOtherInput.required = false;
+        brandOtherInput.value = "";
+        if (typeof clearFieldError === "function") {
+          clearFieldError(brandOtherInput, document.getElementById("b-brand-other-error"));
+        }
       }
     }
-  }
 
-  brandSelect.addEventListener("change", syncBrandUI);
-  syncBrandUI();
+    brandSelect.addEventListener("change", syncBrandUI);
+    syncBrandUI();
 
-  // ---- Check Supabase Auth Session and Prefill ----
-  let loggedInUserId = null;
-  async function checkUserSession() {
-    if (window.supabaseClient) {
-      try {
-        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
-        if (error) throw error;
-        
-        if (session && session.user) {
-          loggedInUserId = session.user.id;
-          
-          const nameInput = document.getElementById("b-name");
-          const phoneInput = document.getElementById("b-phone");
-          
-          if (nameInput && !nameInput.value) {
-            nameInput.value = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "";
-          }
-          if (phoneInput && !phoneInput.value && session.user.phone) {
-            let phoneVal = session.user.phone;
-            const codeEl = document.getElementById("b-phone-code");
-            if (codeEl) {
-              const codes = Array.from(codeEl.options).map(o => o.value);
-              const matchedCode = codes.find(c => phoneVal.startsWith(c));
-              if (matchedCode) {
-                codeEl.value = matchedCode;
-                phoneInput.value = phoneVal.substring(matchedCode.length);
+    // ---- Check Supabase Auth Session and Prefill ----
+    let loggedInUserId = null;
+    async function checkUserSession() {
+      if (window.supabaseClient) {
+        try {
+          const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+          if (error) throw error;
+
+          if (session && session.user) {
+            loggedInUserId = session.user.id;
+
+            const nameInput = document.getElementById("b-name");
+            const phoneInput = document.getElementById("b-phone");
+
+            if (nameInput && !nameInput.value) {
+              nameInput.value = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "";
+            }
+            if (phoneInput && !phoneInput.value && session.user.phone) {
+              let phoneVal = session.user.phone;
+              const codeEl = document.getElementById("b-phone-code");
+              if (codeEl) {
+                const codes = Array.from(codeEl.options).map(o => o.value);
+                const matchedCode = codes.find(c => phoneVal.startsWith(c));
+                if (matchedCode) {
+                  codeEl.value = matchedCode;
+                  phoneInput.value = phoneVal.substring(matchedCode.length);
+                } else {
+                  phoneInput.value = phoneVal;
+                }
               } else {
                 phoneInput.value = phoneVal;
               }
-            } else {
-              phoneInput.value = phoneVal;
             }
           }
+        } catch (err) {
+          console.error("Error retrieving auth session:", err);
         }
-      } catch (err) {
-        console.error("Error retrieving auth session:", err);
       }
     }
-  }
-  checkUserSession();
+    checkUserSession();
 
-  // ---- Form validation + webhook submission ----
-  const form = document.getElementById("booking-form");
-  const submitBtn = document.getElementById("b-submit");
-  const successEl = document.getElementById("b-success");
-  const errorEl = document.getElementById("b-error");
+    // ---- Form validation + webhook submission ----
+    const form = document.getElementById("booking-form");
+    const submitBtn = document.getElementById("b-submit");
+    const successEl = document.getElementById("b-success");
+    const errorEl = document.getElementById("b-error");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-    const nameInput = document.getElementById("b-name");
-    const phoneInput = document.getElementById("b-phone");
-    const brandSelectEl = document.getElementById("b-brand");
-    const brandOtherInputEl = document.getElementById("b-brand-other");
-    const bikeInput = document.getElementById("b-bike");
-    const issueInput = document.getElementById("b-issue");
+      const nameInput = document.getElementById("b-name");
+      const phoneInput = document.getElementById("b-phone");
+      const brandSelectEl = document.getElementById("b-brand");
+      const brandOtherInputEl = document.getElementById("b-brand-other");
+      const bikeInput = document.getElementById("b-bike");
+      const issueInput = document.getElementById("b-issue");
 
-    const rules = [
-      { input: nameInput, error: document.getElementById("b-name-error"), required: true },
-      { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value) },
-      { input: serviceSelect, error: document.getElementById("b-service-error"), required: true },
-      { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true },
-      { input: bikeInput, error: document.getElementById("b-bike-error"), required: true },
-      { input: issueInput, error: document.getElementById("b-issue-error"), required: true }
-    ];
+      const rules = [
+        { input: nameInput, error: document.getElementById("b-name-error"), required: true },
+        { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value) },
+        { input: serviceSelect, error: document.getElementById("b-service-error"), required: true },
+        { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true },
+        { input: bikeInput, error: document.getElementById("b-bike-error"), required: true },
+        { input: issueInput, error: document.getElementById("b-issue-error"), required: true }
+      ];
 
-    if (brandSelectEl.value === "Other") {
-      rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true });
-    } else {
-      clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
-    }
-
-    const val = serviceSelect.value;
-    if (locationInput.required) {
-      rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true });
-    } else {
-      clearFieldError(locationInput, document.getElementById("b-location-error"));
-    }
-
-    const isDateTimeRequired = val === "home-visit" || val === "workshop";
-    const dateInput = document.getElementById("b-date");
-    const timeInput = document.getElementById("b-time");
-
-    if (isDateTimeRequired) {
-      rules.push({ input: dateInput, error: document.getElementById("b-date-error"), required: true });
-      rules.push({ input: timeInput, error: document.getElementById("b-time-error"), required: true });
-    } else {
-      clearFieldError(dateInput, document.getElementById("b-date-error"));
-      clearFieldError(timeInput, document.getElementById("b-time-error"));
-    }
-
-    if (!validateForm(rules)) return;
-
-    // Immediately disable the submit button to prevent double submissions
-    submitBtn.disabled = true;
-    const originalBtnText = submitBtn.innerHTML;
-    submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Saving...`;
-
-    // Combine brand and model names
-    const brandVal = brandSelectEl.value;
-    const brandOtherVal = brandOtherInputEl.value.trim();
-    const modelVal = bikeInput.value.trim();
-    const combinedBikeModel = brandVal === "Other" ? `${brandOtherVal} ${modelVal}`.trim() : `${brandVal} ${modelVal}`.trim();
-
-    // Clean and combine phone number
-    const phoneCodeEl = document.getElementById("b-phone-code");
-    const cleanedLocalPhone = cleanPhoneNumber(phoneInput.value, phoneCodeEl.value);
-    const combinedPhone = `${phoneCodeEl.value}${cleanedLocalPhone}`;
-
-    // Get coordinates & create Google Maps link
-    const coordsVal = document.getElementById("b-coords").value;
-    const googleMapsLink = coordsVal ? `https://www.google.com/maps?q=${coordsVal}` : "";
-
-    // Separate date and time for submission
-    const now = new Date();
-    const submissionDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
-    const submissionTime = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
-
-    // Save booking to Supabase Database first
-    let supabaseBookingId = null;
-    if (!window.supabaseClient) {
-      console.warn("Supabase client not initialized. Attempting inline initialization...");
-      if (typeof window.supabase !== "undefined" && typeof window.supabase.createClient === "function") {
-        window.supabaseClient = window.supabase.createClient(
-          "https://qvnjjvbmethdvmlzeoow.supabase.co",
-          "sb_publishable_JHxEhYkcEdn6zNs3cEIp3g_p69o5_4k"
-        );
+      if (brandSelectEl.value === "Other") {
+        rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true });
+      } else {
+        clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
       }
-    }
 
-    if (!window.supabaseClient) {
-      alert("Database connection is not ready. Please verify your internet connection or disable any ad-blockers blocking CDN scripts, then refresh the page.");
-      return;
-    }
+      const val = serviceSelect.value;
+      if (locationInput.required) {
+        rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true });
+      } else {
+        clearFieldError(locationInput, document.getElementById("b-location-error"));
+      }
 
-    try {
+      const isDateTimeRequired = val === "home-visit" || val === "workshop";
+      const dateInput = document.getElementById("b-date");
+      const timeInput = document.getElementById("b-time");
+
+      if (isDateTimeRequired) {
+        rules.push({ input: dateInput, error: document.getElementById("b-date-error"), required: true });
+        rules.push({ input: timeInput, error: document.getElementById("b-time-error"), required: true });
+      } else {
+        clearFieldError(dateInput, document.getElementById("b-date-error"));
+        clearFieldError(timeInput, document.getElementById("b-time-error"));
+      }
+
+      if (!validateForm(rules)) return;
+
+      // Combine brand and model names
+      const brandVal = brandSelectEl.value;
+      const brandOtherVal = brandOtherInputEl.value.trim();
+      const modelVal = bikeInput.value.trim();
+      const combinedBikeModel = brandVal === "Other" ? `${brandOtherVal} ${modelVal}`.trim() : `${brandVal} ${modelVal}`.trim();
+
+      // Clean and combine phone number
+      const phoneCodeEl = document.getElementById("b-phone-code");
+      const cleanedLocalPhone = cleanPhoneNumber(phoneInput.value, phoneCodeEl.value);
+      const combinedPhone = `${phoneCodeEl.value}${cleanedLocalPhone}`;
+
+      // Get coordinates & create Google Maps link
+      const coordsVal = document.getElementById("b-coords").value;
+      const googleMapsLink = coordsVal ? `https://www.google.com/maps?q=${coordsVal}` : "";
+
+      // Separate date and time for submission
+      const now = new Date();
+      const submissionDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
+      const submissionTime = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+
+      // Save booking to Supabase Database first
+      let supabaseBookingId = null;
+      if (!window.supabaseClient) {
+        console.warn("Supabase client not initialized. Attempting inline initialization...");
+        if (typeof window.supabase !== "undefined" && typeof window.supabase.createClient === "function") {
+          window.supabaseClient = window.supabase.createClient(
+            "https://qvnjjvbmethdvmlzeoow.supabase.co",
+            "sb_publishable_JHxEhYkcEdn6zNs3cEIp3g_p69o5_4k"
+          );
+        }
+      }
+
+      if (!window.supabaseClient) {
+        alert("Database connection is not ready. Please verify your internet connection or disable any ad-blockers blocking CDN scripts, then refresh the page.");
+        return;
+      }
+
+      try {
         const insertData = {
           user_id: loggedInUserId,
           name: nameInput.value.trim(),
@@ -635,51 +671,59 @@
         return; // Stop submission if DB save fails
       }
 
-    const payload = {
-      form_type: "booking",
-      supabase_booking_id: supabaseBookingId,
-      name: nameInput.value.trim(),
-      phone: combinedPhone,
-      bikeModel: combinedBikeModel,
-      serviceType: serviceSelect.value,
-      location: locationInput.value.trim(),
-      coordinates: coordsVal,
-      googleMapsLink: googleMapsLink,
-      submissionDate: submissionDate,
-      submissionTime: submissionTime,
-      preferredDate: document.getElementById("b-date").value,
-      preferredTime: document.getElementById("b-time").value,
-      issueDescription: issueInput.value.trim(),
-      submittedAt: now.toISOString(),
-      source: "booking.html",
-    };
+      // Database write succeeded! Show success state immediately.
+      if (successEl) successEl.classList.remove("hidden");
+      if (errorEl) errorEl.classList.add("hidden");
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = "<i class='fa-solid fa-circle-check'></i> Booking Confirmed";
 
-    const waMessage =
-      `Booking request — Chhotu Motorcycles\n` +
-      `Name: ${payload.name}\nPhone: ${payload.phone}\nBike: ${payload.bikeModel}\n` +
-      `Service: ${payload.serviceType}\nLocation: ${payload.location || "N/A"}\n` +
-      (payload.googleMapsLink ? `Google Map: ${payload.googleMapsLink}\n` : "") +
-      `Preferred: ${payload.preferredDate || "N/A"} ${payload.preferredTime || ""}\n` +
-      `Submitted: ${payload.submissionDate} @ ${payload.submissionTime}\n` +
-      `Issue: ${payload.issueDescription}`;
-    const waHref = buildWhatsAppLink(waMessage);
-    document.getElementById("b-success-wa").setAttribute("href", waHref);
+      const payload = {
+        form_type: "booking",
+        supabase_booking_id: supabaseBookingId,
+        name: nameInput.value.trim(),
+        phone: combinedPhone,
+        bikeModel: combinedBikeModel,
+        serviceType: serviceSelect.value,
+        location: locationInput.value.trim(),
+        coordinates: coordsVal,
+        googleMapsLink: googleMapsLink,
+        submissionDate: submissionDate,
+        submissionTime: submissionTime,
+        preferredDate: document.getElementById("b-date").value,
+        preferredTime: document.getElementById("b-time").value,
+        issueDescription: issueInput.value.trim(),
+        submittedAt: now.toISOString(),
+        source: "booking.html",
+      };
 
-    // Set tracking link URL dynamically
-    const trackLink = document.getElementById("b-track-link");
-    if (trackLink && supabaseBookingId) {
-      trackLink.setAttribute("href", `tracking.html?id=${supabaseBookingId}`);
-    }
+      const waMessage =
+        `Booking request — Chhotu Motorcycles\n` +
+        `Name: ${payload.name}\nPhone: ${payload.phone}\nBike: ${payload.bikeModel}\n` +
+        `Service: ${payload.serviceType}\nLocation: ${payload.location || "N/A"}\n` +
+        (payload.googleMapsLink ? `Google Map: ${payload.googleMapsLink}\n` : "") +
+        `Preferred: ${payload.preferredDate || "N/A"} ${payload.preferredTime || ""}\n` +
+        `Submitted: ${payload.submissionDate} @ ${payload.submissionTime}\n` +
+        `Issue: ${payload.issueDescription}`;
+      const waHref = buildWhatsAppLink(waMessage);
+      document.getElementById("b-success-wa").setAttribute("href", waHref);
 
-    await submitToWebhook({
-      payload,
-      button: submitBtn,
-      successEl,
-      errorEl,
-      waFallbackHref: waHref,
+      // Set tracking link URL dynamically
+      const trackLink = document.getElementById("b-track-link");
+      if (trackLink && supabaseBookingId) {
+        trackLink.setAttribute("href", `tracking.html?id=${supabaseBookingId}`);
+      }
+
+      // Fire the webhook in the background without blocking the user
+      submitToWebhook({
+        payload,
+        button: submitBtn,
+        successEl: null,
+        errorEl: null,
+        waFallbackHref: waHref,
+      }).catch(e => console.error("Admin webhook notification failed:", e));
     });
-  });
-</script>
-<script src="assets/agentation-bundle.js"></script>
+  </script>
+  <script src="assets/agentation-bundle.js"></script>
 </body>
+
 </html>
