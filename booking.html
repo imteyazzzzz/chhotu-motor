@@ -716,7 +716,7 @@
       // Fire the webhook in the background without blocking the user
       submitToWebhook({
         payload,
-        button: submitBtn,
+        button: document.createElement("button"), // Pass a dummy button to prevent it from re-enabling the real submit button
         successEl: null,
         errorEl: null,
         waFallbackHref: waHref,
