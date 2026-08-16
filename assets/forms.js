@@ -5,7 +5,7 @@
    bookings vs. general contact messages separately.
    ========================================================================= */
 
-const N8N_WEBHOOK_URL = "https://imteefy.duckdns.org/webhook-test/chhotu-motor";
+const N8N_WEBHOOK_URL = "https://imteefy.duckdns.org/webhook/chhotu-motor";
 
 /** Nepal-friendly phone check: allows +977, spaces, dashes, 7-10 digits after any prefix. */
 function isValidPhone(value) {
