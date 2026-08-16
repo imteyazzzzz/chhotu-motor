@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Confirmed | Chhotu Motorcycles Workshop, Kathmandu</title>
+  <meta name="description" content="Your motorcycle repair booking has been successfully received by Chhotu Motorcycles Workshop.">
+  <meta property="og:title" content="Booking Confirmed — Chhotu Motorcycles">
+  <meta property="og:description" content="Thank you! We've received your repair booking details.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_NP">
+  <link rel="icon" href="data:,">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
+</head>
+
+<body class="antialiased">
+
+  <!-- =====================================================================
+     SHARED HEADER START — keep identical across all pages.
+     ===================================================================== -->
+<header class="sticky top-0 z-40 bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
+      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU <span class="text-[#FF5A1F]">WORKSHOP</span></span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+      <a href="index.html" data-nav-link class="nav-link">Home</a>
+      <a href="about.html" data-nav-link class="nav-link">About</a>
+      <a href="services.html" data-nav-link class="nav-link">Services</a>
+      <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+      <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    </nav>
+
+    <div class="hidden md:flex items-center gap-3" id="desktop-auth-actions">
+      <a href="auth.html" id="d-btn-auth" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-user-plus"></i> Sign In / Sign Up</a>
+      <a href="tracking.html" id="d-btn-track" class="btn btn-primary !py-2 !px-4 !text-xs"><i class="fa-solid fa-route"></i> Track Booking</a>
+    </div>
+
+    <div class="flex items-center gap-1 md:hidden">
+      <!-- Mobile-only WhatsApp button next to hamburger menu -->
+      <a href="#" class="emergency-wa-trigger flex items-center justify-center text-[#25D366] text-2xl w-11 h-11" title="Emergency WhatsApp" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+      
+      <!-- Hamburger menu toggle -->
+      <button id="nav-toggle" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile slide-in menu -->
+<div id="mobile-menu" class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden" aria-hidden="true">
+  <div class="flex items-center justify-between h-16 px-4 border-b border-[#3A3F49]">
+    <span class="font-display text-sm">MENU</span>
+    <button id="nav-close" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <nav class="flex flex-col p-6 gap-6 text-lg" aria-label="Mobile Primary">
+    <a href="index.html" data-nav-link class="nav-link">Home</a>
+    <a href="about.html" data-nav-link class="nav-link">About</a>
+    <a href="services.html" data-nav-link class="nav-link">Services</a>
+    <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+    <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    
+    <div class="flex flex-col gap-3 mt-4" id="m-auth-actions">
+      <a href="auth.html" id="m-btn-auth" class="btn btn-primary w-full text-center"><i class="fa-solid fa-user-plus"></i> Sign In / Sign Up</a>
+      <a href="tracking.html" id="m-btn-track" class="btn btn-outline w-full text-center"><i class="fa-solid fa-route"></i> Track Booking</a>
+    </div>
+  </nav>
+</div>
+<!-- =====================================================================
+     SHARED HEADER END
+     ===================================================================== -->
+
+  <main class="min-h-[70vh] flex items-center justify-center py-16 px-4">
+    <div class="max-w-md w-full">
+      
+      <!-- Standalone Success Screen Card -->
+      <div class="success-screen shadow-xl">
+        <div class="hazard-stripe hazard-stripe--thin"></div>
+        <div class="success-confetti">
+          <span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="success-check"><i class="fa-solid fa-check"></i></div>
+        <h3>You're Booked!</h3>
+        <p class="text-[#B9B6AC] text-sm">We've got your details — a dispatcher will confirm by phone or WhatsApp shortly. For anything urgent, message us directly.</p>
+        <div class="flex flex-col gap-3 mt-4">
+          <a href="#" id="b-success-wa" class="btn btn-outline w-full text-center"><i class="fa-brands fa-whatsapp"></i> Confirm via WhatsApp</a>
+          <a href="tracking.html" id="b-track-link" class="btn btn-primary w-full text-center">
+            <i class="fa-solid fa-location-arrow"></i> Track Booking
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- =====================================================================
+     SHARED FOOTER START — keep identical across all pages.
+     ===================================================================== -->
+  <footer class="bg-[#1B1E24] border-t border-[#3A3F49]">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 py-14 grid md:grid-cols-4 gap-10">
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          <span class="font-display font-semibold text-sm">CHHOTU WORKSHOP</span>
+        </div>
+        <p class="text-[#B9B6AC] text-sm">24/7 emergency roadside repair, home visits, and workshop appointments for every motorcycle in Kathmandu.</p>
+        <div class="flex gap-3 mt-5 text-lg">
+          <a href="#" aria-label="Facebook" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-facebook"></i></a>
+          <a href="#" aria-label="Instagram" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." aria-label="WhatsApp" class="text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">QUICK LINKS</h4>
+        <ul class="space-y-2 text-sm text-[#B9B6AC]">
+          <li><a href="index.html" class="hover:text-[#F4F1E8]">Home</a></li>
+          <li><a href="about.html" class="hover:text-[#F4F1E8]">About</a></li>
+          <li><a href="services.html" class="hover:text-[#F4F1E8]">Services</a></li>
+          <li><a href="booking.html" class="hover:text-[#F4F1E8]">Booking</a></li>
+          <li><a href="contact.html" class="hover:text-[#F4F1E8]">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">SERVICES</h4>
+        <ul class="space-y-2 text-sm text-[#B9B6AC]">
+          <li><a href="services.html#emergency" class="hover:text-[#F4F1E8]">Emergency Repair</a></li>
+          <li><a href="services.html#home-visit" class="hover:text-[#F4F1E8]">Home / Office Visit</a></li>
+          <li><a href="services.html#workshop" class="hover:text-[#F4F1E8]">Workshop Appointment</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">CONTACT</h4>
+        <ul class="space-y-3 text-sm text-[#B9B6AC]">
+          <li class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-1"></i> Jorpati, Boudha Rd, Kathmandu 44600, Nepal</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-phone"></i> <a href="tel:+9779813691072" class="hover:text-[#F4F1E8]">+977 981-369-1072</a></li>
+          <li class="flex items-center gap-2"><i class="fa-brands fa-whatsapp"></i> <a href="#" data-wa-message="Hi Chhotu Motorcycles, I have a question." class="hover:text-[#F4F1E8]">WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-[#3A3F49] py-5">
+      <p class="text-center text-xs text-[#B9B6AC]">© <span id="year"></span> Chhotu Motorcycles Workshop. All rights reserved.</p>
+    </div>
+  </footer>
+  <!-- =====================================================================
+     SHARED FOOTER END
+     ===================================================================== -->
+
+  <a href="#" data-wa-message="Hi Chhotu Motorcycles, I'd like to book a repair." class="fab-whatsapp" aria-label="Chat on WhatsApp">
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+  <a href="tel:+9779813691072" class="fab-call" aria-label="Call Chhotu Motorcycles">
+    <i class="fa-solid fa-phone"></i>
+  </a>
+  <button id="back-to-top" class="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+  <script src="assets/main.js"></script>
+  <script src="assets/auth-header.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // 1. Get query parameters from URL
+    const params = new URLSearchParams(window.location.search);
+    const bookingId = params.get("id") || "";
+    const name = params.get("name") || "";
+    const phone = params.get("phone") || "";
+    const bike = params.get("bike") || "";
+    const service = params.get("service") || "";
+    const locationVal = params.get("location") || "";
+    const coords = params.get("coords") || "";
+    const date = params.get("date") || "";
+    const time = params.get("time") || "";
+    const issue = params.get("issue") || "";
+
+    // 2. Set dynamic link for Track Booking
+    const trackLink = document.getElementById("b-track-link");
+    if (trackLink) {
+      if (bookingId && bookingId !== "null" && bookingId !== "undefined") {
+        trackLink.setAttribute("href", `tracking.html?id=${bookingId}`);
+      } else {
+        trackLink.setAttribute("href", `tracking.html?phone=${encodeURIComponent(phone)}`);
+      }
+    }
+
+    // 3. Construct WhatsApp confirmation message
+    const now = new Date();
+    const submissionDate = now.toISOString().split("T")[0];
+    const submissionTime = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+    
+    const mapsLink = coords ? `https://www.google.com/maps?q=${coords}` : "";
+
+    const waMessage =
+      `Booking request — Chhotu Motorcycles\n` +
+      `Name: ${name}\nPhone: ${phone}\nBike: ${bike}\n` +
+      `Service: ${service}\nLocation: ${locationVal || "N/A"}\n` +
+      (mapsLink ? `Google Map: ${mapsLink}\n` : "") +
+      `Preferred: ${date || "N/A"} ${time || ""}\n` +
+      `Submitted: ${submissionDate} @ ${submissionTime}\n` +
+      `Issue: ${issue}`;
+
+    const waHref = `https://wa.me/9779813691072?text=${encodeURIComponent(waMessage)}`;
+    const waBtn = document.getElementById("b-success-wa");
+    if (waBtn) {
+      waBtn.setAttribute("href", waHref);
+    }
+  </script>
+</body>
+
+</html>

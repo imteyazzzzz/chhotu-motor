@@ -672,12 +672,7 @@
         return; // Stop submission if DB save fails
       }
 
-      // Database write succeeded! Show success state immediately.
-      if (successEl) successEl.classList.remove("hidden");
-      if (errorEl) errorEl.classList.add("hidden");
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = "<i class='fa-solid fa-circle-check'></i> Booking Confirmed";
-
+      // Database write succeeded! Redirect to booking-success.html
       const payload = {
         form_type: "booking",
         supabase_booking_id: supabaseBookingId,
@@ -706,22 +701,34 @@
         `Submitted: ${payload.submissionDate} @ ${payload.submissionTime}\n` +
         `Issue: ${payload.issueDescription}`;
       const waHref = buildWhatsAppLink(waMessage);
-      document.getElementById("b-success-wa").setAttribute("href", waHref);
 
-      // Set tracking link URL dynamically
-      const trackLink = document.getElementById("b-track-link");
-      if (trackLink && supabaseBookingId) {
-        trackLink.setAttribute("href", `tracking.html?id=${supabaseBookingId}`);
+      // Fire the webhook and wait for it so the request goes out before redirecting
+      try {
+        await submitToWebhook({
+          payload,
+          button: document.createElement("button"), // Pass a dummy button
+          successEl: null,
+          errorEl: null,
+          waFallbackHref: waHref,
+        });
+      } catch (e) {
+        console.error("Admin webhook notification failed:", e);
       }
 
-      // Fire the webhook in the background without blocking the user
-      submitToWebhook({
-        payload,
-        button: document.createElement("button"), // Pass a dummy button to prevent it from re-enabling the real submit button
-        successEl: null,
-        errorEl: null,
-        waFallbackHref: waHref,
-      }).catch(e => console.error("Admin webhook notification failed:", e));
+      // Redirect user to the separate success page with query parameters
+      const successUrl = `booking-success.html?` +
+        `id=${encodeURIComponent(supabaseBookingId || '')}` +
+        `&name=${encodeURIComponent(payload.name)}` +
+        `&phone=${encodeURIComponent(payload.phone)}` +
+        `&bike=${encodeURIComponent(payload.bikeModel)}` +
+        `&service=${encodeURIComponent(payload.serviceType)}` +
+        `&location=${encodeURIComponent(payload.location)}` +
+        `&coords=${encodeURIComponent(payload.coordinates)}` +
+        `&date=${encodeURIComponent(payload.preferredDate)}` +
+        `&time=${encodeURIComponent(payload.preferredTime)}` +
+        `&issue=${encodeURIComponent(payload.issueDescription)}`;
+
+      window.location.href = successUrl;
     });
   </script>
   <script src="assets/agentation-bundle.js"></script>
