@@ -17,6 +17,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase.js"></script>
 </head>
 <body class="antialiased">
 
@@ -196,7 +198,10 @@
           <div id="b-success" class="hidden bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-5">
             <p class="font-display text-sm text-[#FF5A1F] mb-2"><i class="fa-solid fa-circle-check"></i> BOOKING RECEIVED</p>
             <p class="text-[#B9B6AC] text-sm mb-4">We've got your details — a dispatcher will confirm by phone or WhatsApp shortly. For anything urgent, message us directly.</p>
-            <a href="#" id="b-success-wa" class="btn btn-outline !text-xs"><i class="fa-brands fa-whatsapp"></i> Confirm via WhatsApp</a>
+            <div class="flex flex-wrap gap-3 mt-2">
+              <a href="#" id="b-success-wa" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-brands fa-whatsapp"></i> Confirm via WhatsApp</a>
+              <a href="tracking.html" id="b-track-link" class="btn btn-primary !py-2 !px-4 !text-xs"><i class="fa-solid fa-route"></i> Track Repair Status</a>
+            </div>
           </div>
 
           <!-- Error state -->
@@ -296,6 +301,7 @@
 
 <script src="assets/main.js"></script>
 <script src="assets/forms.js"></script>
+<script src="assets/auth-header.js"></script>
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -439,6 +445,47 @@
   brandSelect.addEventListener("change", syncBrandUI);
   syncBrandUI();
 
+  // ---- Check Supabase Auth Session and Prefill ----
+  let loggedInUserId = null;
+  async function checkUserSession() {
+    if (window.supabaseClient) {
+      try {
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        if (error) throw error;
+        
+        if (session && session.user) {
+          loggedInUserId = session.user.id;
+          
+          const nameInput = document.getElementById("b-name");
+          const phoneInput = document.getElementById("b-phone");
+          
+          if (nameInput && !nameInput.value) {
+            nameInput.value = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "";
+          }
+          if (phoneInput && !phoneInput.value && session.user.phone) {
+            let phoneVal = session.user.phone;
+            const codeEl = document.getElementById("b-phone-code");
+            if (codeEl) {
+              const codes = Array.from(codeEl.options).map(o => o.value);
+              const matchedCode = codes.find(c => phoneVal.startsWith(c));
+              if (matchedCode) {
+                codeEl.value = matchedCode;
+                phoneInput.value = phoneVal.substring(matchedCode.length);
+              } else {
+                phoneInput.value = phoneVal;
+              }
+            } else {
+              phoneInput.value = phoneVal;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error retrieving auth session:", err);
+      }
+    }
+  }
+  checkUserSession();
+
   // ---- Form validation + webhook submission ----
   const form = document.getElementById("booking-form");
   const submitBtn = document.getElementById("b-submit");
@@ -500,8 +547,46 @@
     const submissionDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
     const submissionTime = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
 
+    // Save booking to Supabase Database first
+    let supabaseBookingId = null;
+    if (window.supabaseClient) {
+      try {
+        const insertData = {
+          user_id: loggedInUserId,
+          name: nameInput.value.trim(),
+          phone: combinedPhone,
+          bike_brand: brandVal === "Other" ? brandOtherVal : brandVal,
+          bike_model: modelVal,
+          service_type: serviceSelect.value,
+          location: locationInput.value.trim() || null,
+          coordinates: coordsVal || null,
+          google_maps_link: googleMapsLink || null,
+          preferred_date: document.getElementById("b-date").value || null,
+          preferred_time: document.getElementById("b-time").value || null,
+          issue_description: issueInput.value.trim() || null,
+          status: 'pending',
+          source: 'booking.html'
+        };
+
+        const { data, error } = await window.supabaseClient
+          .from('bookings')
+          .insert([insertData])
+          .select('id');
+
+        if (error) throw error;
+        if (data && data.length > 0) {
+          supabaseBookingId = data[0].id;
+        }
+      } catch (err) {
+        console.error("Failed to save booking to Supabase:", err);
+        alert("Failed to save booking to database: " + (err.message || err));
+        return; // Stop submission if DB save fails
+      }
+    }
+
     const payload = {
       form_type: "booking",
+      supabase_booking_id: supabaseBookingId,
       name: nameInput.value.trim(),
       phone: combinedPhone,
       bikeModel: combinedBikeModel,
@@ -528,6 +613,12 @@
       `Issue: ${payload.issueDescription}`;
     const waHref = buildWhatsAppLink(waMessage);
     document.getElementById("b-success-wa").setAttribute("href", waHref);
+
+    // Set tracking link URL dynamically
+    const trackLink = document.getElementById("b-track-link");
+    if (trackLink && supabaseBookingId) {
+      trackLink.setAttribute("href", `tracking.html?id=${supabaseBookingId}`);
+    }
 
     await submitToWebhook({
       payload,

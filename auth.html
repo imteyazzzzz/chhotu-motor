@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Access | Chhotu Motorcycles Workshop, Kathmandu</title>
+<meta name="description" content="Sign up or sign in to your Chhotu Motorcycles account to place bookings and track your repair status in real-time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase.js"></script>
+</head>
+<body class="antialiased">
+
+<!-- =====================================================================
+     SHARED HEADER START
+     ===================================================================== -->
+<header class="sticky top-0 z-40 bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
+      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU <span class="text-[#FF5A1F]">WORKSHOP</span></span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+      <a href="index.html" data-nav-link class="nav-link">Home</a>
+      <a href="about.html" data-nav-link class="nav-link">About</a>
+      <a href="services.html" data-nav-link class="nav-link">Services</a>
+      <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+      <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    </nav>
+
+    <div class="hidden md:flex items-center gap-3">
+      <a href="tel:+9779813691072" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-phone"></i> Call</a>
+      <a href="booking.html" class="btn btn-primary !py-2 !px-4 !text-xs">Book a Repair</a>
+    </div>
+
+    <div class="flex items-center gap-1 md:hidden">
+      <a href="#" class="emergency-wa-trigger flex items-center justify-center text-[#25D366] text-2xl w-11 h-11" title="Emergency WhatsApp" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+      <button id="nav-toggle" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div id="mobile-menu" class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden" aria-hidden="true">
+  <div class="flex items-center justify-between h-16 px-4 border-b border-[#3A3F49]">
+    <span class="font-display text-sm">MENU</span>
+    <button id="nav-close" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <nav class="flex flex-col p-6 gap-6 text-lg" aria-label="Mobile Primary">
+    <a href="index.html" data-nav-link class="nav-link">Home</a>
+    <a href="about.html" data-nav-link class="nav-link">About</a>
+    <a href="services.html" data-nav-link class="nav-link">Services</a>
+    <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+    <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    <a href="tel:+9779813691072" class="btn btn-call mt-4"><i class="fa-solid fa-phone"></i> Call +977 981-369-1072</a>
+  </nav>
+</div>
+<!-- =====================================================================
+     SHARED HEADER END
+     ===================================================================== -->
+
+<main class="min-h-[calc(100vh-16rem)] flex items-center justify-center py-16 px-4">
+  <div class="max-w-md w-full reveal">
+    
+    <!-- Auth Card Panel -->
+    <div class="card p-6 md:p-8 space-y-6">
+      
+      <!-- Tabs -->
+      <div class="flex border-b border-[#3A3F49]">
+        <button id="tab-signin" class="flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-[#FF5A1F] text-[#FF5A1F] transition-all">Sign In</button>
+        <button id="tab-signup" class="flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8] transition-all">Sign Up</button>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="auth-signin-form" class="space-y-4" novalidate>
+        <div>
+          <label class="field-label" for="signin-email">Email Address *</label>
+          <input id="signin-email" type="email" class="field-input" placeholder="name@example.com" required>
+          <p class="field-error" id="signin-email-error">Please enter your email.</p>
+        </div>
+        <div>
+          <label class="field-label" for="signin-password">Password *</label>
+          <input id="signin-password" type="password" class="field-input" placeholder="••••••••" required>
+          <p class="field-error" id="signin-password-error">Please enter your password.</p>
+        </div>
+        <button type="submit" id="signin-submit" class="btn btn-primary w-full">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In
+        </button>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form id="auth-signup-form" class="space-y-4 hidden" novalidate>
+        <div>
+          <label class="field-label" for="signup-name">Full Name *</label>
+          <input id="signup-name" type="text" class="field-input" placeholder="Full Name" required>
+          <p class="field-error" id="signup-name-error">Please enter your full name.</p>
+        </div>
+        <div>
+          <label class="field-label" for="signup-email">Email Address *</label>
+          <input id="signup-email" type="email" class="field-input" placeholder="name@example.com" required>
+          <p class="field-error" id="signup-email-error">Please enter your email.</p>
+        </div>
+        <div>
+          <label class="field-label" for="signup-phone">Phone Number *</label>
+          <div class="flex gap-2">
+            <select id="signup-phone-code" class="field-input !w-[100px] shrink-0" required>
+              <option value="+977">+977 (NP)</option>
+              <option value="+91">+91 (IN)</option>
+              <option value="+1">+1 (US)</option>
+              <option value="+44">+44 (UK)</option>
+            </select>
+            <input id="signup-phone" type="tel" class="field-input flex-1" placeholder="98XXXXXXXX" required>
+          </div>
+          <p class="field-error" id="signup-phone-error">Please enter a valid phone number.</p>
+        </div>
+        <div>
+          <label class="field-label" for="signup-password">Password *</label>
+          <input id="signup-password" type="password" class="field-input" placeholder="Minimum 6 characters" required>
+          <p class="field-error" id="signup-password-error">Please choose a password.</p>
+        </div>
+        <button type="submit" id="signup-submit" class="btn btn-primary w-full">
+          <i class="fa-solid fa-user-plus"></i> Create Account
+        </button>
+      </form>
+
+      <!-- Feedback Messages -->
+      <div id="auth-success" class="hidden bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-4 text-sm">
+        <p class="text-[#FF5A1F] font-semibold mb-1" id="success-title"></p>
+        <p class="text-[#B9B6AC]" id="success-desc"></p>
+      </div>
+
+      <div id="auth-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-4 text-sm">
+        <p class="text-red-400 font-semibold mb-1"><i class="fa-solid fa-triangle-exclamation"></i> ACTION FAILED</p>
+        <p class="text-[#B9B6AC]" id="error-desc"></p>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- =====================================================================
+     SHARED FOOTER START
+     ===================================================================== -->
+<footer class="bg-[#1B1E24] border-t border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 py-14 grid md:grid-cols-4 gap-10">
+    <div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="font-display font-semibold text-sm">CHHOTU WORKSHOP</span>
+      </div>
+      <p class="text-[#B9B6AC] text-sm">24/7 emergency roadside repair, home visits, and workshop appointments for every motorcycle in Kathmandu.</p>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">QUICK LINKS</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="index.html" class="hover:text-[#F4F1E8]">Home</a></li>
+        <li><a href="about.html" class="hover:text-[#F4F1E8]">About</a></li>
+        <li><a href="services.html" class="hover:text-[#F4F1E8]">Services</a></li>
+        <li><a href="booking.html" class="hover:text-[#F4F1E8]">Booking</a></li>
+        <li><a href="contact.html" class="hover:text-[#F4F1E8]">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">SERVICES</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="services.html#emergency" class="hover:text-[#F4F1E8]">Emergency Repair</a></li>
+        <li><a href="services.html#home-visit" class="hover:text-[#F4F1E8]">Home / Office Visit</a></li>
+        <li><a href="services.html#workshop" class="hover:text-[#F4F1E8]">Workshop Appointment</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">CONTACT</h4>
+      <ul class="space-y-3 text-sm text-[#B9B6AC]">
+        <li class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-1"></i> Jorpati, Boudha Rd, Kathmandu 44600, Nepal</li>
+        <li class="flex items-center gap-2"><i class="fa-solid fa-phone"></i> <a href="tel:+9779813691072" class="hover:text-[#F4F1E8]">+977 981-369-1072</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-[#3A3F49] py-5">
+    <p class="text-center text-xs text-[#B9B6AC]">© <span id="year"></span> Chhotu Motorcycles Workshop. All rights reserved.</p>
+  </div>
+</footer>
+<!-- =====================================================================
+     SHARED FOOTER END
+     ===================================================================== -->
+
+<script src="assets/main.js"></script>
+<script src="assets/forms.js"></script>
+<script src="assets/auth-header.js"></script>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Tab switching logic
+  const tabSignin = document.getElementById("tab-signin");
+  const tabSignup = document.getElementById("tab-signup");
+  const formSignin = document.getElementById("auth-signin-form");
+  const formSignup = document.getElementById("auth-signup-form");
+  const successEl = document.getElementById("auth-success");
+  const errorEl = document.getElementById("auth-error");
+
+  function showMessage(type, title, desc) {
+    successEl.classList.add("hidden");
+    errorEl.classList.add("hidden");
+    
+    if (type === "success") {
+      document.getElementById("success-title").innerHTML = title;
+      document.getElementById("success-desc").innerText = desc;
+      successEl.classList.remove("hidden");
+    } else {
+      document.getElementById("error-desc").innerText = desc;
+      errorEl.classList.remove("hidden");
+    }
+  }
+
+  tabSignin.addEventListener("click", () => {
+    tabSignin.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-[#FF5A1F] text-[#FF5A1F] transition-all";
+    tabSignup.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8] transition-all";
+    formSignin.classList.remove("hidden");
+    formSignup.classList.add("hidden");
+  });
+
+  tabSignup.addEventListener("click", () => {
+    tabSignup.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-[#FF5A1F] text-[#FF5A1F] transition-all";
+    tabSignin.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8] transition-all";
+    formSignup.classList.remove("hidden");
+    formSignin.classList.add("hidden");
+  });
+
+  // Handle Sign In submission
+  formSignin.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById("signin-email");
+    const passwordInput = document.getElementById("signin-password");
+
+    const rules = [
+      { input: emailInput, error: document.getElementById("signin-email-error"), required: true },
+      { input: passwordInput, error: document.getElementById("signin-password-error"), required: true }
+    ];
+
+    if (!validateForm(rules)) return;
+
+    const submitBtn = document.getElementById("signin-submit");
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Signing in...`;
+
+    try {
+      if (!window.supabaseClient) throw new Error("Supabase client is not configured.");
+      
+      const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+        email: emailInput.value.trim(),
+        password: passwordInput.value
+      });
+
+      if (error) throw error;
+      
+      showMessage("success", "<i class='fa-solid fa-circle-check'></i> SIGN IN SUCCESSFUL", "Welcome back! Redirecting you...");
+      setTimeout(() => {
+        window.location.href = "booking.html";
+      }, 1500);
+
+    } catch (err) {
+      console.error(err);
+      showMessage("error", "", err.message || err);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  });
+
+  // Handle Sign Up submission
+  formSignup.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const nameInput = document.getElementById("signup-name");
+    const emailInput = document.getElementById("signup-email");
+    const codeSelect = document.getElementById("signup-phone-code");
+    const phoneInput = document.getElementById("signup-phone");
+    const passwordInput = document.getElementById("signup-password");
+
+    const rules = [
+      { input: nameInput, error: document.getElementById("signup-name-error"), required: true },
+      { input: emailInput, error: document.getElementById("signup-email-error"), required: true },
+      { input: phoneInput, error: document.getElementById("signup-phone-error"), required: true, validator: (val) => isValidPhone(val, codeSelect.value) },
+      { input: passwordInput, error: document.getElementById("signup-password-error"), required: true }
+    ];
+
+    if (!validateForm(rules)) return;
+
+    if (passwordInput.value.length < 6) {
+      showFieldError(passwordInput, document.getElementById("signup-password-error"), "Password must be at least 6 characters.");
+      return;
+    }
+
+    const submitBtn = document.getElementById("signup-submit");
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Registering...`;
+
+    try {
+      if (!window.supabaseClient) throw new Error("Supabase client is not configured.");
+
+      const cleanedLocal = cleanPhoneNumber(phoneInput.value, codeSelect.value);
+      const combinedPhone = `${codeSelect.value}${cleanedLocal}`;
+
+      const { data, error } = await window.supabaseClient.auth.signUp({
+        email: emailInput.value.trim(),
+        password: passwordInput.value,
+        options: {
+          data: {
+            full_name: nameInput.value.trim(),
+            phone: combinedPhone
+          }
+        }
+      });
+
+      if (error) throw error;
+      
+      showMessage("success", "<i class='fa-solid fa-envelope-circle-check'></i> REGISTRATION COMPLETE", "Account created successfully! Please check your email inbox to verify your account, or sign in now.");
+      formSignup.reset();
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    } catch (err) {
+      console.error(err);
+      showMessage("error", "", err.message || err);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  });
+</script>
+</body>
+</html>

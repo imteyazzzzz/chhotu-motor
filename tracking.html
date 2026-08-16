@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Repair Status | Chhotu Motorcycles Workshop, Kathmandu</title>
+<meta name="description" content="Track your motorcycle service or roadside emergency repair status in real-time with Chhotu Motorcycles Jorpati.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/supabase.js"></script>
+<style>
+  /* Timeline custom styles */
+  .step-circle {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+  .step-line {
+    width: 2px;
+    background-color: var(--steel);
+    flex-grow: 1;
+    position: absolute;
+    top: 2.25rem;
+    bottom: -1rem;
+    left: 1.1rem;
+    z-index: 1;
+  }
+  .step-line.active {
+    background-color: var(--orange);
+  }
+  .pulse-glow {
+    box-shadow: 0 0 0 0 rgba(255, 90, 31, 0.5);
+    animation: pulse-orange 1.8s infinite;
+  }
+  @keyframes pulse-orange {
+    0% { box-shadow: 0 0 0 0 rgba(255, 90, 31, 0.6); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 90, 31, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 90, 31, 0); }
+  }
+</style>
+</head>
+<body class="antialiased">
+
+<!-- =====================================================================
+     SHARED HEADER START
+     ===================================================================== -->
+<header class="sticky top-0 z-40 bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
+      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU <span class="text-[#FF5A1F]">WORKSHOP</span></span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+      <a href="index.html" data-nav-link class="nav-link">Home</a>
+      <a href="about.html" data-nav-link class="nav-link">About</a>
+      <a href="services.html" data-nav-link class="nav-link">Services</a>
+      <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+      <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    </nav>
+
+    <div class="hidden md:flex items-center gap-3">
+      <a href="tel:+9779813691072" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-phone"></i> Call</a>
+      <a href="booking.html" class="btn btn-primary !py-2 !px-4 !text-xs">Book a Repair</a>
+    </div>
+
+    <div class="flex items-center gap-1 md:hidden">
+      <a href="#" class="emergency-wa-trigger flex items-center justify-center text-[#25D366] text-2xl w-11 h-11" title="Emergency WhatsApp" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+      <button id="nav-toggle" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div id="mobile-menu" class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden" aria-hidden="true">
+  <div class="flex items-center justify-between h-16 px-4 border-b border-[#3A3F49]">
+    <span class="font-display text-sm">MENU</span>
+    <button id="nav-close" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <nav class="flex flex-col p-6 gap-6 text-lg" aria-label="Mobile Primary">
+    <a href="index.html" data-nav-link class="nav-link">Home</a>
+    <a href="about.html" data-nav-link class="nav-link">About</a>
+    <a href="services.html" data-nav-link class="nav-link">Services</a>
+    <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+    <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    <a href="tel:+9779813691072" class="btn btn-call mt-4"><i class="fa-solid fa-phone"></i> Call +977 981-369-1072</a>
+  </nav>
+</div>
+<!-- =====================================================================
+     SHARED HEADER END
+     ===================================================================== -->
+
+<main class="min-h-[calc(100vh-16rem)] py-14">
+  <div class="max-w-4xl mx-auto px-4 md:px-8 space-y-8">
+    
+    <div class="text-center reveal">
+      <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">TRACK STATUS</p>
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">REPAIR STATUS CENTER</h1>
+      <p class="text-[#B9B6AC]" id="tracking-subtitle">Look up details or check repair progress in real-time.</p>
+    </div>
+
+    <!-- Lookup Box (Shown by default/guest) -->
+    <div id="lookup-panel" class="card p-6 reveal">
+      <h2 class="font-display text-sm mb-4 text-[#FF5A1F]">Search Booking</h2>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input id="lookup-input" type="text" class="field-input flex-1" placeholder="Enter Booking ID or Phone (+977... / +91...)">
+        <button id="lookup-btn" class="btn btn-primary shrink-0">
+          <i class="fa-solid fa-magnifying-glass text-[#14161A]"></i> Search
+        </button>
+      </div>
+      <p class="text-xs text-[#B9B6AC] mt-3 font-mono">Tip: Search with your registered phone number (including country code, e.g., +9779813691072) to see all your requests.</p>
+    </div>
+
+    <!-- Logged In Bookings List (Hidden initially) -->
+    <div id="history-panel" class="card p-6 reveal hidden">
+      <h2 class="font-display text-sm mb-4 text-[#FF5A1F]">Your Repair History</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-[#B9B6AC] font-mono">
+          <thead>
+            <tr class="border-b border-[#3A3F49] text-[#F4F1E8]">
+              <th class="py-3 px-2">Bike</th>
+              <th class="py-3 px-2">Service</th>
+              <th class="py-3 px-2">Date</th>
+              <th class="py-3 px-2">Status</th>
+              <th class="py-3 px-2 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body">
+            <!-- Dynamic rows inserted here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Search Results / Timeline (Hidden initially) -->
+    <div id="status-panel" class="card p-6 md:p-8 reveal hidden">
+      
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#3A3F49] pb-4 mb-6 gap-4">
+        <div>
+          <span class="text-xs font-mono uppercase text-[#B9B6AC]" id="status-meta-id">Booking ID: --</span>
+          <h2 class="text-2xl font-bold font-display text-[#F4F1E8] mt-1" id="status-bike-title">BIKE MODEL</h2>
+        </div>
+        <div class="px-3 py-1 text-xs font-mono uppercase rounded font-semibold border border-[#FF5A1F]/30 bg-[#FF5A1F]/10 text-[#FF5A1F]" id="status-badge">
+          PENDING
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        
+        <!-- Timeline Stepper (Left 2 cols) -->
+        <div class="md:col-span-2 space-y-8 relative">
+          
+          <!-- Stepper Item 1 -->
+          <div class="flex gap-4 relative">
+            <div class="step-line" id="line-1"></div>
+            <div class="step-circle bg-[#3A3F49] text-[#B9B6AC]" id="circle-1">
+              <i class="fa-solid fa-receipt"></i>
+            </div>
+            <div>
+              <h4 class="font-display text-sm text-[#F4F1E8]">Request Received</h4>
+              <p class="text-xs text-[#B9B6AC] mt-1">We have received your repair request. Our dispatcher is reviewing the details.</p>
+            </div>
+          </div>
+
+          <!-- Stepper Item 2 -->
+          <div class="flex gap-4 relative">
+            <div class="step-line" id="line-2"></div>
+            <div class="step-circle bg-[#3A3F49] text-[#B9B6AC]" id="circle-2">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div>
+              <h4 class="font-display text-sm text-[#B9B6AC]" id="step-title-2">Approved &amp; Scheduled</h4>
+              <p class="text-xs text-[#B9B6AC] mt-1" id="step-desc-2">Booking confirmed. Your visit has been approved and scheduled on our calendar.</p>
+            </div>
+          </div>
+
+          <!-- Stepper Item 3 (Emergency specific or generic status) -->
+          <div class="flex gap-4 relative" id="emergency-step-wrap">
+            <div class="step-line" id="line-3"></div>
+            <div class="step-circle bg-[#3A3F49] text-[#B9B6AC]" id="circle-3">
+              <i class="fa-solid fa-motorcycle"></i>
+            </div>
+            <div>
+              <h4 class="font-display text-sm text-[#B9B6AC]" id="step-title-3">Mechanic Dispatched</h4>
+              <p class="text-xs text-[#B9B6AC] mt-1" id="step-desc-3">Our roadside mechanic is on the way to your coordinates.</p>
+            </div>
+          </div>
+
+          <!-- Stepper Item 4 -->
+          <div class="flex gap-4 relative">
+            <div class="step-line" id="line-4"></div>
+            <div class="step-circle bg-[#3A3F49] text-[#B9B6AC]" id="circle-4">
+              <i class="fa-solid fa-screwdriver-wrench"></i>
+            </div>
+            <div>
+              <h4 class="font-display text-sm text-[#B9B6AC]" id="step-title-4">Under Repair</h4>
+              <p class="text-xs text-[#B9B6AC] mt-1" id="step-desc-4">Work is currently in progress. We are fixing your motorcycle.</p>
+            </div>
+          </div>
+
+          <!-- Stepper Item 5 -->
+          <div class="flex gap-4 relative">
+            <div class="step-circle bg-[#3A3F49] text-[#B9B6AC]" id="circle-5">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <h4 class="font-display text-sm text-[#B9B6AC]" id="step-title-5">Completed</h4>
+              <p class="text-xs text-[#B9B6AC] mt-1" id="step-desc-5">Service is finished. Your bike is ready for pickup or the visit is complete.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Details Info Card (Right 1 col) -->
+        <div class="space-y-4">
+          <div class="bg-[#14161A] border border-[#3A3F49] p-5 rounded-md space-y-4 text-sm">
+            <h3 class="font-display text-xs text-[#FF5A1F] tracking-wider uppercase border-b border-[#3A3F49] pb-2">Booking Details</h3>
+            
+            <div class="font-mono text-xs space-y-3">
+              <div>
+                <span class="text-[#B9B6AC] block">Customer:</span>
+                <span class="text-[#F4F1E8]" id="detail-name">--</span>
+              </div>
+              <div>
+                <span class="text-[#B9B6AC] block">Service Type:</span>
+                <span class="text-[#F4F1E8] uppercase" id="detail-service">--</span>
+              </div>
+              <div>
+                <span class="text-[#B9B6AC] block">Location:</span>
+                <span class="text-[#F4F1E8]" id="detail-location">--</span>
+                <div class="mt-1" id="detail-map-link-wrap">
+                  <!-- Dynamic map link -->
+                </div>
+              </div>
+              <div id="detail-date-wrap">
+                <span class="text-[#B9B6AC] block">Preferred Slot:</span>
+                <span class="text-[#F4F1E8]" id="detail-slot">--</span>
+              </div>
+              <div>
+                <span class="text-[#B9B6AC] block">Description / Issue:</span>
+                <span class="text-[#F4F1E8]" id="detail-issue">--</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card p-5 text-center space-y-3">
+            <p class="text-xs text-[#B9B6AC]">Need to contact the mechanic or update details?</p>
+            <a href="tel:+9779813691072" class="btn btn-call w-full !min-h-[40px] !py-2"><i class="fa-solid fa-phone"></i> Call Workshop</a>
+            <a href="#" id="wa-discuss" class="btn btn-outline w-full !min-h-[40px] !py-2"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<!-- =====================================================================
+     SHARED FOOTER START
+     ===================================================================== -->
+<footer class="bg-[#1B1E24] border-t border-[#3A3F49]">
+  <div class="max-w-7xl mx-auto px-4 md:px-8 py-14 grid md:grid-cols-4 gap-10">
+    <div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="font-display font-semibold text-sm">CHHOTU WORKSHOP</span>
+      </div>
+      <p class="text-[#B9B6AC] text-sm">24/7 emergency roadside repair, home visits, and workshop appointments for every motorcycle in Kathmandu.</p>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">QUICK LINKS</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="index.html" class="hover:text-[#F4F1E8]">Home</a></li>
+        <li><a href="about.html" class="hover:text-[#F4F1E8]">About</a></li>
+        <li><a href="services.html" class="hover:text-[#F4F1E8]">Services</a></li>
+        <li><a href="booking.html" class="hover:text-[#F4F1E8]">Booking</a></li>
+        <li><a href="contact.html" class="hover:text-[#F4F1E8]">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">SERVICES</h4>
+      <ul class="space-y-2 text-sm text-[#B9B6AC]">
+        <li><a href="services.html#emergency" class="hover:text-[#F4F1E8]">Emergency Repair</a></li>
+        <li><a href="services.html#home-visit" class="hover:text-[#F4F1E8]">Home / Office Visit</a></li>
+        <li><a href="services.html#workshop" class="hover:text-[#F4F1E8]">Workshop Appointment</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-display text-sm mb-4 text-[#FF5A1F]">CONTACT</h4>
+      <ul class="space-y-3 text-sm text-[#B9B6AC]">
+        <li class="flex items-start gap-2"><i class="fa-solid fa-location-dot mt-1"></i> Jorpati, Boudha Rd, Kathmandu 44600, Nepal</li>
+        <li class="flex items-center gap-2"><i class="fa-solid fa-phone"></i> <a href="tel:+9779813691072" class="hover:text-[#F4F1E8]">+977 981-369-1072</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-[#3A3F49] py-5">
+    <p class="text-center text-xs text-[#B9B6AC]">© <span id="year"></span> Chhotu Motorcycles Workshop. All rights reserved.</p>
+  </div>
+</footer>
+<!-- =====================================================================
+     SHARED FOOTER END
+     ===================================================================== -->
+
+<script src="assets/main.js"></script>
+<script src="assets/auth-header.js"></script>
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  const lookupInput = document.getElementById("lookup-input");
+  const lookupBtn = document.getElementById("lookup-btn");
+  const statusPanel = document.getElementById("status-panel");
+  const historyPanel = document.getElementById("history-panel");
+  const historyBody = document.getElementById("history-table-body");
+
+  // Status index mapping
+  const statuses = ["pending", "confirmed", "dispatched", "in-progress", "completed"];
+
+  // Helper: Get visual status name
+  function getStatusLabel(status) {
+    switch (status) {
+      case "pending": return "Pending Review";
+      case "confirmed": return "Confirmed";
+      case "dispatched": return "Dispatched";
+      case "in-progress": return "In Progress";
+      case "completed": return "Completed";
+      case "cancelled": return "Cancelled";
+      default: return "Unknown";
+    }
+  }
+
+  // Load a single booking's timeline
+  function displayBooking(booking) {
+    statusPanel.classList.add("hidden");
+    
+    // Set headers & badge
+    document.getElementById("status-meta-id").innerText = `Booking ID: ${booking.id}`;
+    document.getElementById("status-bike-title").innerText = `${booking.bike_brand} ${booking.bike_model}`;
+    const badge = document.getElementById("status-badge");
+    badge.innerText = getStatusLabel(booking.status);
+    
+    if (booking.status === "cancelled") {
+      badge.className = "px-3 py-1 text-xs font-mono uppercase rounded font-semibold border border-red-500/30 bg-red-500/10 text-red-400";
+    } else {
+      badge.className = "px-3 py-1 text-xs font-mono uppercase rounded font-semibold border border-[#FF5A1F]/30 bg-[#FF5A1F]/10 text-[#FF5A1F]";
+    }
+
+    // Set Sidebar Details
+    document.getElementById("detail-name").innerText = booking.name;
+    document.getElementById("detail-service").innerText = booking.service_type === "emergency" ? "Emergency Roadside Help" : booking.service_type === "home-visit" ? "Scheduled Home Visit" : "Workshop Appointment";
+    document.getElementById("detail-location").innerText = booking.location || "Workshop (Jorpati, Boudha Rd)";
+    document.getElementById("detail-issue").innerText = booking.issue_description || "N/A";
+    
+    const slotWrap = document.getElementById("detail-date-wrap");
+    if (booking.preferred_date) {
+      slotWrap.style.display = "block";
+      document.getElementById("detail-slot").innerText = `${booking.preferred_date} ${booking.preferred_time || ""}`;
+    } else {
+      slotWrap.style.display = "none";
+    }
+
+    // Map Link
+    const mapWrap = document.getElementById("detail-map-link-wrap");
+    if (booking.google_maps_link) {
+      mapWrap.innerHTML = `<a href="${booking.google_maps_link}" target="_blank" class="text-xs text-[#FF5A1F] hover:underline"><i class="fa-solid fa-location-dot"></i> View Geolocated Map</a>`;
+    } else {
+      mapWrap.innerHTML = "";
+    }
+
+    // WhatsApp discuss link
+    const discussWa = document.getElementById("wa-discuss");
+    const waText = `Hi Chhotu Motorcycles, I am checking on my booking status.\nID: ${booking.id}\nBike: ${booking.bike_brand} ${booking.bike_model}`;
+    discussWa.href = buildWhatsAppLink(waText);
+
+    // Toggle emergency step in UI
+    const emergencyStepWrap = document.getElementById("emergency-step-wrap");
+    const isEmergency = booking.service_type === "emergency";
+    emergencyStepWrap.style.display = isEmergency ? "flex" : "none";
+
+    // Build timeline updates
+    const currentStatus = booking.status;
+    
+    // Determine active index
+    let activeIdx = statuses.indexOf(currentStatus);
+    if (currentStatus === "cancelled") activeIdx = -1; // Don't highlight stepper for cancelled
+
+    // Reset styles on all stepper items
+    for (let i = 1; i <= 5; i++) {
+      const circle = document.getElementById(`circle-${i}`);
+      const line = document.getElementById(`line-${i}`);
+      const title = document.getElementById(`step-title-${i}`);
+      const desc = document.getElementById(`step-desc-${i}`);
+
+      if (!circle) continue;
+
+      // Reset
+      circle.className = "step-circle bg-[#22262E] text-[#B9B6AC]";
+      if (line) line.className = "step-line";
+      if (title) title.classList.remove("text-[#FF5A1F]");
+      if (title) title.classList.add("text-[#B9B6AC]");
+    }
+
+    // Set timeline highlights
+    if (activeIdx !== -1) {
+      // Loop over stepper indices
+      const itemsList = [1, 2, 3, 4, 5];
+      // If NOT emergency, skip index 3 (Mechanic Dispatched)
+      const activeSteps = isEmergency ? [1, 2, 3, 4, 5] : [1, 2, 4, 5];
+
+      // Translate database status name to step circle ID (1-5)
+      let currentStepId = 1;
+      if (currentStatus === "confirmed") currentStepId = 2;
+      if (currentStatus === "dispatched" && isEmergency) currentStepId = 3;
+      if (currentStatus === "in-progress") currentStepId = 4;
+      if (currentStatus === "completed") currentStepId = 5;
+
+      activeSteps.forEach(stepId => {
+        const circle = document.getElementById(`circle-${stepId}`);
+        const line = document.getElementById(`line-${stepId}`);
+        const title = document.getElementById(`step-title-${stepId}`);
+        
+        if (!circle) return;
+
+        if (stepId < currentStepId) {
+          // Completed step
+          circle.className = "step-circle bg-[#FF5A1F] text-[#14161A]";
+          circle.innerHTML = `<i class="fa-solid fa-check"></i>`;
+          if (line) line.className = "step-line active";
+          if (title) {
+            title.classList.remove("text-[#B9B6AC]");
+            title.classList.add("text-[#F4F1E8]");
+          }
+        } else if (stepId === currentStepId) {
+          // Current Active step
+          circle.className = "step-circle bg-[#FF5A1F] text-[#14161A] pulse-glow";
+          if (line) line.className = "step-line"; // Line stays grey since next step isn't complete
+          if (title) {
+            title.classList.remove("text-[#B9B6AC]");
+            title.classList.add("text-[#FF5A1F]");
+          }
+        } else {
+          // Future pending step
+          // Reset icon
+          if (stepId === 2) circle.innerHTML = `<i class="fa-solid fa-calendar-check"></i>`;
+          if (stepId === 3) circle.innerHTML = `<i class="fa-solid fa-motorcycle"></i>`;
+          if (stepId === 4) circle.innerHTML = `<i class="fa-solid fa-screwdriver-wrench"></i>`;
+          if (stepId === 5) circle.innerHTML = `<i class="fa-solid fa-circle-check"></i>`;
+        }
+      });
+    }
+
+    statusPanel.classList.remove("hidden");
+    statusPanel.scrollIntoView({ behavior: "smooth" });
+  }
+
+  // Load list of all bookings for user
+  async function loadUserHistory(userId) {
+    if (!window.supabaseClient) return;
+
+    try {
+      const { data, error } = await window.supabaseClient
+        .from("bookings")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        historyBody.innerHTML = "";
+        data.forEach(booking => {
+          const row = document.createElement("tr");
+          row.className = "border-b border-[#3A3F49]/40 hover:bg-[#22262E]/20 transition-colors";
+          row.innerHTML = `
+            <td class="py-3 px-2 text-[#F4F1E8] font-semibold">${booking.bike_brand} ${booking.bike_model}</td>
+            <td class="py-3 px-2 uppercase text-xs">${booking.service_type}</td>
+            <td class="py-3 px-2 text-xs">${new Date(booking.created_at).toLocaleDateString()}</td>
+            <td class="py-3 px-2">
+              <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                booking.status === 'completed' ? 'bg-green-500/10 text-green-400 border border-green-500/30' :
+                booking.status === 'cancelled' ? 'bg-red-500/10 text-red-400 border border-red-500/30' :
+                'bg-[#FF5A1F]/10 text-[#FF5A1F] border border-[#FF5A1F]/30'
+              }">${getStatusLabel(booking.status)}</span>
+            </td>
+            <td class="py-3 px-2 text-right">
+              <button class="btn btn-outline !min-h-[30px] !py-1 !px-3 !text-xs select-booking-btn" data-id="${booking.id}">Track</button>
+            </td>
+          `;
+          historyBody.appendChild(row);
+        });
+
+        // Add click events to track buttons
+        historyBody.querySelectorAll(".select-booking-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const bookingId = btn.getAttribute("data-id");
+            const selected = data.find(b => b.id === bookingId);
+            if (selected) displayBooking(selected);
+          });
+        });
+
+        historyPanel.classList.remove("hidden");
+        document.getElementById("tracking-subtitle").innerText = "Manage your repair history and check progress in real-time.";
+      }
+    } catch (err) {
+      console.error("Failed to load user booking history:", err);
+    }
+  }
+
+  // Lookup button click handler
+  lookupBtn.addEventListener("click", async () => {
+    const val = lookupInput.value.trim();
+    if (!val) {
+      alert("Please enter a booking ID or phone number.");
+      return;
+    }
+
+    const originalText = lookupBtn.innerHTML;
+    lookupBtn.disabled = true;
+    lookupBtn.innerHTML = `<span class="inline-block h-3 w-3 border-2 border-[#14161A] border-t-transparent rounded-full animate-spin"></span> Search`;
+
+    try {
+      if (!window.supabaseClient) throw new Error("Supabase is not configured.");
+
+      let query = window.supabaseClient.from("bookings").select("*");
+      
+      // UUID format check (regex)
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+      
+      if (isUUID) {
+        query = query.eq("id", val);
+      } else {
+        // Assume phone lookup. Clean it first
+        const cleaned = val.replace(/[-\s()]/g, "");
+        query = query.eq("phone", cleaned).order("created_at", { ascending: false });
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        alert("No bookings found matching your search. Please check the ID or Phone Number.");
+        statusPanel.classList.add("hidden");
+      } else if (data.length === 1) {
+        displayBooking(data[0]);
+      } else {
+        // Multiple bookings for a phone number. Show in history panel
+        historyBody.innerHTML = "";
+        data.forEach(booking => {
+          const row = document.createElement("tr");
+          row.className = "border-b border-[#3A3F49]/40 hover:bg-[#22262E]/20 transition-colors";
+          row.innerHTML = `
+            <td class="py-3 px-2 text-[#F4F1E8] font-semibold">${booking.bike_brand} ${booking.bike_model}</td>
+            <td class="py-3 px-2 uppercase text-xs">${booking.service_type}</td>
+            <td class="py-3 px-2 text-xs">${new Date(booking.created_at).toLocaleDateString()}</td>
+            <td class="py-3 px-2">
+              <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                booking.status === 'completed' ? 'bg-green-500/10 text-green-400 border border-green-500/30' :
+                booking.status === 'cancelled' ? 'bg-red-500/10 text-red-400 border border-red-500/30' :
+                'bg-[#FF5A1F]/10 text-[#FF5A1F] border border-[#FF5A1F]/30'
+              }">${getStatusLabel(booking.status)}</span>
+            </td>
+            <td class="py-3 px-2 text-right">
+              <button class="btn btn-outline !min-h-[30px] !py-1 !px-3 !text-xs select-booking-btn" data-id="${booking.id}">Track</button>
+            </td>
+          `;
+          historyBody.appendChild(row);
+        });
+
+        historyBody.querySelectorAll(".select-booking-btn").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const bookingId = btn.getAttribute("data-id");
+            const selected = data.find(b => b.id === bookingId);
+            if (selected) displayBooking(selected);
+          });
+        });
+
+        historyPanel.classList.remove("hidden");
+        statusPanel.classList.add("hidden");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Error searching database: " + (err.message || err));
+    } finally {
+      lookupBtn.disabled = false;
+      lookupBtn.innerHTML = originalText;
+    }
+  });
+
+  // Check initial parameters and session
+  async function checkInitState() {
+    // 1. If ID is passed in URL query param, automatically search it
+    const params = new URLSearchParams(window.location.search);
+    const idParam = params.get("id");
+    if (idParam) {
+      lookupInput.value = idParam;
+      lookupBtn.click();
+    }
+
+    // 2. Check if logged in, load user history list
+    if (window.supabaseClient) {
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (session && session.user) {
+        loadUserHistory(session.user.id);
+      }
+    }
+  }
+
+  // Load state on init
+  setTimeout(checkInitState, 200);
+</script>
+</body>
+</html>
