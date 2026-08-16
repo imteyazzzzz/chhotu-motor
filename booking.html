@@ -109,6 +109,18 @@
           <div class="grid sm:grid-cols-2 gap-5">
             <div>
               <label class="field-label" for="b-bike">Bike Model *</label>
+              <p class="text-[10px] font-mono uppercase tracking-wider text-[#B9B6AC] mb-1.5">Popular Brands:</p>
+              <div class="flex flex-wrap gap-1.5 mb-3" id="brand-grid">
+                <button type="button" class="brand-chip" data-brand="Bajaj">Bajaj</button>
+                <button type="button" class="brand-chip" data-brand="Honda">Honda</button>
+                <button type="button" class="brand-chip" data-brand="Yamaha">Yamaha</button>
+                <button type="button" class="brand-chip" data-brand="Hero">Hero</button>
+                <button type="button" class="brand-chip" data-brand="TVS">TVS</button>
+                <button type="button" class="brand-chip" data-brand="Royal Enfield">Royal Enfield</button>
+                <button type="button" class="brand-chip" data-brand="Suzuki">Suzuki</button>
+                <button type="button" class="brand-chip" data-brand="KTM">KTM</button>
+                <button type="button" class="brand-chip" data-brand="Other">Other</button>
+              </div>
               <input id="b-bike" name="bikeModel" type="text" class="field-input" placeholder="e.g. Bajaj Pulsar 150" required>
               <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
             </div>
@@ -371,6 +383,97 @@
       );
     });
   }
+  // ---- Popular Brand Selection Logic ----
+  const brandChips = document.querySelectorAll(".brand-chip");
+  const bikeInput = document.getElementById("b-bike");
+  const popularBrands = ["Bajaj", "Honda", "Yamaha", "Hero", "TVS", "Royal Enfield", "Suzuki", "KTM"];
+
+  function clearActiveChips() {
+    brandChips.forEach(chip => chip.classList.remove("active"));
+  }
+
+  function setActiveChip(brandName) {
+    clearActiveChips();
+    brandChips.forEach(chip => {
+      if (chip.getAttribute("data-brand").toLowerCase() === brandName.toLowerCase()) {
+        chip.classList.add("active");
+      }
+    });
+  }
+
+  brandChips.forEach(chip => {
+    chip.addEventListener("click", () => {
+      const brand = chip.getAttribute("data-brand");
+      
+      if (brand === "Other") {
+        setActiveChip("Other");
+        // Clear any popular brand prefix if present
+        let val = bikeInput.value.trim();
+        let matchedBrand = null;
+        for (const b of popularBrands) {
+          if (val.toLowerCase().startsWith(b.toLowerCase())) {
+            matchedBrand = b;
+            break;
+          }
+        }
+        if (matchedBrand) {
+          bikeInput.value = val.substring(matchedBrand.length).trim();
+        }
+        bikeInput.focus();
+      } else {
+        setActiveChip(brand);
+        
+        let currentValue = bikeInput.value.trim();
+        let matchedBrand = null;
+        for (const b of popularBrands) {
+          if (currentValue.toLowerCase().startsWith(b.toLowerCase())) {
+            matchedBrand = b;
+            break;
+          }
+        }
+
+        if (matchedBrand) {
+          // Replace matching brand prefix
+          bikeInput.value = bikeInput.value.replace(new RegExp('^' + matchedBrand, 'i'), brand);
+        } else {
+          // Prepend brand name
+          if (currentValue === "") {
+            bikeInput.value = brand + " ";
+          } else {
+            bikeInput.value = brand + " " + currentValue;
+          }
+        }
+        bikeInput.focus();
+      }
+      
+      // Trigger input event to clear validation styling if present
+      if (typeof clearFieldError === "function") {
+        clearFieldError(bikeInput, document.getElementById("b-bike-error"));
+      }
+    });
+  });
+
+  // Sync text input edits back to chips
+  bikeInput.addEventListener("input", () => {
+    const value = bikeInput.value.trim().toLowerCase();
+    if (value === "") {
+      clearActiveChips();
+      return;
+    }
+    
+    let matched = false;
+    for (const b of popularBrands) {
+      if (value.startsWith(b.toLowerCase())) {
+        setActiveChip(b);
+        matched = true;
+        break;
+      }
+    }
+    
+    if (!matched) {
+      setActiveChip("Other");
+    }
+  });
 
   // ---- Form validation + webhook submission ----
   const form = document.getElementById("booking-form");
