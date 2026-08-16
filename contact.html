@@ -99,8 +99,18 @@
           </div>
           <div>
             <label class="field-label" for="c-phone">Phone Number *</label>
-            <input id="c-phone" name="phone" type="tel" class="field-input" placeholder="98XXXXXXXX" required>
-            <p class="field-error" id="c-phone-error">Enter a valid Nepal phone number.</p>
+            <div class="flex gap-2">
+              <select id="c-phone-code" name="phoneCode" class="field-input !w-[100px] shrink-0" required>
+                <option value="+977">+977 (NP)</option>
+                <option value="+91">+91 (IN)</option>
+                <option value="+1">+1 (US)</option>
+                <option value="+44">+44 (UK)</option>
+                <option value="+61">+61 (AU)</option>
+                <option value="+971">+971 (AE)</option>
+              </select>
+              <input id="c-phone" name="phone" type="tel" class="field-input flex-1" placeholder="98XXXXXXXX" required>
+            </div>
+            <p class="field-error" id="c-phone-error">Please enter a valid phone number.</p>
           </div>
           <div>
             <label class="field-label" for="c-email">Email (optional)</label>
@@ -314,7 +324,7 @@
 
     const rules = [
       { input: nameInput, error: document.getElementById("c-name-error"), required: true },
-      { input: phoneInput, error: document.getElementById("c-phone-error"), required: true, validator: isValidPhone },
+      { input: phoneInput, error: document.getElementById("c-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("c-phone-code").value) },
       { input: messageInput, error: document.getElementById("c-message-error"), required: true },
     ];
     if (emailInput.value.trim()) {
@@ -325,10 +335,15 @@
 
     if (!validateForm(rules)) return;
 
+    // Clean and combine phone number
+    const phoneCodeEl = document.getElementById("c-phone-code");
+    const cleanedLocalPhone = cleanPhoneNumber(phoneInput.value, phoneCodeEl.value);
+    const combinedPhone = `${phoneCodeEl.value}${cleanedLocalPhone}`;
+
     const payload = {
       form_type: "contact",
       name: nameInput.value.trim(),
-      phone: phoneInput.value.trim(),
+      phone: combinedPhone,
       email: emailInput.value.trim(),
       message: messageInput.value.trim(),
       submittedAt: new Date().toISOString(),

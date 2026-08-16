@@ -101,8 +101,18 @@
             </div>
             <div>
               <label class="field-label" for="b-phone">Phone Number *</label>
-              <input id="b-phone" name="phone" type="tel" class="field-input" placeholder="98XXXXXXXX" required>
-              <p class="field-error" id="b-phone-error">Enter a valid Nepal phone number.</p>
+              <div class="flex gap-2">
+                <select id="b-phone-code" name="phoneCode" class="field-input !w-[100px] shrink-0" required>
+                  <option value="+977">+977 (NP)</option>
+                  <option value="+91">+91 (IN)</option>
+                  <option value="+1">+1 (US)</option>
+                  <option value="+44">+44 (UK)</option>
+                  <option value="+61">+61 (AU)</option>
+                  <option value="+971">+971 (AE)</option>
+                </select>
+                <input id="b-phone" name="phone" type="tel" class="field-input flex-1" placeholder="98XXXXXXXX" required>
+              </div>
+              <p class="field-error" id="b-phone-error">Please enter a valid phone number.</p>
             </div>
           </div>
 
@@ -439,7 +449,7 @@
 
     const rules = [
       { input: nameInput, error: document.getElementById("b-name-error"), required: true },
-      { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: isValidPhone },
+      { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value) },
       { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true },
       { input: bikeInput, error: document.getElementById("b-bike-error"), required: true },
       { input: serviceSelect, error: document.getElementById("b-service-error"), required: true },
@@ -468,10 +478,15 @@
     const modelVal = bikeInput.value.trim();
     const combinedBikeModel = brandVal === "Other" ? `${brandOtherVal} ${modelVal}`.trim() : `${brandVal} ${modelVal}`.trim();
 
+    // Clean and combine phone number
+    const phoneCodeEl = document.getElementById("b-phone-code");
+    const cleanedLocalPhone = cleanPhoneNumber(phoneInput.value, phoneCodeEl.value);
+    const combinedPhone = `${phoneCodeEl.value}${cleanedLocalPhone}`;
+
     const payload = {
       form_type: "booking",
       name: nameInput.value.trim(),
-      phone: phoneInput.value.trim(),
+      phone: combinedPhone,
       bikeModel: combinedBikeModel,
       serviceType: serviceSelect.value,
       location: locationInput.value.trim(),

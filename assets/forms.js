@@ -7,10 +7,38 @@
 
 const N8N_WEBHOOK_URL = "https://imteefy.duckdns.org/webhook-test/chhotu-motor";
 
-/** Nepal-friendly phone check: allows +977, spaces, dashes, 7-10 digits after any prefix. */
-function isValidPhone(value) {
-  const cleaned = value.trim();
-  return /^(\+?977[-\s]?)?[0-9]{7,10}$/.test(cleaned.replace(/[-\s]/g, ""));
+/** Clean phone number: strips formatting and redundant country/zero prefixes */
+function cleanPhoneNumber(value, countryCode = "") {
+  let cleaned = value.replace(/[-\s()]/g, "");
+  
+  if (countryCode) {
+    const codeNum = countryCode.replace("+", "");
+    if (cleaned.startsWith(countryCode)) {
+      cleaned = cleaned.substring(countryCode.length);
+    } else if (cleaned.startsWith(codeNum)) {
+      cleaned = cleaned.substring(codeNum.length);
+    }
+  }
+  
+  if (cleaned.startsWith("0")) {
+    cleaned = cleaned.substring(1);
+  }
+  
+  return cleaned;
+}
+
+/** Check if the phone number is valid for the selected country code */
+function isValidPhone(value, countryCode = "+977") {
+  const cleaned = cleanPhoneNumber(value, countryCode);
+  if (countryCode === "+977") {
+    // Nepal mobile (10 digits) or landline (7-9 digits)
+    return /^[0-9]{7,10}$/.test(cleaned);
+  }
+  if (countryCode === "+91") {
+    // India mobile (10 digits)
+    return /^[0-9]{10}$/.test(cleaned);
+  }
+  return /^[0-9]{7,12}$/.test(cleaned);
 }
 
 function showFieldError(inputEl, errorEl, message) {
