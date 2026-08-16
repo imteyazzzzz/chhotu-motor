@@ -193,7 +193,7 @@
 
           <!-- Issue Description -->
           <div id="b-issue-wrap">
-            <label class="field-label" for="b-issue">Issue Description *</label>
+            <label class="field-label" for="b-issue">Issue Description <span id="b-issue-required">*</span></label>
             <textarea id="b-issue" name="issueDescription" rows="4" class="field-input" placeholder="What's wrong with the bike?" required></textarea>
             <p class="field-error" id="b-issue-error">Please describe the issue.</p>
           </div>
@@ -331,35 +331,38 @@
 
   // ---- Toggle "location required" + date/time relevance based on service type ----
   function syncServiceUI() {
+    if (!serviceSelect) return;
     const val = serviceSelect.value;
     
     // 1. Location visibility and required status
     const locationRequired = val === "emergency" || val === "home-visit";
     const showLocation = val === "emergency" || val === "home-visit";
     
-    locationInput.required = locationRequired;
-    locationRequiredMark.style.display = locationRequired ? "inline" : "none";
-    locationWrap.style.display = showLocation ? "block" : "none";
-    if (!showLocation) {
+    if (locationInput) locationInput.required = locationRequired;
+    if (locationRequiredMark) locationRequiredMark.style.display = locationRequired ? "inline" : "none";
+    if (locationWrap) locationWrap.style.display = showLocation ? "block" : "none";
+    if (!showLocation && locationInput) {
       locationInput.value = "";
     }
 
     // 2. Date and Time visibility
     const showDateTime = val === "home-visit" || val === "workshop";
-    dateTimeWrap.style.display = showDateTime ? "grid" : "none";
+    if (dateTimeWrap) dateTimeWrap.style.display = showDateTime ? "grid" : "none";
     if (!showDateTime) {
-      document.getElementById("b-date").value = "";
-      document.getElementById("b-time").value = "";
+      const dateEl = document.getElementById("b-date");
+      const timeEl = document.getElementById("b-time");
+      if (dateEl) dateEl.value = "";
+      if (timeEl) timeEl.value = "";
     }
 
     // 3. Issue visibility and required status
     const issueRequired = val !== "";
     const showIssue = val !== "";
     
-    issueInput.required = issueRequired;
-    issueRequiredMark.style.display = issueRequired ? "inline" : "none";
-    issueWrap.style.display = showIssue ? "block" : "none";
-    if (!showIssue) {
+    if (issueInput) issueInput.required = issueRequired;
+    if (issueRequiredMark) issueRequiredMark.style.display = issueRequired ? "inline" : "none";
+    if (issueWrap) issueWrap.style.display = showIssue ? "block" : "none";
+    if (!showIssue && issueInput) {
       issueInput.value = "";
     }
   }
