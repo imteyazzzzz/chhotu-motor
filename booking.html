@@ -221,16 +221,20 @@
             </button>
 
             <!-- Success state -->
-            <div id="b-success" class="hidden bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-5">
-              <p class="font-display text-sm text-[#FF5A1F] mb-2"><i class="fa-solid fa-circle-check"></i> BOOKING
-                RECEIVED</p>
-              <p class="text-[#B9B6AC] text-sm mb-4">We've got your details — a dispatcher will confirm by phone or
-                WhatsApp shortly. For anything urgent, message us directly.</p>
-              <div class="flex flex-wrap gap-3 mt-2">
-                <a href="#" id="b-success-wa" class="btn btn-outline !py-2 !px-4 !text-xs"><i
-                    class="fa-brands fa-whatsapp"></i> Confirm via WhatsApp</a>
-                <a href="tracking.html" id="b-track-link" class="btn btn-primary !py-2 !px-4 !text-xs"><i
-                    class="fa-solid fa-route"></i> Track Repair Status</a>
+            <div id="b-success" class="hidden success-screen">
+              <div class="hazard-stripe hazard-stripe--thin"></div>
+              <div class="success-confetti">
+                <span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="success-check"><i class="fa-solid fa-check"></i></div>
+              <h3>You're Booked!</h3>
+              <p>We've got your details — a dispatcher will confirm by phone or WhatsApp shortly.</p>
+              <div class="flex flex-wrap justify-center gap-3 mt-4">
+                <a href="#" id="b-success-wa" class="btn btn-outline w-full sm:w-auto"><i class="fa-brands fa-whatsapp"></i> Confirm via WhatsApp</a>
+                <a href="tracking.html" id="b-track-link" class="btn btn-primary w-full sm:w-auto">
+                  <i class="fa-solid fa-location-arrow"></i> Track Booking
+                </a>
               </div>
             </div>
 

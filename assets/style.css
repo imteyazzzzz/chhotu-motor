@@ -334,3 +334,68 @@ img.lazy-ph{
     margin-bottom: 0 !important;
   }
 }
+
+/* ---- Booking success screen ---- */
+.success-screen{
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 2.5rem 1.5rem 2rem;
+  background: var(--charcoal-2);
+  border: 1px solid var(--steel);
+  border-radius: 8px;
+}
+.success-screen .hazard-stripe{
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+}
+.success-confetti{
+  position: absolute;
+  top: 30px; left: 0; right: 0;
+  height: 120px;
+  pointer-events: none;
+}
+.success-confetti span{
+  position: absolute;
+  display: block;
+  width: 7px; height: 7px;
+  background: var(--orange);
+}
+.success-confetti span:nth-child(1){ top:10px; left:12%; background:var(--yellow); border-radius:2px; transform:rotate(20deg); }
+.success-confetti span:nth-child(2){ top:26px; left:24%; border-radius:50%; }
+.success-confetti span:nth-child(3){ top:6px;  left:38%; background:var(--off-white); border-radius:2px; transform:rotate(-15deg); }
+.success-confetti span:nth-child(4){ top:40px; left:52%; border-radius:50%; }
+.success-confetti span:nth-child(5){ top:14px; left:66%; background:var(--yellow); border-radius:2px; transform:rotate(40deg); }
+.success-confetti span:nth-child(6){ top:36px; left:80%; background:var(--off-white); border-radius:50%; }
+.success-confetti span:nth-child(7){ top:70px; left:18%; border-radius:50%; }
+.success-confetti span:nth-child(8){ top:84px; left:44%; background:var(--yellow); border-radius:2px; transform:rotate(60deg); }
+.success-confetti span:nth-child(9){ top:76px; left:70%; border-radius:2px; transform:rotate(-30deg); }
+
+.success-check{
+  position: relative;
+  z-index: 1;
+  width: 76px; height: 76px;
+  margin: 0.5rem auto 0;
+  border-radius: 50%;
+  background: var(--orange);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: var(--charcoal);
+}
+.success-screen h3{
+  margin-top: 1.25rem;
+  font-size: 1.5rem;
+  font-family: var(--font-display), Oswald, sans-serif;
+  color: var(--off-white);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.success-screen p{
+  color: var(--off-white-dim);
+  font-size: 0.95rem;
+  max-width: 320px;
+  margin: 0.6rem auto 1.5rem;
+}
