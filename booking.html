@@ -549,8 +549,22 @@
 
     // Save booking to Supabase Database first
     let supabaseBookingId = null;
-    if (window.supabaseClient) {
-      try {
+    if (!window.supabaseClient) {
+      console.warn("Supabase client not initialized. Attempting inline initialization...");
+      if (typeof window.supabase !== "undefined" && typeof window.supabase.createClient === "function") {
+        window.supabaseClient = window.supabase.createClient(
+          "https://qvnjjvbmethdvmlzeoow.supabase.co",
+          "sb_publishable_JHxEhYkcEdn6zNs3cEIp3g_p69o5_4k"
+        );
+      }
+    }
+
+    if (!window.supabaseClient) {
+      alert("Database connection is not ready. Please verify your internet connection or disable any ad-blockers blocking CDN scripts, then refresh the page.");
+      return;
+    }
+
+    try {
         const insertData = {
           user_id: loggedInUserId,
           name: nameInput.value.trim(),
