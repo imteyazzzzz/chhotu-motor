@@ -92,6 +92,7 @@
       <!-- ============ BOOKING FORM ============ -->
       <div class="lg:col-span-2 reveal">
         <form id="booking-form" class="card p-6 md:p-8 space-y-6" novalidate>
+          <input type="hidden" id="b-coords" name="coordinates" value="">
 
           <div class="grid sm:grid-cols-2 gap-5">
             <div>
@@ -367,6 +368,8 @@
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
+          // Save raw coordinates in hidden input for mapping
+          document.getElementById("b-coords").value = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
           // Set raw GPS coordinates first
           locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
           
@@ -405,6 +408,11 @@
       );
     });
   }
+
+  // Clear coordinates if user types manually in the location field
+  locationInput.addEventListener("input", () => {
+    document.getElementById("b-coords").value = "";
+  });
   // ---- Brand select toggle logic ----
   const brandSelect = document.getElementById("b-brand");
   const brandOtherWrap = document.getElementById("b-brand-other-wrap");
@@ -483,6 +491,15 @@
     const cleanedLocalPhone = cleanPhoneNumber(phoneInput.value, phoneCodeEl.value);
     const combinedPhone = `${phoneCodeEl.value}${cleanedLocalPhone}`;
 
+    // Get coordinates & create Google Maps link
+    const coordsVal = document.getElementById("b-coords").value;
+    const googleMapsLink = coordsVal ? `https://www.google.com/maps?q=${coordsVal}` : "";
+
+    // Separate date and time for submission
+    const now = new Date();
+    const submissionDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
+    const submissionTime = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+
     const payload = {
       form_type: "booking",
       name: nameInput.value.trim(),
@@ -490,10 +507,14 @@
       bikeModel: combinedBikeModel,
       serviceType: serviceSelect.value,
       location: locationInput.value.trim(),
+      coordinates: coordsVal,
+      googleMapsLink: googleMapsLink,
+      submissionDate: submissionDate,
+      submissionTime: submissionTime,
       preferredDate: document.getElementById("b-date").value,
       preferredTime: document.getElementById("b-time").value,
       issueDescription: issueInput.value.trim(),
-      submittedAt: new Date().toISOString(),
+      submittedAt: now.toISOString(),
       source: "booking.html",
     };
 
@@ -501,7 +522,9 @@
       `Booking request — Chhotu Motorcycles\n` +
       `Name: ${payload.name}\nPhone: ${payload.phone}\nBike: ${payload.bikeModel}\n` +
       `Service: ${payload.serviceType}\nLocation: ${payload.location || "N/A"}\n` +
+      (payload.googleMapsLink ? `Google Map: ${payload.googleMapsLink}\n` : "") +
       `Preferred: ${payload.preferredDate || "N/A"} ${payload.preferredTime || ""}\n` +
+      `Submitted: ${payload.submissionDate} @ ${payload.submissionTime}\n` +
       `Issue: ${payload.issueDescription}`;
     const waHref = buildWhatsAppLink(waMessage);
     document.getElementById("b-success-wa").setAttribute("href", waHref);
