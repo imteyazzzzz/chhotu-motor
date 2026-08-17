@@ -349,6 +349,8 @@
   // Helper: Get visual status name
   function getStatusLabel(status) {
     switch (status) {
+      case "pending_verification": return "Awaiting Verification";
+      case "payment_rejected": return "Payment Rejected";
       case "pending": return "Pending Review";
       case "confirmed": return "Confirmed";
       case "dispatched": return "Dispatched";
@@ -361,6 +363,11 @@
 
   // Load a single booking's timeline
   function displayBooking(booking) {
+    if (booking.status === "pending_verification" || booking.status === "payment_rejected") {
+      alert("This booking requires payment verification. Redirecting you to your profile page to check status or upload proof.");
+      window.location.href = "profile.html";
+      return;
+    }
     lookupPanel.classList.add("hidden");
     historyPanel.classList.add("hidden");
     statusPanel.classList.add("hidden");

@@ -107,118 +107,199 @@
           <form id="booking-form" class="card p-6 md:p-8 space-y-6" novalidate>
             <input type="hidden" id="b-coords" name="coordinates" value="">
 
-            <!-- Full Name & Phone Number -->
-            <div class="grid sm:grid-cols-2 gap-5">
-              <div>
-                <label class="field-label" for="b-name">Full Name *</label>
-                <input id="b-name" name="name" type="text" class="field-input" placeholder="Your name" required>
-                <p class="field-error" id="b-name-error">Please enter your name.</p>
-              </div>
-              <div>
-                <label class="field-label" for="b-phone">Phone Number *</label>
-                <div class="flex gap-2">
-                  <select id="b-phone-code" name="phoneCode" class="field-input !w-[100px] shrink-0" required>
-                    <option value="+977">+977 (NP)</option>
-                    <option value="+91">+91 (IN)</option>
-                    <option value="+1">+1 (US)</option>
-                    <option value="+44">+44 (UK)</option>
-                    <option value="+61">+61 (AU)</option>
-                    <option value="+971">+971 (AE)</option>
-                  </select>
-                  <input id="b-phone" name="phone" type="tel" class="field-input flex-1" placeholder="98XXXXXXXX"
-                    required>
+            <!-- STEP 1: Booking Fields (Full Name, Phone, Service, Bike, Location, Date, Issue) -->
+            <div id="booking-fields-step" class="space-y-6">
+              <!-- Full Name & Phone Number -->
+              <div class="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label class="field-label" for="b-name">Full Name *</label>
+                  <input id="b-name" name="name" type="text" class="field-input" placeholder="Your name" required>
+                  <p class="field-error" id="b-name-error">Please enter your name.</p>
                 </div>
-                <p class="field-error" id="b-phone-error">Please enter a valid phone number.</p>
+                <div>
+                  <label class="field-label" for="b-phone">Phone Number *</label>
+                  <div class="flex gap-2">
+                    <select id="b-phone-code" name="phoneCode" class="field-input !w-[100px] shrink-0" required>
+                      <option value="+977">+977 (NP)</option>
+                      <option value="+91">+91 (IN)</option>
+                      <option value="+1">+1 (US)</option>
+                      <option value="+44">+44 (UK)</option>
+                      <option value="+61">+61 (AU)</option>
+                      <option value="+971">+971 (AE)</option>
+                    </select>
+                    <input id="b-phone" name="phone" type="tel" class="field-input flex-1" placeholder="98XXXXXXXX"
+                      required>
+                  </div>
+                  <p class="field-error" id="b-phone-error">Please enter a valid phone number.</p>
+                </div>
               </div>
-            </div>
 
-            <!-- Service Type -->
-            <div id="b-service-wrap">
-              <label class="field-label" for="b-service">Service Type *</label>
-              <select id="b-service" name="serviceType" class="field-input" required>
-                <option value="">Select a service</option>
-                <option value="emergency">Emergency Repair / Roadside Assistance</option>
-                <option value="home-visit">Scheduled Home / Office Visit</option>
-                <option value="workshop">Workshop Visit / Appointment</option>
-              </select>
-              <p class="field-error" id="b-service-error">Please select a service type.</p>
-            </div>
-
-            <!-- Bike Brand & Bike Model -->
-            <div class="grid sm:grid-cols-2 gap-5">
-              <div>
-                <label class="field-label" for="b-brand">Bike Brand *</label>
-                <select id="b-brand" name="bikeBrand" class="field-input" required>
-                  <option value="">Select Brand</option>
-                  <option value="Bajaj">Bajaj</option>
-                  <option value="Honda">Honda</option>
-                  <option value="Yamaha">Yamaha</option>
-                  <option value="Hero">Hero</option>
-                  <option value="TVS">TVS</option>
-                  <option value="Royal Enfield">Royal Enfield</option>
-                  <option value="Suzuki">Suzuki</option>
-                  <option value="KTM">KTM</option>
-                  <option value="Other">Other Brand</option>
+              <!-- Service Type -->
+              <div id="b-service-wrap">
+                <label class="field-label" for="b-service">Service Type *</label>
+                <select id="b-service" name="serviceType" class="field-input" required>
+                  <option value="">Select a service</option>
+                  <option value="emergency">Emergency Repair / Roadside Assistance</option>
+                  <option value="home-visit">Scheduled Home / Office Visit</option>
+                  <option value="workshop">Workshop Visit / Appointment</option>
                 </select>
-                <p class="field-error" id="b-brand-error">Please select a brand.</p>
+                <p class="field-error" id="b-service-error">Please select a service type.</p>
               </div>
-              <div>
-                <label class="field-label" for="b-bike">Bike Model *</label>
-                <input id="b-bike" name="bikeModel" type="text" class="field-input"
-                  placeholder="e.g. Pulsar 150, Shine, FZ" required>
-                <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
+
+              <!-- Bike Brand & Bike Model -->
+              <div class="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label class="field-label" for="b-brand">Bike Brand *</label>
+                  <select id="b-brand" name="bikeBrand" class="field-input" required>
+                    <option value="">Select Brand</option>
+                    <option value="Bajaj">Bajaj</option>
+                    <option value="Honda">Honda</option>
+                    <option value="Yamaha">Yamaha</option>
+                    <option value="Hero">Hero</option>
+                    <option value="TVS">TVS</option>
+                    <option value="Royal Enfield">Royal Enfield</option>
+                    <option value="Suzuki">Suzuki</option>
+                    <option value="KTM">KTM</option>
+                    <option value="Other">Other Brand</option>
+                  </select>
+                  <p class="field-error" id="b-brand-error">Please select a brand.</p>
+                </div>
+                <div>
+                  <label class="field-label" for="b-bike">Bike Model *</label>
+                  <input id="b-bike" name="bikeModel" type="text" class="field-input"
+                    placeholder="e.g. Pulsar 150, Shine, FZ" required>
+                  <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
+                </div>
               </div>
+
+              <!-- Specify Brand (Hidden by default) -->
+              <div id="b-brand-other-wrap" class="hidden">
+                <label class="field-label" for="b-brand-other">Specify Brand *</label>
+                <input id="b-brand-other" name="brandOther" type="text" class="field-input"
+                  placeholder="e.g. Vespa, Aprilia, Ducati">
+                <p class="field-error" id="b-brand-other-error">Please specify your bike brand.</p>
+              </div>
+
+              <!-- Location / Address -->
+              <div id="b-location-wrap">
+                <label class="field-label" for="b-location">Location / Address <span
+                    id="b-location-required">*</span></label>
+                <div class="flex gap-2">
+                  <input id="b-location" name="location" type="text" class="field-input flex-1"
+                    placeholder="Street, landmark, or GPS pin — required for Emergency &amp; Home Visit">
+                  <button type="button" id="b-detect-location" class="btn btn-outline shrink-0 !py-0 !px-4"
+                    title="Auto-detect location">
+                    <i class="fa-solid fa-location-crosshairs text-[#FF5A1F]"></i>
+                    <span class="hidden sm:inline text-xs">Auto-Detect</span>
+                  </button>
+                </div>
+                <p class="field-error" id="b-location-error">Location is required for this service.</p>
+              </div>
+
+              <!-- Preferred Date & Time -->
+              <div class="grid sm:grid-cols-2 gap-5" id="b-datetime-wrap">
+                <div>
+                  <label class="field-label" for="b-date">Preferred Date *</label>
+                  <input id="b-date" name="preferredDate" type="date" class="field-input">
+                  <p class="field-error" id="b-date-error">Preferred date is required for this service.</p>
+                </div>
+                <div>
+                  <label class="field-label" for="b-time">Preferred Time *</label>
+                  <input id="b-time" name="preferredTime" type="time" class="field-input">
+                  <p class="field-error" id="b-time-error">Preferred time is required for this service.</p>
+                </div>
+              </div>
+
+              <!-- Issue Description -->
+              <div id="b-issue-wrap">
+                <label class="field-label" for="b-issue">Issue Description <span id="b-issue-required">*</span></label>
+                <textarea id="b-issue" name="issueDescription" rows="4" class="field-input"
+                  placeholder="What's wrong with the bike?" required></textarea>
+                <p class="field-error" id="b-issue-error">Please describe the issue.</p>
+              </div>
+
+              <button type="button" id="b-continue-payment" class="btn btn-primary w-full sm:w-auto">
+                Continue to Payment <i class="fa-solid fa-arrow-right"></i>
+              </button>
             </div>
 
-            <!-- Specify Brand (Hidden by default) -->
-            <div id="b-brand-other-wrap" class="hidden">
-              <label class="field-label" for="b-brand-other">Specify Brand *</label>
-              <input id="b-brand-other" name="brandOther" type="text" class="field-input"
-                placeholder="e.g. Vespa, Aprilia, Ducati">
-              <p class="field-error" id="b-brand-other-error">Please specify your bike brand.</p>
-            </div>
+            <!-- STEP 2: Upfront Booking Payment Step (QR Code & Screenshot Proof) -->
+            <div id="booking-payment-step" class="hidden space-y-6">
+              <h3 class="font-display text-sm font-bold text-[#FF5A1F] uppercase tracking-wider border-b border-[#3A3F49]/40 pb-2">Upfront Booking Charge</h3>
+              
+              <!-- Amount Breakdown Table -->
+              <div class="card p-4 bg-[#14161A]/50 border border-[#3A3F49]/40 space-y-3 font-mono text-xs">
+                <div class="flex justify-between items-center text-[#B9B6AC]">
+                  <span>Refundable Booking Deposit</span>
+                  <span>Rs. 200</span>
+                </div>
+                <div class="flex justify-between items-center text-[#B9B6AC]">
+                  <span>Platform Fee (non-refundable)</span>
+                  <span>Rs. 49</span>
+                </div>
+                <div class="border-t border-[#3A3F49]/40 pt-2.5 flex justify-between items-center font-bold text-sm text-[#FF5A1F]">
+                  <span>Total to Pay Now</span>
+                  <span>Rs. 249</span>
+                </div>
+              </div>
 
-            <!-- Location / Address -->
-            <div id="b-location-wrap">
-              <label class="field-label" for="b-location">Location / Address <span
-                  id="b-location-required">*</span></label>
-              <div class="flex gap-2">
-                <input id="b-location" name="location" type="text" class="field-input flex-1"
-                  placeholder="Street, landmark, or GPS pin — required for Emergency &amp; Home Visit">
-                <button type="button" id="b-detect-location" class="btn btn-outline shrink-0 !py-0 !px-4"
-                  title="Auto-detect location">
-                  <i class="fa-solid fa-location-crosshairs text-[#FF5A1F]"></i>
-                  <span class="hidden sm:inline text-xs">Auto-Detect</span>
+              <!-- UPI & QR Code -->
+              <div class="flex flex-col items-center justify-center py-5 bg-[#14161A]/30 border border-[#3A3F49]/30 rounded-lg space-y-4">
+                <div class="bg-white p-3.5 inline-block rounded-md shadow-lg">
+                  <img id="booking-upi-qr" src="" alt="UPI Scan QR" class="w-[180px] h-[180px]">
+                </div>
+                <div class="text-center">
+                  <p class="text-[11px] text-[#B9B6AC] uppercase font-mono tracking-wider">UPI ID: imteez@slc</p>
+                  <p class="text-xs text-[#F4F1E8] font-semibold mt-1">Scan QR using any UPI App to Pay Rs. 249</p>
+                </div>
+                
+                <div class="text-[10px] text-[#B9B6AC] max-w-xs text-center border-t border-[#3A3F49]/20 pt-2 px-4 leading-normal">
+                  <i class="fa-solid fa-circle-info"></i> The Rs. 200 deposit is a safety block against fake roadside requests and is automatically applied as a discount on your final invoice.
+                </div>
+              </div>
+
+              <!-- Proof Upload -->
+              <div class="space-y-4">
+                <div>
+                  <label class="field-label">Upload Payment Screenshot *</label>
+                  <div id="booking-screenshot-dropzone" class="border-2 border-dashed border-[#3A3F49] hover:border-[#FF5A1F] transition-all rounded-lg p-5 flex flex-col items-center justify-center cursor-pointer text-center relative min-h-[120px]">
+                    <input type="file" id="booking-screenshot" accept="image/png, image/jpeg, image/jpg" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                    <div id="dropzone-prompt" class="space-y-2">
+                      <i class="fa-solid fa-cloud-arrow-up text-2xl text-[#FF5A1F]"></i>
+                      <p class="text-xs text-[#F4F1E8]">Tap to upload or drag & drop screenshot here</p>
+                      <p class="text-[10px] text-[#B9B6AC] font-mono">PNG, JPG or JPEG up to 5MB</p>
+                    </div>
+                    <div id="dropzone-preview" class="hidden w-full flex items-center justify-between gap-4 p-2 bg-[#14161A]/80 border border-[#3A3F49] rounded-md">
+                      <div class="flex items-center gap-3">
+                        <img id="screenshot-preview-thumb" src="" class="w-10 h-10 object-cover rounded border border-[#3A3F49]">
+                        <div class="text-left">
+                          <p id="screenshot-filename" class="text-xs text-[#F4F1E8] font-semibold max-w-[150px] truncate">screenshot.png</p>
+                          <p id="screenshot-filesize" class="text-[9px] text-[#B9B6AC] font-mono">1.2 MB</p>
+                        </div>
+                      </div>
+                      <button type="button" id="btn-remove-screenshot" class="text-red-500 hover:text-red-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                  </div>
+                  <p class="field-error" id="b-screenshot-error">Please upload your payment screenshot.</p>
+                </div>
+
+                <div>
+                  <label class="field-label" for="booking-utr">UPI Transaction / Reference ID (UTR - Optional)</label>
+                  <input id="booking-utr" type="text" class="field-input font-mono" placeholder="e.g. 402931827492">
+                  <p class="text-[10px] text-[#B9B6AC] mt-1 font-mono">Optional but highly recommended to speed up verification.</p>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[#3A3F49]/40">
+                <button type="button" id="b-btn-back-fields" class="btn btn-outline flex-1 order-2 sm:order-1 text-center py-2.5">
+                  <i class="fa-solid fa-arrow-left"></i> Edit Details
+                </button>
+                <button type="submit" id="b-submit" class="btn btn-primary flex-1 order-1 sm:order-2">
+                  <i class="fa-solid fa-circle-check"></i> Submit for Verification
                 </button>
               </div>
-              <p class="field-error" id="b-location-error">Location is required for this service.</p>
             </div>
-
-            <!-- Preferred Date & Time -->
-            <div class="grid sm:grid-cols-2 gap-5" id="b-datetime-wrap">
-              <div>
-                <label class="field-label" for="b-date">Preferred Date *</label>
-                <input id="b-date" name="preferredDate" type="date" class="field-input">
-                <p class="field-error" id="b-date-error">Preferred date is required for this service.</p>
-              </div>
-              <div>
-                <label class="field-label" for="b-time">Preferred Time *</label>
-                <input id="b-time" name="preferredTime" type="time" class="field-input">
-                <p class="field-error" id="b-time-error">Preferred time is required for this service.</p>
-              </div>
-            </div>
-
-            <!-- Issue Description -->
-            <div id="b-issue-wrap">
-              <label class="field-label" for="b-issue">Issue Description <span id="b-issue-required">*</span></label>
-              <textarea id="b-issue" name="issueDescription" rows="4" class="field-input"
-                placeholder="What's wrong with the bike?" required></textarea>
-              <p class="field-error" id="b-issue-error">Please describe the issue.</p>
-            </div>
-
-            <button type="submit" id="b-submit" class="btn btn-primary w-full sm:w-auto">
-              <i class="fa-solid fa-paper-plane"></i> Submit Booking
-            </button>
 
             <!-- Success state -->
             <div id="b-success" class="hidden success-screen">
@@ -549,15 +630,101 @@
     }
     checkUserSession();
 
-    // ---- Form validation + webhook submission ----
+    // ---- Form validation + step transitions + upload submission ----
     const form = document.getElementById("booking-form");
+    const continueBtn = document.getElementById("b-continue-payment");
+    const backBtn = document.getElementById("b-btn-back-fields");
     const submitBtn = document.getElementById("b-submit");
     const successEl = document.getElementById("b-success");
     const errorEl = document.getElementById("b-error");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    const fieldsStep = document.getElementById("booking-fields-step");
+    const paymentStep = document.getElementById("booking-payment-step");
+    
+    const screenshotInput = document.getElementById("booking-screenshot");
+    const dropzone = document.getElementById("booking-screenshot-dropzone");
+    const dropzonePrompt = document.getElementById("dropzone-prompt");
+    const dropzonePreview = document.getElementById("dropzone-preview");
+    const previewThumb = document.getElementById("screenshot-preview-thumb");
+    const previewFilename = document.getElementById("screenshot-filename");
+    const previewFilesize = document.getElementById("screenshot-filesize");
+    const removeScreenshotBtn = document.getElementById("btn-remove-screenshot");
+    const screenshotError = document.getElementById("b-screenshot-error");
 
+    let selectedFile = null;
+    let paymentRef = "";
+
+    // 1. Dropzone Drag & Drop / Selection Events
+    dropzone.addEventListener("click", () => screenshotInput.click());
+    
+    screenshotInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFileSelect(e.target.files[0]);
+      }
+    });
+
+    // Drag-over hover styling
+    dropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropzone.classList.add("border-[#FF5A1F]");
+    });
+
+    dropzone.addEventListener("dragleave", () => {
+      dropzone.classList.remove("border-[#FF5A1F]");
+    });
+
+    dropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropzone.classList.remove("border-[#FF5A1F]");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFileSelect(e.dataTransfer.files[0]);
+      }
+    });
+
+    function handleFileSelect(file) {
+      screenshotError.classList.add("hidden");
+
+      // Validations: size cap (5MB) & type
+      if (!file.type.match("image/jpeg") && !file.type.match("image/png") && !file.type.match("image/jpg")) {
+        alert("Please select a valid image file (PNG or JPEG).");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Screenshot exceeds 5MB size limit. Please compress and try again.");
+        return;
+      }
+
+      selectedFile = file;
+
+      // Show thumbnail preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previewThumb.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      previewFilename.textContent = file.name;
+      previewFilesize.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+
+      dropzonePrompt.classList.add("hidden");
+      dropzonePreview.classList.remove("hidden");
+    }
+
+    removeScreenshotBtn.addEventListener("click", (e) => {
+      e.stopPropagation(); // prevent triggering file picker click
+      resetScreenshotInput();
+    });
+
+    function resetScreenshotInput() {
+      selectedFile = null;
+      screenshotInput.value = "";
+      dropzonePrompt.classList.remove("hidden");
+      dropzonePreview.classList.add("hidden");
+    }
+
+    // 2. Step Navigation Trigger
+    continueBtn.addEventListener("click", () => {
       const nameInput = document.getElementById("b-name");
       const phoneInput = document.getElementById("b-phone");
       const brandSelectEl = document.getElementById("b-brand");
@@ -580,13 +747,13 @@
         clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
       }
 
-      const val = serviceSelect.value;
       if (locationInput.required) {
         rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true });
       } else {
         clearFieldError(locationInput, document.getElementById("b-location-error"));
       }
 
+      const val = serviceSelect.value;
       const isDateTimeRequired = val === "home-visit" || val === "workshop";
       const dateInput = document.getElementById("b-date");
       const timeInput = document.getElementById("b-time");
@@ -601,44 +768,88 @@
 
       if (!validateForm(rules)) return;
 
-      // Combine brand and model names
+      // Enter payment step
+      fieldsStep.classList.add("hidden");
+      paymentStep.classList.remove("hidden");
+
+      // Generate random transaction reference
+      if (!paymentRef) {
+        paymentRef = "DEP-" + Math.floor(100000 + Math.random() * 900000);
+      }
+
+      // Populate dynamic UPI QR code pointing to imteez@slc
+      const upiUri = `upi://pay?pa=imteez@slc&pn=Chhotu%20Motorcycle%20Workshop&am=249&tn=${paymentRef}`;
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
+      document.getElementById("booking-upi-qr").src = qrApiUrl;
+    });
+
+    backBtn.addEventListener("click", () => {
+      paymentStep.classList.add("hidden");
+      fieldsStep.classList.remove("hidden");
+    });
+
+    // 3. Final Submit Handler (Step 2)
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!selectedFile) {
+        screenshotError.classList.remove("hidden");
+        return;
+      }
+
+      const nameInput = document.getElementById("b-name");
+      const phoneInput = document.getElementById("b-phone");
+      const brandSelectEl = document.getElementById("b-brand");
+      const brandOtherInputEl = document.getElementById("b-brand-other");
+      const bikeInput = document.getElementById("b-bike");
+      const issueInput = document.getElementById("b-issue");
+
       const brandVal = brandSelectEl.value;
       const brandOtherVal = brandOtherInputEl.value.trim();
       const modelVal = bikeInput.value.trim();
       const combinedBikeModel = brandVal === "Other" ? `${brandOtherVal} ${modelVal}`.trim() : `${brandVal} ${modelVal}`.trim();
 
-      // Clean and combine phone number
       const phoneCodeEl = document.getElementById("b-phone-code");
       const cleanedLocalPhone = cleanPhoneNumber(phoneInput.value, phoneCodeEl.value);
       const combinedPhone = `${phoneCodeEl.value}${cleanedLocalPhone}`;
 
-      // Get coordinates & create Google Maps link
       const coordsVal = document.getElementById("b-coords").value;
       const googleMapsLink = coordsVal ? `https://www.google.com/maps?q=${coordsVal}` : "";
 
-      // Separate date and time for submission
       const now = new Date();
-      const submissionDate = now.toISOString().split("T")[0]; // YYYY-MM-DD
+      const submissionDate = now.toISOString().split("T")[0];
       const submissionTime = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
 
-      // Save booking to Supabase Database first
-      let supabaseBookingId = null;
-      if (!window.supabaseClient) {
-        console.warn("Supabase client not initialized. Attempting inline initialization...");
-        if (typeof window.supabase !== "undefined" && typeof window.supabase.createClient === "function") {
-          window.supabaseClient = window.supabase.createClient(
-            "https://qvnjjvbmethdvmlzeoow.supabase.co",
-            "sb_publishable_JHxEhYkcEdn6zNs3cEIp3g_p69o5_4k"
-          );
-        }
-      }
+      const originalBtnText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Uploading Proof...`;
 
       if (!window.supabaseClient) {
-        alert("Database connection is not ready. Please verify your internet connection or disable any ad-blockers blocking CDN scripts, then refresh the page.");
+        alert("Database connection is not ready. Please refresh the page.");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnText;
         return;
       }
 
+      let screenshotUrl = "";
+      let supabaseBookingId = null;
+
       try {
+        // A. Upload Payment Screenshot to private Supabase Storage bucket
+        const fileExt = selectedFile.name.split(".").pop();
+        const randName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+        const filePath = `screenshots/${randName}`;
+
+        const { data: uploadData, error: uploadErr } = await window.supabaseClient.storage
+          .from("payment-screenshots")
+          .upload(filePath, selectedFile);
+
+        if (uploadErr) throw uploadErr;
+        screenshotUrl = filePath; // store relative storage path
+
+        submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Saving Booking...`;
+
+        // B. Save booking record in 'pending_verification' status
         const insertData = {
           user_id: loggedInUserId,
           name: nameInput.value.trim(),
@@ -652,18 +863,27 @@
           preferred_date: document.getElementById("b-date").value || null,
           preferred_time: document.getElementById("b-time").value || null,
           issue_description: issueInput.value.trim() || null,
-          status: 'pending',
-          source: 'booking.html'
+          status: "pending_verification",
+          payment_status: "submitted",
+          payment_screenshot_url: screenshotUrl,
+          upi_reference: document.getElementById("booking-utr").value.trim() || null,
+          booking_charge_amount: 249,
+          refund_status: "pending",
+          source: "booking.html"
         };
 
-        const { data, error } = await window.supabaseClient
-          .from('bookings')
-          .insert([insertData]);
+        const { data: insertedRows, error: dbErr } = await window.supabaseClient
+          .from("bookings")
+          .insert([insertData])
+          .select();
 
-        if (error) throw error;
+        if (dbErr) throw dbErr;
+        if (insertedRows && insertedRows[0]) {
+          supabaseBookingId = insertedRows[0].id;
+        }
+
       } catch (err) {
-        console.error("Failed to save booking to Supabase:", err);
-        if (successEl) successEl.classList.add("hidden");
+        console.error("Booking payment submission failed:", err);
         if (errorEl) {
           errorEl.classList.remove("hidden");
           const detailsEl = errorEl.querySelector(".error-details");
@@ -672,15 +892,14 @@
             detailsEl.classList.remove("hidden");
           }
         }
-        // Re-enable button on database failure
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
-        return; // Stop submission if DB save fails
+        return;
       }
 
-      // Database write succeeded! Redirect to booking-success.html
+      // C. Submit details webhook
       const payload = {
-        form_type: "booking",
+        form_type: "booking_payment",
         supabase_booking_id: supabaseBookingId,
         name: nameInput.value.trim(),
         phone: combinedPhone,
@@ -694,25 +913,25 @@
         preferredDate: document.getElementById("b-date").value,
         preferredTime: document.getElementById("b-time").value,
         issueDescription: issueInput.value.trim(),
+        booking_charge: 249,
+        payment_ref: paymentRef,
         submittedAt: now.toISOString(),
         source: "booking.html",
       };
 
       const waMessage =
-        `Booking request — Chhotu Motorcycles\n` +
-        `Name: ${payload.name}\nPhone: ${payload.phone}\nBike: ${payload.bikeModel}\n` +
-        `Service: ${payload.serviceType}\nLocation: ${payload.location || "N/A"}\n` +
-        (payload.googleMapsLink ? `Google Map: ${payload.googleMapsLink}\n` : "") +
-        `Preferred: ${payload.preferredDate || "N/A"} ${payload.preferredTime || ""}\n` +
-        `Submitted: ${payload.submissionDate} @ ${payload.submissionTime}\n` +
-        `Issue: ${payload.issueDescription}`;
+        `Payment Submitted — Chhotu Motorcycles\n` +
+        `Ref: #BK-${supabaseBookingId ? supabaseBookingId.substring(0, 8).toUpperCase() : 'N/A'}\n` +
+        `Name: ${payload.name}\nPhone: ${payload.phone}\n` +
+        `Bike: ${payload.bikeModel}\nService: ${payload.serviceType}\n` +
+        `Pay Ref: ${paymentRef}\nUTR: ${document.getElementById("booking-utr").value.trim() || "N/A"}\n` +
+        `Awaiting verification. We will process shortly.`;
       const waHref = buildWhatsAppLink(waMessage);
 
-      // Fire the webhook and wait for it so the request goes out before redirecting
       try {
         await submitToWebhook({
           payload,
-          button: document.createElement("button"), // Pass a dummy button
+          button: document.createElement("button"),
           successEl: null,
           errorEl: null,
           waFallbackHref: waHref,
@@ -721,7 +940,7 @@
         console.error("Admin webhook notification failed:", e);
       }
 
-      // Redirect user to the separate success page with query parameters
+      // D. Redirect to booking-success.html
       const successUrl = `booking-success.html?` +
         `id=${encodeURIComponent(supabaseBookingId || '')}` +
         `&name=${encodeURIComponent(payload.name)}` +
@@ -732,7 +951,8 @@
         `&coords=${encodeURIComponent(payload.coordinates)}` +
         `&date=${encodeURIComponent(payload.preferredDate)}` +
         `&time=${encodeURIComponent(payload.preferredTime)}` +
-        `&issue=${encodeURIComponent(payload.issueDescription)}`;
+        `&issue=${encodeURIComponent(payload.issueDescription)}` +
+        `&payref=${encodeURIComponent(paymentRef)}`;
 
       window.location.href = successUrl;
     });

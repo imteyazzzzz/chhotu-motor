@@ -650,6 +650,69 @@
   <a href="tel:+9779813691072" class="fab-call" aria-label="Call Chhotu Motorcycles">
     <i class="fa-solid fa-phone"></i>
   </a>
+  <!-- Modal: Re-upload Screenshot Proof (for Rejected Payments) -->
+  <div id="modal-reupload-payment" class="fixed inset-0 z-50 flex items-center justify-center bg-[#14161A]/85 backdrop-blur hidden" role="dialog" aria-modal="true" aria-labelledby="reupload-modal-title">
+    <div class="card max-w-md w-full p-6 md:p-8 space-y-6 mx-4 relative border border-[#3A3F49] shadow-2xl">
+      <div class="flex justify-between items-center border-b border-[#3A3F49]/40 pb-3">
+        <h3 id="reupload-modal-title" class="font-display text-sm font-bold text-[#FF5A1F] uppercase tracking-wide">Update Payment Proof</h3>
+        <button type="button" onclick="closeReuploadModal()" class="text-[#B9B6AC] hover:text-[#F4F1E8] text-lg p-1"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Warning note -->
+      <div class="card p-3 border-red-500/20 bg-red-950/5 text-xs">
+        <p class="text-red-400 font-semibold mb-1"><i class="fa-solid fa-triangle-exclamation"></i> Payment Rejected Reason:</p>
+        <p id="reupload-rejection-reason" class="text-[#B9B6AC] italic">"Unreadable screenshot. Please submit again."</p>
+      </div>
+
+      <!-- Amount details / UPI -->
+      <div class="card p-3.5 bg-[#14161A]/30 border border-[#3A3F49]/30 rounded-lg flex items-center justify-between text-xs font-mono">
+        <div>
+          <p class="text-[10px] text-[#B9B6AC] uppercase">UPI ID: imteez@slc</p>
+          <p class="text-[#F4F1E8] font-bold mt-0.5">Rs. 249 (Deposit + Fee)</p>
+        </div>
+        <!-- Scan QR button link -->
+        <a href="#" id="reupload-qr-link" target="_blank" class="px-2 py-1 bg-[#FF5A1F]/10 text-[#FF5A1F] hover:bg-[#FF5A1F]/20 rounded font-mono text-[9px] uppercase font-bold"><i class="fa-solid fa-qrcode"></i> View QR</a>
+      </div>
+
+      <form id="reupload-proof-form" class="space-y-4" novalidate>
+        <input type="hidden" id="reupload-booking-id" value="">
+        
+        <div>
+          <label class="field-label">Upload New Payment Screenshot *</label>
+          <div id="reupload-screenshot-dropzone" class="border-2 border-dashed border-[#3A3F49] hover:border-[#FF5A1F] transition-all rounded-lg p-5 flex flex-col items-center justify-center cursor-pointer text-center relative min-h-[110px]">
+            <input type="file" id="reupload-screenshot" accept="image/png, image/jpeg, image/jpg" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+            <div id="reupload-dropzone-prompt" class="space-y-2">
+              <i class="fa-solid fa-cloud-arrow-up text-xl text-[#FF5A1F]"></i>
+              <p class="text-xs text-[#F4F1E8]">Tap to upload new screenshot</p>
+              <p class="text-[9px] text-[#B9B6AC] font-mono">PNG, JPG or JPEG up to 5MB</p>
+            </div>
+            <div id="reupload-dropzone-preview" class="hidden w-full flex items-center justify-between gap-4 p-2 bg-[#14161A]/80 border border-[#3A3F49] rounded-md">
+              <div class="flex items-center gap-3">
+                <img id="reupload-preview-thumb" src="" class="w-10 h-10 object-cover rounded border border-[#3A3F49]">
+                <div class="text-left">
+                  <p id="reupload-filename" class="text-xs text-[#F4F1E8] font-semibold max-w-[150px] truncate">screenshot.png</p>
+                  <p id="reupload-filesize" class="text-[9px] text-[#B9B6AC] font-mono">1.2 MB</p>
+                </div>
+              </div>
+              <button type="button" id="btn-remove-reupload" class="text-red-500 hover:text-red-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          </div>
+          <p class="field-error" id="reupload-screenshot-error">New screenshot is required.</p>
+        </div>
+
+        <div>
+          <label class="field-label" for="reupload-utr">UPI Transaction / Reference ID (Optional)</label>
+          <input id="reupload-utr" type="text" class="field-input font-mono" placeholder="UTR Number">
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" onclick="closeReuploadModal()" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
+          <button type="submit" id="btn-reupload-submit" class="btn btn-primary !py-2 !px-4 !text-xs">Submit Proof</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <button id="back-to-top" class="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
   <script src="assets/main.js"></script>

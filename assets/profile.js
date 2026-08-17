@@ -254,7 +254,7 @@ async function loadOverviewData() {
       latestBooking = bookingsData[0];
       
       activeBookings = bookingsData.filter(b => 
-        ["pending", "assigned", "in_progress", "dispatched"].includes(b.status)
+        ["pending_verification", "payment_rejected", "pending", "assigned", "in_progress", "dispatched"].includes(b.status)
       ).length;
     }
   } catch (err) {
@@ -308,7 +308,12 @@ async function loadOverviewData() {
             ${statusPill}
           </div>
           <div class="flex gap-2">
-            <a href="tracking.html?id=${latestBooking.id}" class="btn btn-primary !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-location-arrow"></i> Track Status</a>
+            ${latestBooking.status === 'pending_verification' 
+              ? `<button disabled class="btn btn-primary !py-1.5 !px-3 !text-xs opacity-60 cursor-not-allowed"><i class="fa-solid fa-hourglass-half"></i> Verifying Payment</button>`
+              : latestBooking.status === 'payment_rejected'
+                ? `<button onclick="openReuploadModal('${latestBooking.id}', '${encodeURIComponent(latestBooking.rejection_reason || '')}')" class="btn btn-primary !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-upload"></i> Re-upload Proof</button>`
+                : `<a href="tracking.html?id=${latestBooking.id}" class="btn btn-primary !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-location-arrow"></i> Track Status</a>`
+            }
             <button onclick="document.getElementById('tab-bookings').click()" class="btn btn-outline !py-1.5 !px-3 !text-xs">View History</button>
           </div>
         </div>
@@ -329,7 +334,13 @@ function getStatusPill(status) {
   let badgeColorClass = "bg-[#3A3F49] text-[#B9B6AC]";
   let label = "Pending";
 
-  if (status === "assigned" || status === "confirmed") {
+  if (status === "pending_verification") {
+    badgeColorClass = "bg-yellow-500/15 text-yellow-400 border border-yellow-500/25";
+    label = "Awaiting Verification";
+  } else if (status === "payment_rejected") {
+    badgeColorClass = "bg-red-500/15 text-red-500 border border-red-500/25";
+    label = "Payment Rejected";
+  } else if (status === "assigned" || status === "confirmed") {
     badgeColorClass = "bg-blue-500/15 text-blue-400";
     label = "Assigned";
   } else if (status === "dispatched") {
@@ -381,6 +392,17 @@ async function loadUserBookings() {
       const isUrgent = booking.service_type === "emergency";
       const locationLabel = booking.location ? `<p class="text-xs text-[#B9B6AC] mt-1"><i class="fa-solid fa-location-dot text-[9px] text-[#FF5A1F]"></i> Address: ${booking.location}</p>` : "";
 
+      let actionBtn = "";
+      let reasonLabel = "";
+      if (booking.status === "pending_verification") {
+        actionBtn = `<button disabled class="btn btn-outline !py-1.5 !px-3 !text-xs w-full sm:w-auto text-center opacity-50 cursor-not-allowed"><i class="fa-solid fa-hourglass-half"></i> Verifying Proof</button>`;
+      } else if (booking.status === "payment_rejected") {
+        actionBtn = `<button onclick="openReuploadModal('${booking.id}', '${encodeURIComponent(booking.rejection_reason || '')}')" class="btn btn-primary !py-1.5 !px-3 !text-xs w-full sm:w-auto text-center"><i class="fa-solid fa-upload"></i> Re-upload Proof</button>`;
+        reasonLabel = `<p class="text-xs text-red-500 mt-1.5 font-semibold"><i class="fa-solid fa-triangle-exclamation"></i> Rejected: ${booking.rejection_reason || 'Unreadable proof screenshot'}</p>`;
+      } else {
+        actionBtn = `<a href="tracking.html?id=${booking.id}" class="btn btn-outline !py-1.5 !px-3 !text-xs w-full sm:w-auto text-center"><i class="fa-solid fa-route"></i> Track Status</a>`;
+      }
+
       return `
         <div class="card p-5 space-y-3 flex flex-col justify-between sm:flex-row sm:items-center sm:space-y-0">
           <div class="space-y-1">
@@ -390,10 +412,11 @@ async function loadUserBookings() {
             </div>
             <p class="text-xs text-[#B9B6AC] capitalize"><i class="fa-solid fa-clock text-[9px]"></i> ${booking.service_type.replace("-", " ")} · ${dt}</p>
             ${locationLabel}
-            ${booking.issue_description ? `<p class="text-xs text-[#B9B6AC] italic mt-1 bg-[#14161A] p-2 rounded">" ${booking.issue_description} "</p>` : ""}
+            ${reasonLabel}
+            ${booking.issue_description ? `<p class="text-xs text-[#B9B6AC] italic mt-1.5 bg-[#14161A] p-2 rounded">" ${booking.issue_description} "</p>` : ""}
           </div>
           <div class="pt-2 sm:pt-0 shrink-0">
-            <a href="tracking.html?id=${booking.id}" class="btn btn-outline !py-1.5 !px-3 !text-xs w-full sm:w-auto text-center"><i class="fa-solid fa-route"></i> Track Status</a>
+            ${actionBtn}
           </div>
         </div>
       `;
@@ -1160,3 +1183,159 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }, 100);
 });
+
+
+// ---- Re-upload Payment Proof Modal Controllers ----
+let reuploadFile = null;
+
+window.openReuploadModal = function(bookingId, rejectionReason) {
+  document.getElementById("reupload-booking-id").value = bookingId;
+  document.getElementById("reupload-rejection-reason").textContent = `"${decodeURIComponent(rejectionReason) || 'Unreadable screenshot. Please submit again.'}"`;
+  
+  // Format payment link for UPI QR code view
+  const upiUri = `upi://pay?pa=imteez@slc&pn=Chhotu%20Motorcycle%20Workshop&am=249&tn=DEP-${bookingId.substring(0, 8).toUpperCase()}`;
+  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiUri)}`;
+  document.getElementById("reupload-qr-link").setAttribute("href", qrApiUrl);
+
+  resetReuploadInput();
+  
+  // Show modal
+  const modal = document.getElementById("modal-reupload-payment");
+  modal.classList.remove("hidden");
+};
+
+window.closeReuploadModal = function() {
+  const modal = document.getElementById("modal-reupload-payment");
+  modal.classList.add("hidden");
+};
+
+// Handle Dropzone in modal
+setTimeout(() => {
+  const rInput = document.getElementById("reupload-screenshot");
+  const rDropzone = document.getElementById("reupload-screenshot-dropzone");
+  const rPrompt = document.getElementById("reupload-dropzone-prompt");
+  const rPreview = document.getElementById("reupload-dropzone-preview");
+  const rThumb = document.getElementById("reupload-preview-thumb");
+  const rFilename = document.getElementById("reupload-filename");
+  const rFilesize = document.getElementById("reupload-filesize");
+  const rRemoveBtn = document.getElementById("btn-remove-reupload");
+  const rError = document.getElementById("reupload-screenshot-error");
+
+  if (rDropzone) {
+    rDropzone.addEventListener("click", () => rInput.click());
+    rInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) handleReuploadFileSelect(e.target.files[0]);
+    });
+    
+    rDropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      rDropzone.classList.add("border-[#FF5A1F]");
+    });
+    rDropzone.addEventListener("dragleave", () => rDropzone.classList.remove("border-[#FF5A1F]"));
+    rDropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      rDropzone.classList.remove("border-[#FF5A1F]");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) handleReuploadFileSelect(e.dataTransfer.files[0]);
+    });
+  }
+
+  function handleReuploadFileSelect(file) {
+    rError.classList.add("hidden");
+    if (!file.type.match("image/jpeg") && !file.type.match("image/png") && !file.type.match("image/jpg")) {
+      alert("Please select a valid image file (PNG or JPEG).");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Screenshot exceeds 5MB limit.");
+      return;
+    }
+    
+    reuploadFile = file;
+    const reader = new FileReader();
+    reader.onload = (e) => { rThumb.src = e.target.result; };
+    reader.readAsDataURL(file);
+    
+    rFilename.textContent = file.name;
+    rFilesize.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+    
+    rPrompt.classList.add("hidden");
+    rPreview.classList.remove("hidden");
+  }
+
+  if (rRemoveBtn) {
+    rRemoveBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      resetReuploadInput();
+    });
+  }
+
+  function resetReuploadInput() {
+    reuploadFile = null;
+    rInput.value = "";
+    rPrompt.classList.remove("hidden");
+    rPreview.classList.add("hidden");
+    rError.classList.add("hidden");
+  }
+
+  // Handle re-upload form submission
+  const reuploadForm = document.getElementById("reupload-proof-form");
+  if (reuploadForm) {
+    reuploadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!reuploadFile) {
+        rError.classList.remove("hidden");
+        return;
+      }
+      
+      const bookingId = document.getElementById("reupload-booking-id").value;
+      const utr = document.getElementById("reupload-utr").value.trim();
+      const submitBtn = document.getElementById("btn-reupload-submit");
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Uploading...`;
+      
+      try {
+        // 1. Upload new screenshot file
+        const fileExt = reuploadFile.name.split(".").pop();
+        const randName = `${Date.now()}_re_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+        const filePath = `screenshots/${randName}`;
+        
+        const { error: uploadErr } = await window.supabaseClient.storage
+          .from("payment-screenshots")
+          .upload(filePath, reuploadFile);
+          
+        if (uploadErr) throw uploadErr;
+        
+        // 2. Update booking columns back to submitted
+        const { error: dbErr } = await window.supabaseClient
+          .from("bookings")
+          .update({
+            status: "pending_verification",
+            payment_status: "submitted",
+            payment_screenshot_url: filePath,
+            upi_reference: utr || null,
+            rejection_reason: null
+          })
+          .eq("id", bookingId);
+          
+        if (dbErr) throw dbErr;
+        
+        closeReuploadModal();
+        
+        // Reload UI list
+        await loadUserBookings();
+        await loadOverviewData();
+        
+        alert("New payment proof submitted successfully. Awaiting verification.");
+        
+      } catch (err) {
+        console.error("Re-upload proof failed:", err);
+        alert("Failed to submit proof. Error: " + (err.message || err));
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    });
+  }
+}, 500);

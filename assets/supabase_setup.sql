@@ -487,6 +487,11 @@ BEGIN
         RETURN FALSE;
     END IF;
 
+    -- Check if upfront deposit of 200 was verified
+    IF EXISTS (SELECT 1 FROM public.bookings WHERE id = v_booking_id AND payment_status = 'verified') THEN
+        v_base_charge := 200.0; -- Discount Rs. 200 already paid
+    END IF;
+
     -- Calculate invoice items sum
     SELECT COALESCE(SUM((val->>'amount')::NUMERIC), 0.0) INTO v_parts_total
     FROM jsonb_array_elements(p_parts) AS val;
@@ -549,3 +554,54 @@ BEGIN
     RETURN TRUE;
 END;
 $$;
+
+
+-- =========================================================================
+-- MIGRATION: BOOKING PAYMENT & VERIFICATION FLOW
+-- =========================================================================
+
+-- 1. Alter bookings to add upfront payment tracking fields
+ALTER TABLE public.bookings
+ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'none',
+ADD COLUMN IF NOT EXISTS payment_screenshot_url TEXT,
+ADD COLUMN IF NOT EXISTS upi_reference TEXT,
+ADD COLUMN IF NOT EXISTS booking_charge_amount NUMERIC DEFAULT 249.0,
+ADD COLUMN IF NOT EXISTS refund_status TEXT DEFAULT 'none',
+ADD COLUMN IF NOT EXISTS rejection_reason TEXT,
+ADD COLUMN IF NOT EXISTS verified_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ;
+
+-- 2. Drop existing constraint if exists to update status check list
+DO $$
+BEGIN
+    ALTER TABLE public.bookings DROP CONSTRAINT IF EXISTS bookings_status_check;
+    ALTER TABLE public.bookings ADD CONSTRAINT bookings_status_check CHECK (status IN ('pending_verification', 'payment_rejected', 'pending', 'assigned', 'confirmed', 'dispatched', 'en_route', 'in_progress', 'completed', 'paid', 'cancelled'));
+    
+    ALTER TABLE public.bookings DROP CONSTRAINT IF EXISTS bookings_payment_status_check;
+    ALTER TABLE public.bookings ADD CONSTRAINT bookings_payment_status_check CHECK (payment_status IN ('none', 'submitted', 'verified', 'rejected'));
+    
+    ALTER TABLE public.bookings DROP CONSTRAINT IF EXISTS bookings_refund_status_check;
+    ALTER TABLE public.bookings ADD CONSTRAINT bookings_refund_status_check CHECK (refund_status IN ('none', 'pending', 'applied', 'refunded'));
+EXCEPTION
+    WHEN OTHERS THEN NULL;
+END $$;
+
+-- 3. Create Storage bucket and RLS policies
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('payment-screenshots', 'payment-screenshots', false)
+ON CONFLICT (id) DO NOTHING;
+
+-- RLS check
+-- We drop existing policies first to be safe
+DROP POLICY IF EXISTS "Allow public upload to payment-screenshots" ON storage.objects;
+CREATE POLICY "Allow public upload to payment-screenshots" ON storage.objects
+    FOR INSERT WITH CHECK (bucket_id = 'payment-screenshots');
+
+DROP POLICY IF EXISTS "Allow admins to view screenshots" ON storage.objects;
+CREATE POLICY "Allow admins to view screenshots" ON storage.objects
+    FOR SELECT USING (
+        bucket_id = 'payment-screenshots' AND EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.role IN ('admin', 'staff')
+        )
+    );

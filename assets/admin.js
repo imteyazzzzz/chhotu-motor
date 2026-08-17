@@ -73,6 +73,7 @@ function injectAdminLayout(pageName) {
       { page: "admin-dashboard.html", icon: "fa-gauge-high", label: "Overview" },
       { page: "admin-bookings.html", icon: "fa-calendar-days", label: "Bookings", badgeId: "badge-bookings-count" },
       { page: "admin-emergency.html", icon: "fa-triangle-exclamation", label: "Emergency Queue", badgeId: "badge-emergency-count", pulse: true },
+      { page: "admin-payments.html", icon: "fa-credit-card", label: "Verify Payments", badgeId: "badge-payments-count" },
       { page: "admin-mechanics.html", icon: "fa-wrench", label: "Mechanics" },
       { page: "admin-customers.html", icon: "fa-users", label: "Customers" },
       { page: "admin-broadcast.html", icon: "fa-bullhorn", label: "Broadcast" },
@@ -245,6 +246,24 @@ async function updateSidebarBadges() {
           emergencyBadge.classList.remove("hidden");
         } else {
           emergencyBadge.classList.add("hidden");
+        }
+      }
+    }
+
+    // 3. Fetch bookings in pending_verification status
+    const { data: verifyB, error: verifyErr } = await window.supabaseClient
+      .from("bookings")
+      .select("id")
+      .eq("status", "pending_verification");
+
+    if (!verifyErr && verifyB) {
+      const paymentsBadge = document.getElementById("badge-payments-count");
+      if (paymentsBadge) {
+        paymentsBadge.textContent = verifyB.length;
+        if (verifyB.length > 0) {
+          paymentsBadge.classList.remove("hidden");
+        } else {
+          paymentsBadge.classList.add("hidden");
         }
       }
     }
