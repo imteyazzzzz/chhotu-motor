@@ -7,7 +7,7 @@
 <meta name="description" content="Sign up or sign in to your Chhotu Motorcycles account to place bookings and track your repair status in real-time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="assets/style.css">
@@ -45,7 +45,7 @@
   }
 </style>
 </head>
-<body class="antialiased">
+<body class="antialiased text-[#F4F1E8] bg-[#14161A]">
 
 <!-- =====================================================================
      SHARED HEADER START — keep identical across all pages.
@@ -115,7 +115,7 @@
     <div class="card p-6 md:p-8 space-y-6">
       
       <!-- Tabs -->
-      <div class="flex border-b border-[#3A3F49]">
+      <div id="auth-tabs" class="flex border-b border-[#3A3F49]">
         <button id="tab-signin" class="flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-[#FF5A1F] text-[#FF5A1F] transition-all">Sign In</button>
         <button id="tab-signup" class="flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8] transition-all">Sign Up</button>
       </div>
@@ -136,9 +136,56 @@
             </button>
           </div>
           <p class="field-error" id="signin-password-error">Please enter your password.</p>
+          <button type="button" id="forgot-password-link" class="mt-2 text-xs font-mono text-[#B9B6AC] hover:text-[#FF5A1F] underline underline-offset-2">Forgot password?</button>
         </div>
         <button type="submit" id="signin-submit" class="btn btn-primary w-full">
           <i class="fa-solid fa-right-to-bracket"></i> Sign In
+        </button>
+      </form>
+
+      <!-- Forgot Password — Step 1: request reset email -->
+      <form id="auth-forgot-form" class="space-y-4 hidden" novalidate>
+        <div>
+          <p class="text-sm text-[#B9B6AC] mb-1">Enter the email on your account — we'll send you a link to reset your password.</p>
+        </div>
+        <div>
+          <label class="field-label" for="forgot-email">Email Address *</label>
+          <input id="forgot-email" type="email" class="field-input" placeholder="name@example.com" required>
+          <p class="field-error" id="forgot-email-error">Please enter your email.</p>
+        </div>
+        <button type="submit" id="forgot-submit" class="btn btn-primary w-full">
+          <i class="fa-solid fa-paper-plane"></i> Send Reset Link
+        </button>
+        <button type="button" id="back-to-signin-link" class="w-full text-center text-xs font-mono text-[#B9B6AC] hover:text-[#FF5A1F] underline underline-offset-2">← Back to Sign In</button>
+      </form>
+
+      <!-- Forgot Password — Step 2: set a new password (shown after the emailed link is opened) -->
+      <form id="auth-reset-form" class="space-y-4 hidden" novalidate>
+        <div>
+          <p class="text-sm text-[#B9B6AC] mb-1">Choose a new password for your account.</p>
+        </div>
+        <div>
+          <label class="field-label" for="reset-password">New Password *</label>
+          <div class="relative">
+            <input id="reset-password" type="password" class="field-input" style="padding-right:2.75rem" placeholder="Minimum 6 characters" required>
+            <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="reset-password" aria-label="Show password" aria-pressed="false">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <p class="field-error" id="reset-password-error">Please choose a password.</p>
+        </div>
+        <div>
+          <label class="field-label" for="reset-password-confirm">Confirm New Password *</label>
+          <div class="relative">
+            <input id="reset-password-confirm" type="password" class="field-input" style="padding-right:2.75rem" placeholder="Re-enter new password" required>
+            <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="reset-password-confirm" aria-label="Show password" aria-pressed="false">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+          <p class="field-error" id="reset-password-confirm-error">Passwords must match.</p>
+        </div>
+        <button type="submit" id="reset-submit" class="btn btn-primary w-full">
+          <i class="fa-solid fa-key"></i> Update Password
         </button>
       </form>
 
@@ -211,7 +258,9 @@
 <footer class="bg-[#1B1E24] border-t border-[#3A3F49]">
   <div class="max-w-7xl mx-auto px-4 md:px-8 py-14 grid md:grid-cols-4 gap-10">
     <div>
-      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU <span class="text-[#FF5A1F]">WORKSHOP</span></span>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="font-display font-semibold text-sm">CHHOTU WORKSHOP</span>
+      </div>
       <p class="text-[#B9B6AC] text-sm">24/7 emergency roadside repair, home visits, and workshop appointments for every motorcycle in Kathmandu.</p>
     </div>
     <div>
@@ -259,6 +308,8 @@
   const tabSignup = document.getElementById("tab-signup");
   const formSignin = document.getElementById("auth-signin-form");
   const formSignup = document.getElementById("auth-signup-form");
+  const formForgot = document.getElementById("auth-forgot-form");
+  const formReset = document.getElementById("auth-reset-form");
   const successEl = document.getElementById("auth-success");
   const errorEl = document.getElementById("auth-error");
 
@@ -299,22 +350,127 @@
     });
   });
 
+  const authTabs = document.getElementById("auth-tabs");
+
+  function hideAllForms() {
+    formSignin.classList.add("hidden");
+    formSignup.classList.add("hidden");
+    formForgot.classList.add("hidden");
+    formReset.classList.add("hidden");
+    successEl.classList.add("hidden");
+    errorEl.classList.add("hidden");
+  }
+
   tabSignin.addEventListener("click", () => {
     tabSignin.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-[#FF5A1F] text-[#FF5A1F] transition-all";
     tabSignup.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8] transition-all";
+    authTabs.classList.remove("hidden");
+    hideAllForms();
     formSignin.classList.remove("hidden");
-    formSignup.classList.add("hidden");
-    successEl.classList.add("hidden");
-    errorEl.classList.add("hidden");
   });
 
   tabSignup.addEventListener("click", () => {
     tabSignup.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-[#FF5A1F] text-[#FF5A1F] transition-all";
     tabSignin.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8] transition-all";
+    authTabs.classList.remove("hidden");
+    hideAllForms();
     formSignup.classList.remove("hidden");
-    formSignin.classList.add("hidden");
-    successEl.classList.add("hidden");
-    errorEl.classList.add("hidden");
+  });
+
+  // ---- Forgot Password: step 1 (request email) ----
+  document.getElementById("forgot-password-link").addEventListener("click", () => {
+    authTabs.classList.add("hidden"); // hide Sign In / Sign Up tabs while in the reset flow
+    hideAllForms();
+    formForgot.classList.remove("hidden");
+  });
+
+  document.getElementById("back-to-signin-link").addEventListener("click", () => {
+    authTabs.classList.remove("hidden");
+    hideAllForms();
+    formSignin.classList.remove("hidden");
+  });
+
+  formForgot.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById("forgot-email");
+    const rules = [{ input: emailInput, error: document.getElementById("forgot-email-error"), required: true }];
+    if (!validateForm(rules)) return;
+
+    const submitBtn = document.getElementById("forgot-submit");
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Sending...`;
+
+    try {
+      if (!window.supabaseClient) throw new Error("Supabase client is not configured.");
+
+      const { error } = await window.supabaseClient.auth.resetPasswordForEmail(emailInput.value.trim(), {
+        redirectTo: window.location.origin + window.location.pathname
+      });
+      if (error) throw error;
+
+      formForgot.classList.add("hidden");
+      showMessage("success", "<i class='fa-solid fa-envelope-circle-check'></i> RESET LINK SENT", "Check your inbox for a password reset link. It may take a minute to arrive — don't forget to check spam.");
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    } catch (err) {
+      console.error(err);
+      showMessage("error", "", err.message || err);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  });
+
+  // ---- Forgot Password: step 2 (set new password, reached via the emailed link) ----
+  // Supabase automatically detects the recovery token in the URL and fires this event.
+  window.supabaseClient?.auth.onAuthStateChange((event) => {
+    if (event === "PASSWORD_RECOVERY") {
+      authTabs.classList.add("hidden");
+      hideAllForms();
+      formReset.classList.remove("hidden");
+    }
+  });
+
+  formReset.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const newPassInput = document.getElementById("reset-password");
+    const confirmInput = document.getElementById("reset-password-confirm");
+    const newPassError = document.getElementById("reset-password-error");
+    const confirmError = document.getElementById("reset-password-confirm-error");
+
+    const rules = [
+      { input: newPassInput, error: newPassError, required: true },
+      { input: confirmInput, error: confirmError, required: true }
+    ];
+    if (!validateForm(rules)) return;
+
+    if (newPassInput.value.length < 6) {
+      showFieldError(newPassInput, newPassError, "Password must be at least 6 characters.");
+      return;
+    }
+    if (newPassInput.value !== confirmInput.value) {
+      showFieldError(confirmInput, confirmError, "Passwords don't match.");
+      return;
+    }
+
+    const submitBtn = document.getElementById("reset-submit");
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Updating...`;
+
+    try {
+      const { error } = await window.supabaseClient.auth.updateUser({ password: newPassInput.value });
+      if (error) throw error;
+
+      formReset.classList.add("hidden");
+      showMessage("success", "<i class='fa-solid fa-circle-check'></i> PASSWORD UPDATED", "You're all set and signed in. Redirecting you...");
+      setTimeout(() => { window.location.href = "booking.html"; }, 1500);
+    } catch (err) {
+      console.error(err);
+      showMessage("error", "", err.message || err);
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
   });
 
   // Handle Sign In submission
@@ -344,26 +500,35 @@
       });
 
       if (error) throw error;
-      
-      formSignin.classList.add("hidden");
+
+      formSignin.classList.add("hidden"); // hide the form so the success card takes its place, not sits below it
       
       showMessage("success", "<i class='fa-solid fa-circle-check'></i> SIGN IN SUCCESSFUL", "Welcome back! Redirecting you...");
+      
       const urlParams = new URLSearchParams(window.location.search);
       const redirectUrl = urlParams.get("redirect") || "booking.html";
+      
+      let targetUrl = redirectUrl;
+      if (targetUrl === "booking.html") {
+        try {
+          const { data: profile } = await window.supabaseClient
+            .from("profiles")
+            .select("role")
+            .eq("id", data.user.id)
+            .maybeSingle();
+          if (profile && (profile.role === "admin" || profile.role === "staff")) {
+            targetUrl = "admin-dashboard.html";
+          }
+        } catch(_) {}
+      }
+
       setTimeout(() => {
-        window.location.href = redirectUrl;
+        window.location.href = targetUrl;
       }, 1500);
 
     } catch (err) {
       console.error(err);
-      const errMsg = (err.message || err).toLowerCase();
-      if (errMsg.includes("invalid login credentials") || errMsg.includes("invalid credentials")) {
-        showFieldError(emailInput, document.getElementById("signin-email-error"), "Invalid email address or password.");
-        showFieldError(passwordInput, document.getElementById("signin-password-error"), "Invalid email address or password.");
-        emailInput.focus();
-      } else {
-        showMessage("error", "", err.message || err);
-      }
+      showMessage("error", "", err.message || err);
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
     }
@@ -430,9 +595,26 @@
 
       formSignup.classList.add("hidden");
 
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get("redirect") || "booking.html";
+
+      let targetUrl = redirectUrl;
+
       if (session) {
+        if (targetUrl === "booking.html") {
+          try {
+            const { data: profile } = await window.supabaseClient
+              .from("profiles")
+              .select("role")
+              .eq("id", session.user.id)
+              .maybeSingle();
+            if (profile && (profile.role === "admin" || profile.role === "staff")) {
+              targetUrl = "admin-dashboard.html";
+            }
+          } catch(_) {}
+        }
         showMessage("success", "<i class='fa-solid fa-circle-check'></i> ACCOUNT CREATED", "You're all set — signed in automatically. Redirecting you...");
-        setTimeout(() => { window.location.href = "booking.html"; }, 1500);
+        setTimeout(() => { window.location.href = targetUrl; }, 1500);
         return;
       }
 
