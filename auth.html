@@ -348,8 +348,10 @@
       formSignin.classList.add("hidden");
       
       showMessage("success", "<i class='fa-solid fa-circle-check'></i> SIGN IN SUCCESSFUL", "Welcome back! Redirecting you...");
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get("redirect") || "booking.html";
       setTimeout(() => {
-        window.location.href = "booking.html";
+        window.location.href = redirectUrl;
       }, 1500);
 
     } catch (err) {

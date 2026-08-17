@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketing Broadcast | Chhotu Operations Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
+  <script src="assets/admin.js" defer></script>
+</head>
+<body class="antialiased text-[#F4F1E8] overflow-x-hidden bg-[#14161A]">
+
+  <div class="flex min-h-screen">
+    <!-- Left Sidebar (dynamically populated by admin.js) -->
+    <aside id="admin-sidebar" class="hidden lg:block w-[260px] bg-[#1B1E24] border-r border-[#3A3F49] shrink-0"></aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Bar (dynamically populated by admin.js) -->
+      <header id="admin-topbar" class="h-16 border-b border-[#3A3F49] bg-[#14161A] flex items-center justify-between px-6 shrink-0"></header>
+
+      <!-- Dashboard Content -->
+      <main class="flex-1 p-6 overflow-y-auto space-y-6">
+        <div>
+          <h1 class="text-2xl font-bold tracking-wide font-display">PROMOTIONAL BROADCAST</h1>
+          <p class="text-xs text-[#B9B6AC] mt-0.5 font-mono">Send notifications and announcements to opted-in customers.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+          <!-- Broadcast Form -->
+          <div class="lg:col-span-2 card p-6 space-y-6">
+            <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49]/40 pb-2">Draft Broadcast</h3>
+            
+            <form id="broadcast-form" class="space-y-4" novalidate>
+              <div>
+                <label class="field-label" for="broadcast-audience">Target Audience</label>
+                <select id="broadcast-audience" onchange="calculateAudienceCount()" class="field-input text-xs">
+                  <option value="all">All Opted-In Customers</option>
+                  <option value="whatsapp">Opted-In WhatsApp Alerts only</option>
+                  <option value="email">Opted-In Email Alerts only</option>
+                </select>
+                <p class="text-[10px] text-[#B9B6AC] font-mono mt-1" id="audience-count-preview">Audience size: Calculating...</p>
+              </div>
+
+              <!-- Channels selection -->
+              <div class="space-y-2">
+                <span class="text-xs text-[#B9B6AC] uppercase font-mono block">Delivery Channels</span>
+                <div class="flex gap-6">
+                  <label class="flex items-center gap-2 cursor-pointer text-xs">
+                    <input type="checkbox" id="channel-whatsapp" checked class="accent-[#FF5A1F] w-4 h-4">
+                    <span>WhatsApp</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer text-xs">
+                    <input type="checkbox" id="channel-email" checked class="accent-[#FF5A1F] w-4 h-4">
+                    <span>Email</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label class="field-label" for="broadcast-message">Message Details</label>
+                <textarea id="broadcast-message" rows="5" class="field-input text-xs resize-none" placeholder="Type coupon details, service camp announcements, holiday notices..." required></textarea>
+                <p class="field-error" id="broadcast-message-error">Please type message details.</p>
+              </div>
+
+              <div id="broadcast-success" class="hidden text-xs text-green-400 font-semibold bg-green-500/10 p-2 border border-green-500/20 rounded">
+                <i class="fa-solid fa-circle-check"></i> Broadcast payload sent to server pipeline.
+              </div>
+              <div id="broadcast-error" class="hidden text-xs text-red-400 font-semibold bg-red-500/10 p-2 border border-red-500/20 rounded">
+                Failed to dispatch broadcast.
+              </div>
+
+              <div class="flex gap-2">
+                <button type="submit" id="btn-send-broadcast" class="btn btn-primary text-xs w-full"><i class="fa-solid fa-paper-plane"></i> Send Broadcast</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Broadcast History Logs -->
+          <div class="space-y-4">
+            <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49]/40 pb-2">Recent Broadcasts</h3>
+            
+            <div id="broadcast-logs-container" class="space-y-3">
+              <!-- Inline logs -->
+              <div class="card p-4 space-y-2">
+                <div class="flex justify-between items-center text-[10px] text-[#B9B6AC] font-mono">
+                  <span>Monsoon Discount</span>
+                  <span>Aug 10 · 15:40</span>
+                </div>
+                <p class="text-xs text-[#F4F1E8]">"Get 15% off full servicing this monsoon week! Book home visit now."</p>
+                <div class="text-[9px] text-[#B9B6AC] uppercase font-mono tracking-wider pt-1 border-t border-[#3A3F49]/40">
+                  Channels: WhatsApp · Size: 198 sent
+                </div>
+              </div>
+              <div class="card p-4 space-y-2">
+                <div class="flex justify-between items-center text-[10px] text-[#B9B6AC] font-mono">
+                  <span>Dashain Camp</span>
+                  <span>Oct 12 · 11:20</span>
+                </div>
+                <p class="text-xs text-[#F4F1E8]">"Chhotu Dashain pre-trip check camp starts tomorrow. Genuine parts ready."</p>
+                <div class="text-[9px] text-[#B9B6AC] uppercase font-mono tracking-wider pt-1 border-t border-[#3A3F49]/40">
+                  Channels: WhatsApp, Email · Size: 214 sent
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    let preferencesList = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const checkInterval = setInterval(async () => {
+        if (window.currentAdmin && window.supabaseClient) {
+          clearInterval(checkInterval);
+          await loadUserPreferences();
+          
+          const form = document.getElementById("broadcast-form");
+          form.addEventListener("submit", sendBroadcast);
+        }
+      }, 100);
+    });
+
+    async function loadUserPreferences() {
+      try {
+        const { data, error } = await window.supabaseClient
+          .from("notification_preferences")
+          .select("*");
+
+        if (!error && data) {
+          preferencesList = data;
+        }
+        calculateAudienceCount();
+
+      } catch (err) {
+        console.warn("Failed to load audience count:", err);
+      }
+    }
+
+    function calculateAudienceCount() {
+      const audienceSelect = document.getElementById("broadcast-audience").value;
+      const previewText = document.getElementById("audience-count-preview");
+      if (!previewText) return;
+
+      let size = 0;
+      if (audienceSelect === "all") {
+        size = preferencesList.filter(p => p.promo_whatsapp || p.promo_email).length;
+      } else if (audienceSelect === "whatsapp") {
+        size = preferencesList.filter(p => p.promo_whatsapp).length;
+      } else if (audienceSelect === "email") {
+        size = preferencesList.filter(p => p.promo_email).length;
+      }
+
+      previewText.textContent = `Audience size: ${size} customer${size !== 1 ? 's' : ''} opted-in.`;
+    }
+
+    async function sendBroadcast(e) {
+      e.preventDefault();
+      
+      const msgInput = document.getElementById("broadcast-message");
+      const errLabel = document.getElementById("broadcast-message-error");
+      const waChannel = document.getElementById("channel-whatsapp").checked;
+      const emailChannel = document.getElementById("channel-email").checked;
+      
+      const successEl = document.getElementById("broadcast-success");
+      const errorEl = document.getElementById("broadcast-error");
+
+      successEl.classList.add("hidden");
+      errorEl.classList.add("hidden");
+
+      if (!msgInput.value.trim()) {
+        msgInput.classList.add("invalid");
+        errLabel.classList.add("show");
+        return;
+      } else {
+        msgInput.classList.remove("invalid");
+        errLabel.classList.remove("show");
+      }
+
+      const sendBtn = document.getElementById("btn-send-broadcast");
+      const originalText = sendBtn.innerHTML;
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Dispatching...`;
+
+      // Simulating dispatch trigger (needs server side logic / backend configuration)
+      setTimeout(() => {
+        successEl.classList.remove("hidden");
+        msgInput.value = "";
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = originalText;
+        
+        // append new simulated log entry
+        const logs = document.getElementById("broadcast-logs-container");
+        const newLog = document.createElement("div");
+        newLog.className = "card p-4 space-y-2";
+        newLog.innerHTML = `
+          <div class="flex justify-between items-center text-[10px] text-[#B9B6AC] font-mono">
+            <span>Manual Broadcast</span>
+            <span>Just now</span>
+          </div>
+          <p class="text-xs text-[#F4F1E8]">"${msgInput.value.trim()}"</p>
+          <div class="text-[9px] text-[#B9B6AC] uppercase font-mono tracking-wider pt-1 border-t border-[#3A3F49]/40">
+            Channels: ${[waChannel ? 'WhatsApp' : '', emailChannel ? 'Email' : ''].filter(Boolean).join(", ")} · Status: Processing
+          </div>
+        `;
+        logs.prepend(newLog);
+      }, 1500);
+    }
+  </script>
+</body>
+</html>

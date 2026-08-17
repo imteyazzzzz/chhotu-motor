@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Queue | Chhotu Operations Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
+  <script src="assets/admin.js" defer></script>
+</head>
+<body class="antialiased text-[#F4F1E8] overflow-x-hidden bg-[#14161A]">
+
+  <div class="flex min-h-screen">
+    <!-- Left Sidebar (dynamically populated by admin.js) -->
+    <aside id="admin-sidebar" class="hidden lg:block w-[260px] bg-[#1B1E24] border-r border-[#3A3F49] shrink-0"></aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Bar (dynamically populated by admin.js) -->
+      <header id="admin-topbar" class="h-16 border-b border-[#3A3F49] bg-[#14161A] flex items-center justify-between px-6 shrink-0"></header>
+
+      <!-- Dashboard Content -->
+      <main class="flex-1 p-6 overflow-y-auto space-y-6">
+        <div class="flex justify-between items-center border-b border-[#3A3F49] pb-4">
+          <div>
+            <h1 class="text-2xl font-bold tracking-wide font-display flex items-center gap-2">
+              <span class="inline-block h-3.5 w-3.5 rounded-full bg-red-600 animate-ping"></span> 
+              EMERGENCY ROADSIDE QUEUE
+            </h1>
+            <p class="text-xs text-[#B9B6AC] mt-0.5 font-mono">Immediate roadside breakdown requests waiting for dispatch.</p>
+          </div>
+          <div class="text-right">
+            <span id="active-emergencies-count" class="px-2.5 py-1 rounded bg-red-950/20 border border-red-500/30 text-xs font-mono font-bold text-red-500">0 ACTIVE</span>
+          </div>
+        </div>
+
+        <!-- Emergency Cards Stack -->
+        <div id="emergency-cards-container" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Dynamically populated cards -->
+          <p class="text-sm text-[#B9B6AC] skeleton h-32 rounded-md sm:col-span-2 lg:col-span-3"></p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    let emergencyBookings = [];
+    let mechanics = [];
+    let timerInterval = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const checkInterval = setInterval(async () => {
+        if (window.currentAdmin && window.supabaseClient) {
+          clearInterval(checkInterval);
+          await loadMechanicsList();
+          await fetchEmergencyQueue();
+          initRealtimeEmergency();
+          
+          // Start ticking client-side timers every second
+          timerInterval = setInterval(tickQueueTimers, 1000);
+        }
+      }, 100);
+    });
+
+    async function loadMechanicsList() {
+      try {
+        const { data, error } = await window.supabaseClient
+          .from("mechanics")
+          .select("*")
+          .eq("on_duty", true)
+          .order("name", { ascending: true });
+        
+        if (!error && data) {
+          mechanics = data;
+        }
+      } catch (err) {
+        console.error("Could not load mechanics list:", err);
+      }
+    }
+
+    async function fetchEmergencyQueue() {
+      const container = document.getElementById("emergency-cards-container");
+      if (!container) return;
+
+      try {
+        // Query bookings where service_type = 'emergency' and status = 'pending' or 'assigned' or 'dispatched' (but not in_progress/completed/cancelled)
+        const { data, error } = await window.supabaseClient
+          .from("bookings")
+          .select("*, profiles!inner(full_name, phone)")
+          .eq("service_type", "emergency")
+          .in("status", ["pending", "assigned", "dispatched"])
+          .order("created_at", { ascending: true }); // oldest first
+
+        if (error) throw error;
+        emergencyBookings = data || [];
+
+        renderEmergencyQueue();
+
+      } catch (err) {
+        console.error("Failed to load emergency queue:", err);
+        container.innerHTML = `<div class="card p-6 text-center text-xs text-red-400 sm:col-span-2 lg:col-span-3">Failed to load active emergencies.</div>`;
+      }
+    }
+
+    function renderEmergencyQueue() {
+      const container = document.getElementById("emergency-cards-container");
+      const activeCount = document.getElementById("active-emergencies-count");
+      
+      activeCount.textContent = `${emergencyBookings.length} ACTIVE`;
+
+      if (emergencyBookings.length === 0) {
+        activeCount.className = "px-2.5 py-1 rounded bg-green-950/20 border border-green-500/30 text-xs font-mono font-bold text-green-400";
+        container.innerHTML = `
+          <div class="card p-8 text-center space-y-4 sm:col-span-2 lg:col-span-3 border border-green-500/20 bg-green-950/5">
+            <div class="w-12 h-12 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center text-xl mx-auto"><i class="fa-solid fa-circle-check"></i></div>
+            <div>
+              <h3 class="font-display text-sm text-green-400 font-bold uppercase">All Clear</h3>
+              <p class="text-xs text-[#B9B6AC] mt-1">No active roadside emergencies. All requests resolved or in progress.</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      activeCount.className = "px-2.5 py-1 rounded bg-red-950/20 border border-red-500/30 text-xs font-mono font-bold text-red-500";
+
+      container.innerHTML = emergencyBookings.map(b => {
+        const createdDate = new Date(b.created_at);
+        const mapUrl = b.coordinates 
+          ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.coordinates)}" target="_blank" class="text-[#FF5A1F] hover:underline font-mono text-[10px]"><i class="fa-solid fa-map-location-dot"></i> View Coordinates</a>`
+          : "";
+
+        // Build mechanics selection dropdown options
+        const mechanicsOptions = mechanics.map(m => {
+          const selected = b.assigned_mechanic_id === m.id ? "selected" : "";
+          return `<option value="${m.id}" ${selected}>${m.name}</option>`;
+        }).join("");
+
+        const statusPill = b.status === "pending" 
+          ? `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold bg-red-500/15 text-red-400 border border-red-500/20 animate-pulse">Waiting Dispatch</span>`
+          : `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">${b.status}</span>`;
+
+        return `
+          <div id="emergency-card-${b.id}" class="card p-5 space-y-4 relative flex flex-col justify-between" data-created="${b.created_at}">
+            <div class="space-y-2">
+              <div class="flex justify-between items-start border-b border-[#3A3F49]/40 pb-2">
+                <div>
+                  <h4 class="font-mono text-xs font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</h4>
+                  <span class="text-[10px] text-[#B9B6AC] font-mono mt-0.5 inline-block"><i class="fa-solid fa-clock"></i> WAITING: <span class="font-bold text-[#FF5A1F]" id="timer-${b.id}">00:00</span></span>
+                </div>
+                ${statusPill}
+              </div>
+
+              <div class="text-xs space-y-1">
+                <p class="font-bold text-[#F4F1E8]">${b.profiles.full_name}</p>
+                <p class="flex items-center gap-2">
+                  <span class="font-mono text-[#B9B6AC]">${b.profiles.phone}</span>
+                  <a href="tel:${b.profiles.phone}" class="px-1.5 py-0.5 bg-[#FFC530] text-[#14161A] font-mono text-[9px] rounded font-bold uppercase"><i class="fa-solid fa-phone"></i> Call</a>
+                </p>
+                <p class="text-[#B9B6AC] font-semibold">${b.bike_brand || ""} ${b.bike_model}</p>
+                <p class="text-[#B9B6AC]"><i class="fa-solid fa-location-dot text-[9px] text-[#FF5A1F]"></i> Address: ${b.location}</p>
+                ${mapUrl}
+                <p class="text-[#F4F1E8] italic bg-[#14161A] p-2 rounded text-[11px] mt-2">" ${b.issue_description || 'No description'} "</p>
+              </div>
+            </div>
+
+            <!-- Inline dispatch actions -->
+            <div class="space-y-3 pt-3 border-t border-[#3A3F49]/40">
+              <div>
+                <label class="text-[9px] font-mono text-[#B9B6AC] uppercase block mb-1">Quick Assign Mechanic</label>
+                <select onchange="quickAssignMechanic('${b.id}', this.value)" class="field-input text-xs !py-1 !min-height-[34px] bg-[#14161A] border-[#3A3F49]">
+                  <option value="">Select On-Duty Mechanic...</option>
+                  ${mechanicsOptions}
+                </select>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="quickStatusUpdate('${b.id}', 'dispatched')" class="btn btn-primary !py-1.5 !px-3 !text-[11px] w-full text-center"><i class="fa-solid fa-motorcycle"></i> Mark En Route</button>
+                <button onclick="window.location.href='admin-bookings.html?id=${b.id}'" class="btn btn-outline !py-1.5 !px-3 !text-[11px] shrink-0" title="More Details"><i class="fa-solid fa-ellipsis"></i></button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // Update timers immediately
+      tickQueueTimers();
+    }
+
+    function tickQueueTimers() {
+      emergencyBookings.forEach(b => {
+        const timerEl = document.getElementById(`timer-${b.id}`);
+        const cardEl = document.getElementById(`emergency-card-${b.id}`);
+        if (!timerEl) return;
+
+        const diffMs = new Date() - new Date(b.created_at);
+        const diffSecs = Math.floor(diffMs / 1000);
+        const mins = Math.floor(diffSecs / 60);
+        const secs = diffSecs % 60;
+
+        timerEl.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+
+        // Escalation check: if waiting for more than 15 minutes (900 seconds)
+        if (diffSecs > 900 && cardEl) {
+          cardEl.className = "card p-5 space-y-4 relative flex flex-col justify-between border border-red-500/50 shadow-lg shadow-red-500/5 bg-red-950/5 animate-pulse";
+          timerEl.className = "font-bold text-red-500 animate-pulse";
+        }
+      });
+    }
+
+    async function quickAssignMechanic(bookingId, mechanicId) {
+      try {
+        const { error } = await window.supabaseClient
+          .from("bookings")
+          .update({ 
+            assigned_mechanic_id: mechanicId || null,
+            status: mechanicId ? "assigned" : "pending" 
+          })
+          .eq("id", bookingId);
+
+        if (error) throw error;
+
+        // Log audit trail
+        const mName = mechanicId ? (mechanics.find(item => item.id === mechanicId)?.name || "Mechanic") : "Unassigned";
+        await window.supabaseClient
+          .from("bookings_activity")
+          .insert([{
+            booking_id: bookingId,
+            actor_id: window.currentAdmin.id,
+            action: "mechanic_assigned",
+            detail: `Quick-assigned job to ${mName}`
+          }]);
+
+        await fetchEmergencyQueue();
+
+      } catch (err) {
+        console.error("Quick assign failed:", err);
+      }
+    }
+
+    async function quickStatusUpdate(bookingId, targetStatus) {
+      try {
+        const original = emergencyBookings.find(item => item.id === bookingId);
+        if (!original) return;
+
+        const { error } = await window.supabaseClient
+          .from("bookings")
+          .update({ status: targetStatus })
+          .eq("id", bookingId);
+
+        if (error) throw error;
+
+        // Log audit trail
+        await window.supabaseClient
+          .from("bookings_activity")
+          .insert([{
+            booking_id: bookingId,
+            actor_id: window.currentAdmin.id,
+            action: "status_changed",
+            detail: `Quick-changed status from '${original.status}' to '${targetStatus}'`
+          }]);
+
+        await fetchEmergencyQueue();
+
+      } catch (err) {
+        console.error("Quick status update failed:", err);
+      }
+    }
+
+    function initRealtimeEmergency() {
+      // Subscribe to all changes in the bookings table
+      window.supabaseClient
+        .channel("bookings-realtime-emergency")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "bookings" },
+          async () => {
+            await fetchEmergencyQueue();
+          }
+        )
+        .subscribe();
+    }
+  </script>
+</body>
+</html>

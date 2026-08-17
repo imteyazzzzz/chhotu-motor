@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookings Management | Chhotu Operations Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
+  <script src="assets/admin.js" defer></script>
+</head>
+<body class="antialiased text-[#F4F1E8] overflow-x-hidden bg-[#14161A]">
+
+  <div class="flex min-h-screen">
+    <!-- Left Sidebar (dynamically populated by admin.js) -->
+    <aside id="admin-sidebar" class="hidden lg:block w-[260px] bg-[#1B1E24] border-r border-[#3A3F49] shrink-0"></aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Bar (dynamically populated by admin.js) -->
+      <header id="admin-topbar" class="h-16 border-b border-[#3A3F49] bg-[#14161A] flex items-center justify-between px-6 shrink-0"></header>
+
+      <!-- Dashboard Content -->
+      <main class="flex-1 p-6 overflow-y-auto space-y-6 relative">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold tracking-wide font-display">BOOKINGS QUEUE</h1>
+            <p class="text-xs text-[#B9B6AC] mt-0.5 font-mono">Manage, allocate, and track repair requests in real-time.</p>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card p-4 space-y-4">
+          <!-- Status filter pills -->
+          <div class="flex flex-wrap gap-2" id="status-filter-pills">
+            <button onclick="setStatusFilter('all')" id="pill-all" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold">All</button>
+            <button onclick="setStatusFilter('pending')" id="pill-pending" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Pending</button>
+            <button onclick="setStatusFilter('assigned')" id="pill-assigned" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Assigned</button>
+            <button onclick="setStatusFilter('in_progress')" id="pill-in_progress" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">In Progress</button>
+            <button onclick="setStatusFilter('completed')" id="pill-completed" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Completed</button>
+            <button onclick="setStatusFilter('cancelled')" id="pill-cancelled" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Cancelled</button>
+          </div>
+
+          <!-- Dropdowns and Search -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="field-label" for="filter-service">Service Type</label>
+              <select id="filter-service" onchange="loadBookings()" class="field-input text-xs !py-1.5 !px-3 !min-height-[40px]">
+                <option value="all">All Services</option>
+                <option value="emergency">Emergency Roadside</option>
+                <option value="home-visit">Home / Office Visit</option>
+                <option value="workshop">Workshop Appointment</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="filter-date">Date Range</label>
+              <select id="filter-date" onchange="loadBookings()" class="field-input text-xs !py-1.5 !px-3 !min-height-[40px]">
+                <option value="all">All Dates</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label" for="queue-search">Search Customer</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#B9B6AC]">
+                  <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input type="text" id="queue-search" oninput="loadBookings()" class="field-input text-xs pl-9 pr-4 !py-1.5 !min-height-[40px]" placeholder="Search name, phone, ref...">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bookings List Table / Cards -->
+        <div id="bookings-queue-container">
+          <!-- Desktop Table Layout -->
+          <div class="hidden md:block overflow-x-auto card">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-[#3A3F49] bg-[#1B1E24]/30">
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Ref ID</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Customer</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Bike Model</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Service</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Status</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Mechanic</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Created</th>
+                </tr>
+              </thead>
+              <tbody id="bookings-table-rows">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Cards Layout -->
+          <div class="md:hidden space-y-3" id="bookings-cards-list">
+            <!-- Dynamically populated cards -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Booking Details Drawer Overlay (Hidden by default, slides in from right) -->
+    <div id="booking-detail-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-[#1B1E24] border-l border-[#3A3F49] shadow-2xl translate-x-full transition-transform duration-300 flex flex-col justify-between">
+      <div class="flex-1 flex flex-col min-h-0">
+        <!-- Drawer Header -->
+        <div class="p-5 border-b border-[#3A3F49] flex items-center justify-between">
+          <div>
+            <h3 class="font-mono text-base font-bold text-[#FF5A1F]" id="drawer-ref-title">#BK-12345</h3>
+            <p class="text-[10px] text-[#B9B6AC] font-mono mt-0.5" id="drawer-created-at">Aug 17, 2026 · 14:04</p>
+          </div>
+          <button onclick="closeDetailsDrawer()" class="text-xl text-[#B9B6AC] hover:text-[#F4F1E8] p-1.5" aria-label="Close details">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Drawer Body -->
+        <div class="flex-1 p-5 overflow-y-auto space-y-6">
+          <!-- Customer details -->
+          <div class="space-y-3">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Customer Info</h4>
+            <div class="space-y-1 text-xs">
+              <p><span class="text-[#B9B6AC]">Name:</span> <strong id="drawer-cust-name" class="text-[#F4F1E8]">Rohan Sharma</strong></p>
+              <p class="flex items-center gap-2 mt-0.5">
+                <span class="text-[#B9B6AC]">Phone:</span> 
+                <strong id="drawer-cust-phone" class="text-[#F4F1E8] font-mono">+977 9813691072</strong>
+                <a href="tel:+9779813691072" id="drawer-call-link" class="px-2 py-0.5 bg-[#FFC530] text-[#14161A] font-mono text-[9px] rounded font-bold uppercase"><i class="fa-solid fa-phone"></i> Call</a>
+              </p>
+              <p><span class="text-[#B9B6AC]">Service Type:</span> <strong id="drawer-service-type" class="text-[#F4F1E8] capitalize">Emergency</strong></p>
+              <p><span class="text-[#B9B6AC]">Bike:</span> <strong id="drawer-bike-model" class="text-[#F4F1E8] uppercase">Pulsar 150</strong></p>
+              <p id="drawer-reg-no-row"><span class="text-[#B9B6AC]">Registration:</span> <strong id="drawer-reg-no" class="text-[#F4F1E8] font-mono">BA 97 PA 1234</strong></p>
+              <p><span class="text-[#B9B6AC]">Location Address:</span> <strong id="drawer-location" class="text-[#F4F1E8]">Chabahil, Jorpati</strong></p>
+              <p id="drawer-coords-row"><span class="text-[#B9B6AC]">GPS Pin:</span> <a href="#" id="drawer-coords-link" target="_blank" class="text-[#FF5A1F] hover:underline font-mono">View on Google Maps</a></p>
+              <p><span class="text-[#B9B6AC]">Client Issue:</span> <span id="drawer-issue" class="italic text-[#F4F1E8]">"Engine cuts off..."</span></p>
+            </div>
+          </div>
+
+          <!-- Allocations/Actions Form -->
+          <form id="drawer-edit-form" class="space-y-4">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Operational Allocation</h4>
+            
+            <div>
+              <label class="field-label" for="drawer-assign-mechanic">Assign Mechanic</label>
+              <select id="drawer-assign-mechanic" class="field-input text-xs">
+                <option value="">Unassigned</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="field-label" for="drawer-status">Current Status</label>
+              <select id="drawer-status" class="field-input text-xs">
+                <option value="pending">Pending</option>
+                <option value="assigned">Assigned</option>
+                <option value="dispatched">Dispatched</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="field-label" for="drawer-notes">Internal Operations Notes</label>
+              <textarea id="drawer-notes" rows="3" class="field-input text-xs resize-none" placeholder="Add administrative details, parts code used, pricing notes..."></textarea>
+            </div>
+
+            <!-- Inline Success/Error -->
+            <div id="drawer-save-success" class="hidden text-xs text-green-400 font-semibold bg-green-500/10 p-2 border border-green-500/20 rounded">
+              <i class="fa-solid fa-circle-check"></i> Changes saved successfully.
+            </div>
+            <div id="drawer-save-error" class="hidden text-xs text-red-400 font-semibold bg-red-500/10 p-2 border border-red-500/20 rounded">
+              Update failed.
+            </div>
+
+            <button type="submit" id="btn-save-details" class="btn btn-primary w-full text-xs">Save Changes</button>
+          </form>
+
+          <!-- Audit Activity Log -->
+          <div class="space-y-3">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Activity Log</h4>
+            <div id="drawer-activity-log" class="space-y-2 max-h-[140px] overflow-y-auto pr-1">
+              <!-- Dynamically populated entries -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let bookings = [];
+    let mechanics = [];
+    let currentFilterStatus = "all";
+    let selectedBookingId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const checkInterval = setInterval(async () => {
+        if (window.currentAdmin && window.supabaseClient) {
+          clearInterval(checkInterval);
+          await loadMechanicsRoster();
+          await loadBookings();
+          initRealtimeBookings();
+          
+          // Check query params for quick load
+          const urlParams = new URLSearchParams(window.location.search);
+          const searchParam = urlParams.get("search");
+          if (searchParam) {
+            document.getElementById("queue-search").value = searchParam;
+            await loadBookings();
+          }
+          const idParam = urlParams.get("id");
+          if (idParam) {
+            openDetailsDrawer(idParam);
+          }
+        }
+      }, 100);
+
+      // Handle drawer edit form submit
+      const form = document.getElementById("drawer-edit-form");
+      form.addEventListener("submit", saveBookingDetails);
+    });
+
+    async function loadMechanicsRoster() {
+      try {
+        const { data, error } = await window.supabaseClient
+          .from("mechanics")
+          .select("*")
+          .order("on_duty", { ascending: false })
+          .order("name", { ascending: true });
+
+        if (!error && data) {
+          mechanics = data;
+          const selectEl = document.getElementById("drawer-assign-mechanic");
+          
+          // Split on-duty vs off-duty
+          const onDuty = data.filter(m => m.on_duty);
+          const offDuty = data.filter(m => !m.on_duty);
+
+          let optionsHTML = '<option value="">Unassigned</option>';
+          if (onDuty.length > 0) {
+            optionsHTML += '<optgroup label="ON DUTY">';
+            onDuty.forEach(m => {
+              optionsHTML += `<option value="${m.id}">${m.name} (${m.specialty})</option>`;
+            });
+            optionsHTML += '</optgroup>';
+          }
+          if (offDuty.length > 0) {
+            optionsHTML += '<optgroup label="OFF DUTY">';
+            offDuty.forEach(m => {
+              optionsHTML += `<option value="${m.id}">${m.name} (${m.specialty})</option>`;
+            });
+            optionsHTML += '</optgroup>';
+          }
+          selectEl.innerHTML = optionsHTML;
+        }
+      } catch (err) {
+        console.error("Could not load mechanics list:", err);
+      }
+    }
+
+    function setStatusFilter(status) {
+      currentFilterStatus = status;
+      
+      // Update active pill UI styling
+      const pills = document.querySelectorAll("#status-filter-pills button");
+      pills.forEach(pill => {
+        if (pill.id === `pill-${status}`) {
+          pill.className = "px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold";
+        } else {
+          pill.className = "px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]";
+        }
+      });
+
+      loadBookings();
+    }
+
+    async function loadBookings() {
+      const rowsContainer = document.getElementById("bookings-table-rows");
+      const listContainer = document.getElementById("bookings-cards-list");
+      if (!rowsContainer || !listContainer) return;
+
+      rowsContainer.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-xs text-[#B9B6AC] skeleton h-20"></td></tr>`;
+      listContainer.innerHTML = `<p class="text-sm text-[#B9B6AC] skeleton h-20 rounded-md"></p>`;
+
+      try {
+        const { data, error } = await window.supabaseClient
+          .from("bookings")
+          .select("*, profiles!inner(full_name, phone)")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        bookings = data || [];
+
+        // Apply filters locally to preserve fast response
+        const serviceFilter = document.getElementById("filter-service").value;
+        const dateFilter = document.getElementById("filter-date").value;
+        const searchVal = document.getElementById("queue-search").value.toLowerCase().trim();
+
+        let filtered = bookings;
+
+        // 1. Status Filter
+        if (currentFilterStatus !== "all") {
+          filtered = filtered.filter(b => b.status === currentFilterStatus);
+        }
+
+        // 2. Service Filter
+        if (serviceFilter !== "all") {
+          filtered = filtered.filter(b => b.service_type === serviceFilter);
+        }
+
+        // 3. Date Filter
+        if (dateFilter !== "all") {
+          const now = new Date();
+          filtered = filtered.filter(b => {
+            const bDate = new Date(b.created_at);
+            if (dateFilter === "today") {
+              return bDate.toDateString() === now.toDateString();
+            } else if (dateFilter === "week") {
+              const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+              return bDate >= startOfWeek;
+            } else if (dateFilter === "month") {
+              return bDate.getMonth() === now.getMonth() && bDate.getFullYear() === now.getFullYear();
+            }
+            return true;
+          });
+        }
+
+        // 4. Search Filter (customer name, phone, reference)
+        if (searchVal) {
+          filtered = filtered.filter(b => 
+            b.id.toLowerCase().includes(searchVal) ||
+            b.profiles.full_name.toLowerCase().includes(searchVal) ||
+            b.profiles.phone.includes(searchVal) ||
+            (b.bike_model && b.bike_model.toLowerCase().includes(searchVal))
+          );
+        }
+
+        renderQueueLayouts(filtered);
+
+      } catch (err) {
+        console.error("Error loading bookings queue:", err);
+      }
+    }
+
+    function renderQueueLayouts(filteredList) {
+      const rowsContainer = document.getElementById("bookings-table-rows");
+      const listContainer = document.getElementById("bookings-cards-list");
+
+      if (filteredList.length === 0) {
+        rowsContainer.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-xs text-[#B9B6AC]">No matching bookings found.</td></tr>`;
+        listContainer.innerHTML = `<div class="card p-6 text-center text-xs text-[#B9B6AC]">No matching bookings found.</div>`;
+        return;
+      }
+
+      // Render Desktop Rows
+      rowsContainer.innerHTML = filteredList.map(b => {
+        const dt = new Date(b.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+        const statusPill = getStatusPill(b.status);
+        const mechanicName = b.assigned_mechanic_id 
+          ? (mechanics.find(m => m.id === b.assigned_mechanic_id)?.name || "Assigned")
+          : "—";
+
+        return `
+          <tr onclick="openDetailsDrawer('${b.id}')" class="border-b border-[#3A3F49] hover:bg-[#1B1E24]/30 cursor-pointer transition-all">
+            <td class="p-4 font-mono text-xs font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</td>
+            <td class="p-4 text-xs font-semibold text-[#F4F1E8]">${b.profiles.full_name}</td>
+            <td class="p-4 text-xs text-[#B9B6AC] uppercase">${b.bike_brand || ""} ${b.bike_model}</td>
+            <td class="p-4 text-xs text-[#B9B6AC] capitalize">${b.service_type.replace("-", " ")}</td>
+            <td class="p-4">${statusPill}</td>
+            <td class="p-4 text-xs text-[#B9B6AC]">${mechanicName}</td>
+            <td class="p-4 font-mono text-[10px] text-[#B9B6AC]">${dt}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // Render Mobile Cards
+      listContainer.innerHTML = filteredList.map(b => {
+        const dt = new Date(b.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+        const statusPill = getStatusPill(b.status);
+        const mechanicName = b.assigned_mechanic_id 
+          ? (mechanics.find(m => m.id === b.assigned_mechanic_id)?.name || "Assigned")
+          : "—";
+
+        return `
+          <div onclick="openDetailsDrawer('${b.id}')" class="card p-4 space-y-3 cursor-pointer hover:border-[#FF5A1F]/40 transition-all">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-mono text-xs font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</h4>
+                <p class="text-xs font-semibold text-[#F4F1E8] mt-0.5">${b.profiles.full_name}</p>
+              </div>
+              ${statusPill}
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-[10px] text-[#B9B6AC] border-t border-[#3A3F49]/40 pt-2 font-mono">
+              <div>Bike: <span class="text-[#F4F1E8] uppercase">${b.bike_brand || ""} ${b.bike_model}</span></div>
+              <div>Type: <span class="text-[#F4F1E8] capitalize">${b.service_type.replace("-", " ")}</span></div>
+              <div>Mech: <span class="text-[#F4F1E8]">${mechanicName}</span></div>
+              <div>Time: <span class="text-[#F4F1E8]">${dt}</span></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function openDetailsDrawer(bookingId) {
+      selectedBookingId = bookingId;
+      const b = bookings.find(item => item.id === bookingId);
+      if (!b) return;
+
+      // Populate details
+      document.getElementById("drawer-ref-title").textContent = `#${b.id.substring(0, 12).toUpperCase()}...`;
+      document.getElementById("drawer-created-at").textContent = new Date(b.created_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
+      
+      document.getElementById("drawer-cust-name").textContent = b.profiles.full_name;
+      document.getElementById("drawer-cust-phone").textContent = b.profiles.phone || "No phone";
+      document.getElementById("drawer-call-link").setAttribute("href", `tel:${b.profiles.phone || ''}`);
+      
+      document.getElementById("drawer-service-type").textContent = b.service_type.replace("-", " ");
+      document.getElementById("drawer-bike-model").textContent = `${b.bike_brand || ""} ${b.bike_model}`;
+      
+      if (b.registration_no) {
+        document.getElementById("drawer-reg-no").textContent = b.registration_no;
+        document.getElementById("drawer-reg-no-row").classList.remove("hidden");
+      } else {
+        document.getElementById("drawer-reg-no-row").classList.add("hidden");
+      }
+
+      document.getElementById("drawer-location").textContent = b.location;
+      
+      if (b.coordinates) {
+        document.getElementById("drawer-coords-link").setAttribute("href", `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.coordinates)}`);
+        document.getElementById("drawer-coords-row").classList.remove("hidden");
+      } else {
+        document.getElementById("drawer-coords-row").classList.add("hidden");
+      }
+
+      document.getElementById("drawer-issue").textContent = b.issue_description ? `"${b.issue_description}"` : "None";
+
+      // Form assignments
+      document.getElementById("drawer-assign-mechanic").value = b.assigned_mechanic_id || "";
+      document.getElementById("drawer-status").value = b.status || "pending";
+      document.getElementById("drawer-notes").value = b.internal_notes || "";
+
+      // Hide alerts
+      document.getElementById("drawer-save-success").classList.add("hidden");
+      document.getElementById("drawer-save-error").classList.add("hidden");
+
+      // Load Audit Activity Logs
+      await loadActivityLogs(b.id);
+
+      // Slide drawer in
+      const drawer = document.getElementById("booking-detail-drawer");
+      drawer.classList.remove("translate-x-full");
+    }
+
+    function closeDetailsDrawer() {
+      const drawer = document.getElementById("booking-detail-drawer");
+      drawer.classList.add("translate-x-full");
+      selectedBookingId = null;
+    }
+
+    async function loadActivityLogs(bookingId) {
+      const logContainer = document.getElementById("drawer-activity-log");
+      if (!logContainer) return;
+
+      logContainer.innerHTML = `<p class="text-[10px] text-[#B9B6AC] skeleton h-10"></p>`;
+
+      try {
+        const { data, error } = await window.supabaseClient
+          .from("bookings_activity")
+          .select("*, profiles(full_name)")
+          .eq("booking_id", bookingId)
+          .order("created_at", { ascending: false });
+
+        if (error && error.code !== "42P01") throw error;
+
+        if (data && data.length > 0) {
+          logContainer.innerHTML = data.map(log => {
+            const dt = new Date(log.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+            const actor = log.profiles ? log.profiles.full_name.split(" ")[0] : "System";
+            return `
+              <div class="text-[10px] space-x-1 border-l-2 border-[#FF5A1F]/30 pl-2 py-0.5">
+                <span class="text-[#FF5A1F] font-semibold">${dt} ·</span>
+                <span class="text-[#F4F1E8] font-medium">${actor}:</span>
+                <span class="text-[#B9B6AC]">${log.detail || log.action}</span>
+              </div>
+            `;
+          }).join("");
+        } else {
+          logContainer.innerHTML = `<div class="text-[10px] text-[#B9B6AC] italic">No activity logged yet.</div>`;
+        }
+      } catch (err) {
+        logContainer.innerHTML = `<div class="text-[10px] text-red-400">Failed to load history log.</div>`;
+      }
+    }
+
+    async function saveBookingDetails(e) {
+      e.preventDefault();
+      if (!selectedBookingId) return;
+
+      const saveBtn = document.getElementById("btn-save-details");
+      const originalText = saveBtn.innerHTML;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Saving...`;
+
+      const mSelect = document.getElementById("drawer-assign-mechanic").value;
+      const statusSelect = document.getElementById("drawer-status").value;
+      const notesValue = document.getElementById("drawer-notes").value.trim();
+
+      const successEl = document.getElementById("drawer-save-success");
+      const errorEl = document.getElementById("drawer-save-error");
+      successEl.classList.add("hidden");
+      errorEl.classList.add("hidden");
+
+      try {
+        const originalBooking = bookings.find(item => item.id === selectedBookingId);
+        if (!originalBooking) throw new Error("Local booking record missing.");
+
+        const updates = {
+          assigned_mechanic_id: mSelect || null,
+          status: statusSelect,
+          internal_notes: notesValue || null
+        };
+
+        // 1. Write updates to bookings table
+        const { error: updateErr } = await window.supabaseClient
+          .from("bookings")
+          .update(updates)
+          .eq("id", selectedBookingId);
+
+        if (updateErr) throw updateErr;
+
+        // 2. Audit Trails (Add logs if changes detected)
+        const auditLogs = [];
+        if (originalBooking.status !== statusSelect) {
+          auditLogs.push({
+            booking_id: selectedBookingId,
+            actor_id: window.currentAdmin.id,
+            action: "status_changed",
+            detail: `Updated status from '${originalBooking.status}' to '${statusSelect}'`
+          });
+        }
+        if (originalBooking.assigned_mechanic_id !== (mSelect || null)) {
+          const mName = mSelect ? (mechanics.find(item => item.id === mSelect)?.name || "Mechanic") : "Unassigned";
+          auditLogs.push({
+            booking_id: selectedBookingId,
+            actor_id: window.currentAdmin.id,
+            action: "mechanic_assigned",
+            detail: `Assigned job to ${mName}`
+          });
+        }
+
+        if (auditLogs.length > 0) {
+          const { error: logErr } = await window.supabaseClient
+            .from("bookings_activity")
+            .insert(auditLogs);
+          if (logErr && logErr.code !== "42P01") throw logErr;
+        }
+
+        // Show inline save confirmation
+        successEl.classList.remove("hidden");
+        setTimeout(() => successEl.classList.add("hidden"), 3000);
+
+        // Reload data
+        await loadBookings();
+        await loadActivityLogs(selectedBookingId);
+
+      } catch (err) {
+        console.error("Save failed:", err);
+        errorEl.textContent = `Save Failed: ${err.message || err}`;
+        errorEl.classList.remove("hidden");
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
+      }
+    }
+
+    function initRealtimeBookings() {
+      // Subscribe to all changes in the bookings table
+      window.supabaseClient
+        .channel("bookings-realtime-queue")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "bookings" },
+          async () => {
+            await loadBookings();
+            if (selectedBookingId) {
+              // Reload details if open booking has changed
+              const b = bookings.find(item => item.id === selectedBookingId);
+              if (b) {
+                document.getElementById("drawer-assign-mechanic").value = b.assigned_mechanic_id || "";
+                document.getElementById("drawer-status").value = b.status || "pending";
+                document.getElementById("drawer-notes").value = b.internal_notes || "";
+                await loadActivityLogs(selectedBookingId);
+              }
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    // Status Badges helper
+    function getStatusPill(status) {
+      let badgeColorClass = "bg-[#3A3F49] text-[#B9B6AC]";
+      let label = "Pending";
+
+      if (status === "assigned" || status === "confirmed") {
+        badgeColorClass = "bg-blue-500/15 text-blue-400";
+        label = "Assigned";
+      } else if (status === "dispatched") {
+        badgeColorClass = "bg-yellow-500/15 text-yellow-400";
+        label = "Dispatched";
+      } else if (status === "in_progress" || status === "in-progress") {
+        badgeColorClass = "bg-[#FF5A1F]/15 text-[#FF5A1F]";
+        label = "In Progress";
+      } else if (status === "completed") {
+        badgeColorClass = "bg-green-500/15 text-green-400";
+        label = "Completed";
+      } else if (status === "cancelled") {
+        badgeColorClass = "bg-red-500/15 text-red-400";
+        label = "Cancelled";
+      }
+
+      return `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold ${badgeColorClass}">${label}</span>`;
+    }
+  </script>
+</body>
+</html>

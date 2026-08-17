@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mechanics Roster | Chhotu Operations Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
+  <script src="assets/admin.js" defer></script>
+</head>
+<body class="antialiased text-[#F4F1E8] overflow-x-hidden bg-[#14161A]">
+
+  <div class="flex min-h-screen">
+    <!-- Left Sidebar (dynamically populated by admin.js) -->
+    <aside id="admin-sidebar" class="hidden lg:block w-[260px] bg-[#1B1E24] border-r border-[#3A3F49] shrink-0"></aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Bar (dynamically populated by admin.js) -->
+      <header id="admin-topbar" class="h-16 border-b border-[#3A3F49] bg-[#14161A] flex items-center justify-between px-6 shrink-0"></header>
+
+      <!-- Dashboard Content -->
+      <main class="flex-1 p-6 overflow-y-auto space-y-6 relative">
+        <div class="flex justify-between items-center border-b border-[#3A3F49] pb-4">
+          <div>
+            <h1 class="text-2xl font-bold tracking-wide font-display">MECHANICS MANAGEMENT</h1>
+            <p class="text-xs text-[#B9B6AC] mt-0.5 font-mono">Manage team rosters, duty statuses, and specialty skills.</p>
+          </div>
+          <button id="btn-add-mech-trigger" class="btn btn-primary !py-2 !px-4 !text-xs"><i class="fa-solid fa-plus"></i> Add Mechanic</button>
+        </div>
+
+        <!-- Add/Edit Mechanic Drawer Card (Hidden by default) -->
+        <div id="mech-form-card" class="hidden card p-6 space-y-4 max-w-xl">
+          <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49]/40 pb-2" id="mech-form-title">Add New Mechanic</h3>
+          
+          <form id="mech-crud-form" class="space-y-4" novalidate>
+            <input type="hidden" id="crud-mech-id" value="">
+            
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label" for="crud-mech-name">Full Name *</label>
+                <input type="text" id="crud-mech-name" class="field-input text-xs" placeholder="e.g. Rajesh Kumar" required>
+                <p class="field-error" id="crud-mech-name-error">Please enter name.</p>
+              </div>
+              <div>
+                <label class="field-label" for="crud-mech-phone">Phone Number *</label>
+                <input type="text" id="crud-mech-phone" class="field-input text-xs" placeholder="e.g. 9813691072" required>
+                <p class="field-error" id="crud-mech-phone-error">Please enter phone.</p>
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4 items-center">
+              <div>
+                <label class="field-label" for="crud-mech-specialty">Specialty Skill *</label>
+                <input type="text" id="crud-mech-specialty" class="field-input text-xs" placeholder="e.g. Engine Specialist" required>
+                <p class="field-error" id="crud-mech-specialty-error">Please enter specialty.</p>
+              </div>
+              <div class="flex items-center gap-3 pt-4 sm:pt-0">
+                <span class="text-xs text-[#B9B6AC] uppercase font-mono">On Duty Status</span>
+                <label class="switch">
+                  <input type="checkbox" id="crud-mech-duty" role="switch" aria-checked="false">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Inline save confirmations -->
+            <div id="mech-crud-error" class="hidden text-xs text-red-400 font-semibold bg-red-500/10 p-2 border border-red-500/20 rounded">
+              Failed to save details.
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-[#3A3F49]/40">
+              <button type="button" id="btn-mech-cancel" class="btn btn-outline !py-1.5 !px-4 !text-xs">Cancel</button>
+              <button type="submit" id="btn-mech-save" class="btn btn-primary !py-1.5 !px-4 !text-xs">Save Details</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Mechanics Roster Grid -->
+        <div id="mechanics-cards-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Dynamically populated roster cards -->
+          <p class="text-sm text-[#B9B6AC] skeleton h-32 rounded-md sm:col-span-2 lg:col-span-3"></p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    let mechanicsList = [];
+    let bookingsList = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const checkInterval = setInterval(async () => {
+        if (window.currentAdmin && window.supabaseClient) {
+          clearInterval(checkInterval);
+          setupRosterFormController();
+          await fetchRosterData();
+          initRealtimeRoster();
+        }
+      }, 100);
+    });
+
+    async function fetchRosterData() {
+      try {
+        // Fetch all bookings to get active job counts
+        const { data: bookings, error: bErr } = await window.supabaseClient
+          .from("bookings")
+          .select("id, assigned_mechanic_id, status");
+        
+        if (!bErr) bookingsList = bookings || [];
+
+        // Fetch mechanics roster
+        const { data: mechanics, error: mErr } = await window.supabaseClient
+          .from("mechanics")
+          .select("*")
+          .order("name", { ascending: true });
+
+        if (mErr) throw mErr;
+        mechanicsList = mechanics || [];
+
+        renderRosterGrid();
+
+      } catch (err) {
+        console.error("Failed to load roster:", err);
+      }
+    }
+
+    function renderRosterGrid() {
+      const grid = document.getElementById("mechanics-cards-grid");
+      if (!grid) return;
+
+      if (mechanicsList.length === 0) {
+        grid.innerHTML = `
+          <div class="card p-8 text-center sm:col-span-2 lg:col-span-3">
+            <p class="text-sm text-[#B9B6AC]">No mechanics registered yet. Click 'Add Mechanic' above to expand the roster.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Map active job counts
+      const activeJobsMap = {};
+      bookingsList.forEach(b => {
+        if (b.assigned_mechanic_id && ["assigned", "in_progress", "dispatched"].includes(b.status)) {
+          activeJobsMap[b.assigned_mechanic_id] = (activeJobsMap[b.assigned_mechanic_id] || 0) + 1;
+        }
+      });
+
+      grid.innerHTML = mechanicsList.map(m => {
+        const activeJobsCount = activeJobsMap[m.id] || 0;
+        const statusDot = m.on_duty 
+          ? `<span class="h-2 w-2 rounded-full bg-green-400 inline-block mr-2 animate-pulse"></span>`
+          : `<span class="h-2 w-2 rounded-full bg-[#3A3F49] inline-block mr-2"></span>`;
+        
+        const dutyChecked = m.on_duty ? "checked" : "";
+        const dutyAria = m.on_duty ? "true" : "false";
+
+        return `
+          <div class="card p-5 space-y-4 flex flex-col justify-between min-h-[140px]">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="flex items-center">
+                  ${statusDot}
+                  <h4 class="font-display text-base font-bold text-[#F4F1E8]">${m.name}</h4>
+                </div>
+                <p class="text-[10px] text-[#B9B6AC] uppercase font-mono mt-1">${m.specialty}</p>
+                <p class="text-[10px] text-[#B9B6AC] font-mono mt-0.5"><i class="fa-solid fa-phone"></i> ${m.phone}</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" role="switch" aria-checked="${dutyAria}" onchange="toggleDutyStatus('${m.id}', this)" ${dutyChecked}>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="flex justify-between items-center border-t border-[#3A3F49]/40 pt-3 text-xs">
+              <span class="text-[#B9B6AC] font-mono">Jobs: <strong class="text-[#FF5A1F]">${activeJobsCount} Active</strong></span>
+              <button onclick="editMechanicInline('${m.id}')" class="text-[10px] font-mono text-[#B9B6AC] hover:text-[#FF5A1F] uppercase tracking-wider"><i class="fa-solid fa-pencil"></i> Edit</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function toggleDutyStatus(mechanicId, toggleInput) {
+      const isChecked = toggleInput.checked;
+      toggleInput.setAttribute("aria-checked", String(isChecked));
+
+      try {
+        const { error } = await window.supabaseClient
+          .from("mechanics")
+          .update({ on_duty: isChecked })
+          .eq("id", mechanicId);
+
+        if (error) throw error;
+        await fetchRosterData();
+
+      } catch (err) {
+        console.error("Failed to toggle duty status:", err);
+        // revert visual toggle state on failure
+        toggleInput.checked = !isChecked;
+        toggleInput.setAttribute("aria-checked", String(!isChecked));
+      }
+    }
+
+    function setupRosterFormController() {
+      const triggerBtn = document.getElementById("btn-add-mech-trigger");
+      const formCard = document.getElementById("mech-form-card");
+      const form = document.getElementById("mech-crud-form");
+      const cancelBtn = document.getElementById("btn-mech-cancel");
+      const saveBtn = document.getElementById("btn-mech-save");
+
+      if (triggerBtn) {
+        triggerBtn.addEventListener("click", () => {
+          formCard.classList.remove("hidden");
+          document.getElementById("mech-form-title").textContent = "Add New Mechanic";
+          document.getElementById("crud-mech-id").value = "";
+          form.reset();
+          document.getElementById("crud-mech-duty").checked = false;
+          document.getElementById("crud-mech-duty").setAttribute("aria-checked", "false");
+          
+          document.getElementById("crud-mech-name").focus();
+          document.getElementById("mech-crud-error").classList.add("hidden");
+        });
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener("click", () => {
+          formCard.classList.add("hidden");
+          form.reset();
+          clearValidationErrors();
+        });
+      }
+
+      form.addEventListener("submit", saveMechanicDetails);
+    }
+
+    function clearValidationErrors() {
+      const fields = ["name", "phone", "specialty"];
+      fields.forEach(f => {
+        const input = document.getElementById(`crud-mech-${f}`);
+        const error = document.getElementById(`crud-mech-${f}-error`);
+        if (input) input.classList.remove("invalid");
+        if (error) error.classList.remove("show");
+      });
+      document.getElementById("mech-crud-error").classList.add("hidden");
+    }
+
+    async function saveMechanicDetails(e) {
+      e.preventDefault();
+      
+      const nameInput = document.getElementById("crud-mech-name");
+      const phoneInput = document.getElementById("crud-mech-phone");
+      const specialtyInput = document.getElementById("crud-mech-specialty");
+      const dutyInput = document.getElementById("crud-mech-duty");
+      const mechId = document.getElementById("crud-mech-id").value;
+      const saveBtn = document.getElementById("btn-mech-save");
+
+      // Simple validations
+      let valid = true;
+      const validateField = (input, errorId) => {
+        const errEl = document.getElementById(errorId);
+        if (!input.value.trim()) {
+          input.classList.add("invalid");
+          if (errEl) errEl.classList.add("show");
+          valid = false;
+        } else {
+          input.classList.remove("invalid");
+          if (errEl) errEl.classList.remove("show");
+        }
+      };
+
+      validateField(nameInput, "crud-mech-name-error");
+      validateField(phoneInput, "crud-mech-phone-error");
+      validateField(specialtyInput, "crud-mech-specialty-error");
+
+      if (!valid) return;
+
+      const originalBtnText = saveBtn.innerHTML;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Saving...`;
+
+      const rowData = {
+        name: nameInput.value.trim(),
+        phone: phoneInput.value.trim(),
+        specialty: specialtyInput.value.trim(),
+        on_duty: dutyInput.checked
+      };
+
+      try {
+        if (mechId) {
+          const { error } = await window.supabaseClient
+            .from("mechanics")
+            .update(rowData)
+            .eq("id", mechId);
+          if (error) throw error;
+        } else {
+          const { error } = await window.supabaseClient
+            .from("mechanics")
+            .insert([rowData]);
+          if (error) throw error;
+        }
+
+        // Hide form and reload roster
+        document.getElementById("btn-mech-cancel").click();
+        await fetchRosterData();
+
+      } catch (err) {
+        console.error("Save failed:", err);
+        const errEl = document.getElementById("mech-crud-error");
+        if (errEl) {
+          errEl.textContent = `Save Failed: ${err.message || err}`;
+          errEl.classList.remove("hidden");
+        }
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalBtnText;
+      }
+    }
+
+    window.editMechanicInline = function(mechanicId) {
+      const m = mechanicsList.find(item => item.id === mechanicId);
+      if (!m) return;
+
+      const formCard = document.getElementById("mech-form-card");
+      formCard.classList.remove("hidden");
+      clearValidationErrors();
+
+      document.getElementById("mech-form-title").textContent = "Edit Mechanic Details";
+      document.getElementById("crud-mech-id").value = m.id;
+      document.getElementById("crud-mech-name").value = m.name;
+      document.getElementById("crud-mech-phone").value = m.phone;
+      document.getElementById("crud-mech-specialty").value = m.specialty;
+      document.getElementById("crud-mech-duty").checked = m.on_duty;
+      document.getElementById("crud-mech-duty").setAttribute("aria-checked", String(m.on_duty));
+
+      document.getElementById("crud-mech-name").focus();
+      
+      // Scroll to form card view
+      formCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    };
+
+    function initRealtimeRoster() {
+      // Subscribe to changes in the mechanics table
+      window.supabaseClient
+        .channel("mechanics-realtime-roster")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "mechanics" },
+          async () => {
+            await fetchRosterData();
+          }
+        )
+        .subscribe();
+      
+      // Subscribe to changes in bookings to update jobs count live
+      window.supabaseClient
+        .channel("bookings-realtime-roster-jobs")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "bookings" },
+          async () => {
+            await fetchRosterData();
+          }
+        )
+        .subscribe();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customers Directory | Chhotu Operations Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
+  <script src="assets/admin.js" defer></script>
+</head>
+<body class="antialiased text-[#F4F1E8] overflow-x-hidden bg-[#14161A]">
+
+  <div class="flex min-h-screen">
+    <!-- Left Sidebar (dynamically populated by admin.js) -->
+    <aside id="admin-sidebar" class="hidden lg:block w-[260px] bg-[#1B1E24] border-r border-[#3A3F49] shrink-0"></aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col min-w-0">
+      <!-- Top Bar (dynamically populated by admin.js) -->
+      <header id="admin-topbar" class="h-16 border-b border-[#3A3F49] bg-[#14161A] flex items-center justify-between px-6 shrink-0"></header>
+
+      <!-- Dashboard Content -->
+      <main class="flex-1 p-6 overflow-y-auto space-y-6 relative">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 class="text-2xl font-bold tracking-wide font-display">CUSTOMERS DIRECTORY</h1>
+            <p class="text-xs text-[#B9B6AC] mt-0.5 font-mono">Look up customer accounts, booking histories, and saved records.</p>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="card p-4 max-w-md">
+          <label class="field-label" for="customer-search">Search Directory</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#B9B6AC]">
+              <i class="fa-solid fa-magnifying-glass text-xs"></i>
+            </span>
+            <input type="text" id="customer-search" oninput="loadCustomersList()" class="field-input text-xs pl-9 pr-4 !py-1.5 !min-height-[40px]" placeholder="Search by name, email, phone...">
+          </div>
+        </div>
+
+        <!-- Customers List -->
+        <div id="customers-list-container">
+          <!-- Desktop Table -->
+          <div class="hidden md:block overflow-x-auto card">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-[#3A3F49] bg-[#1B1E24]/30">
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Customer Name</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Email Address</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Phone</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Member Since</th>
+                </tr>
+              </thead>
+              <tbody id="customers-table-rows">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile Cards -->
+          <div class="md:hidden space-y-3" id="customers-cards-list">
+            <!-- Dynamically populated cards -->
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Customer Details Drawer (Hidden by default, slides from right) -->
+    <div id="customer-detail-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[425px] bg-[#1B1E24] border-l border-[#3A3F49] shadow-2xl translate-x-full transition-transform duration-300 flex flex-col justify-between">
+      <div class="flex-1 flex flex-col min-h-0">
+        <!-- Header -->
+        <div class="p-5 border-b border-[#3A3F49] flex items-center justify-between">
+          <div>
+            <h3 class="font-display text-base font-bold text-[#FF5A1F]" id="cust-drawer-name">Rohan Sharma</h3>
+            <p class="text-[10px] text-[#B9B6AC] font-mono mt-0.5" id="cust-drawer-member-since">Member Since Jan 2026</p>
+          </div>
+          <button onclick="closeCustomerDrawer()" class="text-xl text-[#B9B6AC] hover:text-[#F4F1E8] p-1.5" aria-label="Close details">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="flex-1 p-5 overflow-y-auto space-y-6 text-xs">
+          <!-- Profile details -->
+          <div class="space-y-2">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Contact Metadata</h4>
+            <div class="space-y-1">
+              <p><span class="text-[#B9B6AC]">Email:</span> <span id="cust-drawer-email" class="text-[#F4F1E8] font-mono">iimtefy@gmail.com</span></p>
+              <p><span class="text-[#B9B6AC]">Phone:</span> <span id="cust-drawer-phone" class="text-[#F4F1E8] font-mono">+977 9813691072</span></p>
+            </div>
+          </div>
+
+          <!-- Saved Coordinates -->
+          <div class="space-y-2">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Saved Addresses</h4>
+            <div class="space-y-1">
+              <p><span class="text-[#B9B6AC]">Home Address:</span> <span id="cust-drawer-home" class="text-[#F4F1E8]">Not set</span></p>
+              <p><span class="text-[#B9B6AC]">Office Address:</span> <span id="cust-drawer-office" class="text-[#F4F1E8]">Not set</span></p>
+            </div>
+          </div>
+
+          <!-- Saved Bikes -->
+          <div class="space-y-2">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Saved Motorcycles</h4>
+            <ul id="cust-drawer-bikes" class="space-y-1 pl-4 list-disc text-[#F4F1E8]">
+              <!-- Dynamically populated -->
+            </ul>
+          </div>
+
+          <!-- Bookings History -->
+          <div class="space-y-3">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Bookings History</h4>
+            <div id="cust-drawer-history" class="space-y-3">
+              <!-- Dynamically populated cards -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let customers = [];
+    let selectedCustomerId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const checkInterval = setInterval(async () => {
+        if (window.currentAdmin && window.supabaseClient) {
+          clearInterval(checkInterval);
+          await loadCustomersList();
+        }
+      }, 100);
+    });
+
+    async function loadCustomersList() {
+      const rows = document.getElementById("customers-table-rows");
+      const list = document.getElementById("customers-cards-list");
+      if (!rows || !list) return;
+
+      rows.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-xs text-[#B9B6AC] skeleton h-20"></td></tr>`;
+      list.innerHTML = `<p class="text-sm text-[#B9B6AC] skeleton h-20 rounded-md"></p>`;
+
+      try {
+        // Query profiles and join user emails if available. (Note: Auth emails are secured in auth.users, but window.supabaseClient queries profiles. We fall back to metadata profiles which carry names/phone/created_at).
+        // Since we are checking user entries, let's query profiles.
+        const { data, error } = await window.supabaseClient
+          .from("profiles")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        customers = data || [];
+
+        const searchVal = document.getElementById("customer-search").value.toLowerCase().trim();
+        let filtered = customers;
+
+        if (searchVal) {
+          filtered = filtered.filter(c => 
+            (c.full_name && c.full_name.toLowerCase().includes(searchVal)) ||
+            (c.phone && c.phone.includes(searchVal))
+          );
+        }
+
+        renderCustomersLayouts(filtered);
+
+      } catch (err) {
+        console.error("Failed to load customers list:", err);
+      }
+    }
+
+    function renderCustomersLayouts(list) {
+      const rows = document.getElementById("customers-table-rows");
+      const cardsList = document.getElementById("customers-cards-list");
+
+      if (list.length === 0) {
+        rows.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-xs text-[#B9B6AC]">No customers found.</td></tr>`;
+        cardsList.innerHTML = `<div class="card p-6 text-center text-xs text-[#B9B6AC]">No customers found.</div>`;
+        return;
+      }
+
+      // Render Desktop Rows
+      rows.innerHTML = list.map(c => {
+        const memberSince = new Date(c.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        return `
+          <tr onclick="openCustomerDrawer('${c.id}')" class="border-b border-[#3A3F49] hover:bg-[#1B1E24]/30 cursor-pointer transition-all">
+            <td class="p-4 text-xs font-semibold text-[#F4F1E8]">${c.full_name || "Customer"}</td>
+            <td class="p-4 text-xs text-[#B9B6AC] font-mono">User ID: ${c.id.substring(0, 8).toUpperCase()}...</td>
+            <td class="p-4 text-xs text-[#B9B6AC] font-mono">${c.phone || "No phone"}</td>
+            <td class="p-4 text-xs text-[#B9B6AC] font-mono">${memberSince}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // Render Mobile Cards
+      cardsList.innerHTML = list.map(c => {
+        const memberSince = new Date(c.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        return `
+          <div onclick="openCustomerDrawer('${c.id}')" class="card p-4 space-y-2 cursor-pointer hover:border-[#FF5A1F]/40 transition-all">
+            <div class="flex justify-between items-start">
+              <h4 class="text-xs font-semibold text-[#F4F1E8]">${c.full_name || "Customer"}</h4>
+              <span class="text-[10px] text-[#B9B6AC] font-mono">${memberSince}</span>
+            </div>
+            <div class="text-[10px] text-[#B9B6AC] font-mono space-y-0.5">
+              <p>Phone: ${c.phone || "No phone"}</p>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function openCustomerDrawer(custId) {
+      selectedCustomerId = custId;
+      const c = customers.find(item => item.id === custId);
+      if (!c) return;
+
+      document.getElementById("cust-drawer-name").textContent = c.full_name || "Customer";
+      document.getElementById("cust-drawer-member-since").textContent = "Member Since " + new Date(c.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+      document.getElementById("cust-drawer-email").textContent = `ID: ${c.id}`;
+      document.getElementById("cust-drawer-phone").textContent = c.phone || "No phone added";
+
+      // 1. Fetch saved addresses
+      const homeEl = document.getElementById("cust-drawer-home");
+      const officeEl = document.getElementById("cust-drawer-office");
+      homeEl.textContent = "Loading...";
+      officeEl.textContent = "Loading...";
+
+      try {
+        const { data: addressData } = await window.supabaseClient
+          .from("addresses")
+          .select("*")
+          .eq("user_id", c.id)
+          .maybeSingle();
+
+        if (addressData) {
+          homeEl.textContent = addressData.home_address || "Not set";
+          officeEl.textContent = addressData.office_address || "Not set";
+        } else {
+          homeEl.textContent = "Not set";
+          officeEl.textContent = "Not set";
+        }
+      } catch (_) {
+        homeEl.textContent = "Error";
+        officeEl.textContent = "Error";
+      }
+
+      // 2. Fetch saved bikes
+      const bikesList = document.getElementById("cust-drawer-bikes");
+      bikesList.innerHTML = `<li class="text-xs text-[#B9B6AC]">Loading...</li>`;
+
+      try {
+        const { data: bikes } = await window.supabaseClient
+          .from("motorcycles")
+          .select("*")
+          .eq("user_id", c.id);
+
+        if (bikes && bikes.length > 0) {
+          bikesList.innerHTML = bikes.map(b => `
+            <li><span class="font-display text-[11px] font-bold uppercase">${b.model}</span> ${b.registration_no ? `<span class="font-mono text-[10px] text-[#B9B6AC]">(${b.registration_no})</span>` : ""}</li>
+          `).join("");
+        } else {
+          bikesList.innerHTML = `<li class="text-xs text-[#B9B6AC] list-none">No saved bikes.</li>`;
+        }
+      } catch (_) {
+        bikesList.innerHTML = `<li class="text-xs text-red-400 list-none">Failed to load bikes.</li>`;
+      }
+
+      // 3. Fetch bookings history
+      const history = document.getElementById("cust-drawer-history");
+      history.innerHTML = `<p class="text-xs text-[#B9B6AC]">Loading history...</p>`;
+
+      try {
+        const { data: bookings } = await window.supabaseClient
+          .from("bookings")
+          .select("*")
+          .eq("user_id", c.id)
+          .order("created_at", { ascending: false });
+
+        if (bookings && bookings.length > 0) {
+          history.innerHTML = bookings.map(b => {
+            const dt = new Date(b.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+            const statusPill = getStatusPill(b.status);
+            return `
+              <div class="card p-3.5 space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-mono text-[10px] font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</span>
+                  ${statusPill}
+                </div>
+                <div class="text-[10px] text-[#B9B6AC] font-mono space-y-0.5">
+                  <p>Bike: <span class="text-[#F4F1E8] uppercase">${b.bike_brand || ""} ${b.bike_model}</span></p>
+                  <p>Service: <span class="text-[#F4F1E8] capitalize">${b.service_type.replace("-", " ")}</span></p>
+                  <p>Date: <span class="text-[#F4F1E8]">${dt}</span></p>
+                </div>
+              </div>
+            `;
+          }).join("");
+        } else {
+          history.innerHTML = `<div class="card p-4 text-center text-[10px] text-[#B9B6AC]">No bookings found.</div>`;
+        }
+      } catch (_) {
+        history.innerHTML = `<p class="text-xs text-red-400">Failed to load bookings.</p>`;
+      }
+
+      // Slide drawer open
+      document.getElementById("customer-detail-drawer").classList.remove("translate-x-full");
+    }
+
+    function closeCustomerDrawer() {
+      document.getElementById("customer-detail-drawer").classList.add("translate-x-full");
+      selectedCustomerId = null;
+    }
+
+    // Status Badges helper
+    function getStatusPill(status) {
+      let badgeColorClass = "bg-[#3A3F49] text-[#B9B6AC]";
+      let label = "Pending";
+
+      if (status === "assigned" || status === "confirmed") {
+        badgeColorClass = "bg-blue-500/15 text-blue-400";
+        label = "Assigned";
+      } else if (status === "dispatched") {
+        badgeColorClass = "bg-yellow-500/15 text-yellow-400";
+        label = "Dispatched";
+      } else if (status === "in_progress" || status === "in-progress") {
+        badgeColorClass = "bg-[#FF5A1F]/15 text-[#FF5A1F]";
+        label = "In Progress";
+      } else if (status === "completed") {
+        badgeColorClass = "bg-green-500/15 text-green-400";
+        label = "Completed";
+      } else if (status === "cancelled") {
+        badgeColorClass = "bg-red-500/15 text-red-400";
+        label = "Cancelled";
+      }
+
+      return `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold ${badgeColorClass}">${label}</span>`;
+    }
+  </script>
+</body>
+</html>

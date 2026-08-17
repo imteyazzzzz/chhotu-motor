@@ -17,10 +17,23 @@ async function updateAuthHeader() {
     if (session && session.user) {
       // USER IS LOGGED IN
       
+      // Determine destination dashboard based on role
+      let targetDashboard = "profile.html";
+      try {
+        const { data: profile } = await window.supabaseClient
+          .from("profiles")
+          .select("role")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        if (profile && (profile.role === "admin" || profile.role === "staff")) {
+          targetDashboard = "admin-dashboard.html";
+        }
+      } catch(_) {}
+      
       // 1. Desktop Buttons
       if (dBtnAuth) {
-        dBtnAuth.innerHTML = `<i class="fa-solid fa-user"></i> My Profile`;
-        dBtnAuth.href = "profile.html";
+        dBtnAuth.innerHTML = `<i class="fa-solid fa-user"></i> ${targetDashboard === "admin-dashboard.html" ? "Dashboard" : "My Profile"}`;
+        dBtnAuth.href = targetDashboard;
         dBtnAuth.className = "btn btn-primary !py-2 !px-4 !text-xs";
         dBtnAuth.onclick = null;
       }
@@ -38,8 +51,8 @@ async function updateAuthHeader() {
 
       // 2. Mobile Buttons
       if (mBtnAuth) {
-        mBtnAuth.innerHTML = `<i class="fa-solid fa-user"></i> My Profile`;
-        mBtnAuth.href = "profile.html";
+        mBtnAuth.innerHTML = `<i class="fa-solid fa-user"></i> ${targetDashboard === "admin-dashboard.html" ? "Dashboard" : "My Profile"}`;
+        mBtnAuth.href = targetDashboard;
         mBtnAuth.className = "btn btn-primary w-full text-center";
         mBtnAuth.onclick = null;
       }
@@ -59,7 +72,7 @@ async function updateAuthHeader() {
       if (window.location.pathname.endsWith("auth.html")) {
         // If there's a redirect query parameter, use it
         const redirectParam = new URLSearchParams(window.location.search).get("redirect");
-        window.location.href = redirectParam || "booking.html";
+        window.location.href = redirectParam || (targetDashboard === "admin-dashboard.html" ? "admin-dashboard.html" : "booking.html");
       }
 
     } else {
