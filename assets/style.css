@@ -20,7 +20,7 @@
 
   /* ---- Type ---- */
   --font-display: 'Oswald', 'Arial Narrow', sans-serif;      /* condensed, industrial, headings */
-  --font-body:    'Work Sans', 'Segoe UI', sans-serif;        /* readable body copy */
+  --font-body:    'Inter', 'Segoe UI', sans-serif;            /* readable body copy */
   --font-mono:    'JetBrains Mono', 'Courier New', monospace; /* dashboard-readout digits / labels */
 }
 
