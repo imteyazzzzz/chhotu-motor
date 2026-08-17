@@ -143,6 +143,19 @@
             </div>
           </div>
 
+          <!-- Field Job Link Sharing Section -->
+          <div id="drawer-job-link-section" class="hidden card p-4 border-[#3A3F49]/40 bg-[#14161A]/20 space-y-3">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Field Job Link</h4>
+            <div class="space-y-2 text-xs">
+              <p class="text-[10px] text-[#B9B6AC] leading-relaxed">Send this passwordless link to the assigned mechanic to track work, manage items, and collect payment.</p>
+              <div class="flex gap-2">
+                <input type="text" id="drawer-job-link-input" readonly class="field-input text-xs !py-1.5 !min-height-[36px] bg-[#14161A] font-mono text-[#B9B6AC]">
+                <button type="button" onclick="copyDrawerJobLink()" id="btn-copy-job-link" class="btn btn-outline !py-1.5 !px-3 !text-xs !min-height-[36px] shrink-0" title="Copy Link"><i class="fa-solid fa-copy"></i></button>
+              </div>
+              <a href="#" id="drawer-whatsapp-job-link" target="_blank" class="btn btn-outline w-full !py-1.5 !text-xs !min-height-[36px] text-center text-[#25D366] border-[#25D366]/40 hover:bg-[#25D366]/10"><i class="fa-brands fa-whatsapp"></i> Send via WhatsApp</a>
+            </div>
+          </div>
+
           <!-- Allocations/Actions Form -->
           <form id="drawer-edit-form" class="space-y-4">
             <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Operational Allocation</h4>
@@ -447,6 +460,21 @@
       document.getElementById("drawer-status").value = b.status || "pending";
       document.getElementById("drawer-notes").value = b.internal_notes || "";
 
+      // Populate Field Job Link sharing section
+      if (b.assigned_mechanic_id) {
+        const portalLink = window.location.origin + "/job.html?token=" + b.mechanic_token;
+        document.getElementById("drawer-job-link-input").value = portalLink;
+        
+        const mObj = mechanics.find(item => item.id === b.assigned_mechanic_id);
+        const mPhone = mObj ? mObj.phone.replace(/[-\s()]/g, "") : "";
+        const waMsg = `Hi, here is your direct mechanic job portal link for booking #${b.id.substring(0, 8).toUpperCase()}: ${portalLink}`;
+        document.getElementById("drawer-whatsapp-job-link").setAttribute("href", `https://wa.me/${mPhone}?text=${encodeURIComponent(waMsg)}`);
+        
+        document.getElementById("drawer-job-link-section").classList.remove("hidden");
+      } else {
+        document.getElementById("drawer-job-link-section").classList.add("hidden");
+      }
+
       // Hide alerts
       document.getElementById("drawer-save-success").classList.add("hidden");
       document.getElementById("drawer-save-error").classList.add("hidden");
@@ -458,6 +486,20 @@
       const drawer = document.getElementById("booking-detail-drawer");
       drawer.classList.remove("translate-x-full");
     }
+
+    window.copyDrawerJobLink = function() {
+      const inputEl = document.getElementById("drawer-job-link-input");
+      inputEl.select();
+      inputEl.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(inputEl.value);
+
+      const copyBtn = document.getElementById("btn-copy-job-link");
+      const original = copyBtn.innerHTML;
+      copyBtn.innerHTML = `<i class="fa-solid fa-check text-green-400"></i>`;
+      setTimeout(() => {
+        copyBtn.innerHTML = original;
+      }, 2000);
+    };
 
     function closeDetailsDrawer() {
       const drawer = document.getElementById("booking-detail-drawer");

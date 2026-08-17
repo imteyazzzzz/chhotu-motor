@@ -1,4 +1,4 @@
--- =========================================================================
+r5ct6-- =========================================================================
 -- CHHOTU MOTORCYCLES WORKSHOP — COMPLETE DATABASE SETUP & MIGRATION
 -- Run this script in the Supabase Dashboard SQL Editor.
 -- Safe to re-run multiple times (idempotent).
@@ -248,3 +248,304 @@ CREATE POLICY "Admin and staff can view bookings activity" ON public.bookings_ac
             WHERE profiles.id = auth.uid() AND profiles.role IN ('admin', 'staff')
         )
     );
+
+
+-- =========================================================================
+-- MIGRATION: MECHANIC PORTAL TABLES & SECURITIES
+-- =========================================================================
+
+-- 1. Alter bookings to add mechanic portal fields
+ALTER TABLE public.bookings 
+ADD COLUMN IF NOT EXISTS mechanic_token UUID DEFAULT gen_random_uuid() NOT NULL,
+ADD COLUMN IF NOT EXISTS mechanic_started_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS mechanic_completed_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
+
+-- Ensure constraint exists
+DO $$
+BEGIN
+    ALTER TABLE public.bookings ADD CONSTRAINT bookings_mechanic_token_key UNIQUE (mechanic_token);
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
+
+
+-- 2. Create invoices table
+CREATE TABLE IF NOT EXISTS public.invoices (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    booking_id UUID NOT NULL REFERENCES public.bookings(id) ON DELETE CASCADE,
+    base_charge NUMERIC DEFAULT 400.0,
+    parts_total NUMERIC DEFAULT 0.0,
+    total_amount NUMERIC DEFAULT 400.0,
+    payment_method TEXT CHECK (payment_method IN ('cash', 'upi')),
+    status TEXT DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'paid')),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    paid_at TIMESTAMPTZ
+);
+
+ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admin/Staff can manage invoices" ON public.invoices;
+CREATE POLICY "Admin/Staff can manage invoices" ON public.invoices
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.role IN ('admin', 'staff')
+        )
+    );
+
+DROP POLICY IF EXISTS "Customers can view own invoices" ON public.invoices;
+CREATE POLICY "Customers can view own invoices" ON public.invoices
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.bookings 
+            WHERE bookings.id = invoices.booking_id AND bookings.user_id = auth.uid()
+        )
+    );
+
+
+-- 3. Create invoice_items table
+CREATE TABLE IF NOT EXISTS public.invoice_items (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    invoice_id UUID NOT NULL REFERENCES public.invoices(id) ON DELETE CASCADE,
+    description TEXT NOT NULL,
+    amount NUMERIC NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.invoice_items ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admin/Staff can manage invoice items" ON public.invoice_items;
+CREATE POLICY "Admin/Staff can manage invoice items" ON public.invoice_items
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.invoices 
+            WHERE invoices.id = invoice_items.invoice_id AND EXISTS (
+                SELECT 1 FROM public.profiles 
+                WHERE profiles.id = auth.uid() AND profiles.role IN ('admin', 'staff')
+            )
+        )
+    );
+
+
+-- 4. Secure Database RPC: Load Job Details by Token
+CREATE OR REPLACE FUNCTION public.get_mechanic_job_by_token(p_token UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_booking RECORD;
+    v_profile RECORD;
+    v_invoice RECORD;
+    v_invoice_items JSONB;
+    v_result JSONB;
+BEGIN
+    -- Fetch booking
+    SELECT * INTO v_booking 
+    FROM public.bookings 
+    WHERE mechanic_token = p_token;
+    
+    IF NOT FOUND THEN
+        RETURN NULL;
+    END IF;
+
+    -- Expiry Check: Paid bookings expire after 5 minutes
+    IF v_booking.status = 'paid' AND v_booking.paid_at IS NOT NULL AND (v_booking.paid_at + interval '5 minutes') < now() THEN
+        RETURN JSONB_BUILD_OBJECT('expired', true);
+    END IF;
+
+    -- Fetch customer info
+    SELECT full_name, phone INTO v_profile
+    FROM public.profiles
+    WHERE id = v_booking.user_id;
+
+    -- Fetch invoice
+    SELECT * INTO v_invoice
+    FROM public.invoices
+    WHERE booking_id = v_booking.id;
+
+    IF FOUND THEN
+        SELECT COALESCE(JSONB_AGG(JSONB_BUILD_OBJECT('description', description, 'amount', amount)), '[]'::JSONB)
+        INTO v_invoice_items
+        FROM public.invoice_items
+        WHERE invoice_id = v_invoice.id;
+    ELSE
+        v_invoice_items := '[]'::JSONB;
+    END IF;
+
+    v_result := JSONB_BUILD_OBJECT(
+        'expired', false,
+        'booking', JSONB_BUILD_OBJECT(
+            'id', v_booking.id,
+            'created_at', v_booking.created_at,
+            'status', v_booking.status,
+            'service_type', v_booking.service_type,
+            'bike_brand', v_booking.bike_brand,
+            'bike_model', v_booking.bike_model,
+            'registration_no', v_booking.registration_no,
+            'location', v_booking.location,
+            'coordinates', v_booking.coordinates,
+            'issue_description', v_booking.issue_description,
+            'mechanic_started_at', v_booking.mechanic_started_at,
+            'mechanic_completed_at', v_booking.mechanic_completed_at,
+            'paid_at', v_booking.paid_at
+        ),
+        'customer', JSONB_BUILD_OBJECT(
+            'full_name', COALESCE(v_profile.full_name, 'Customer'),
+            'phone', COALESCE(v_profile.phone, '')
+        ),
+        'invoice', CASE WHEN v_invoice.id IS NOT NULL THEN
+            JSONB_BUILD_OBJECT(
+                'id', v_invoice.id,
+                'base_charge', v_invoice.base_charge,
+                'parts_total', v_invoice.parts_total,
+                'total_amount', v_invoice.total_amount,
+                'payment_method', v_invoice.payment_method,
+                'status', v_invoice.status,
+                'items', v_invoice_items
+            )
+        ELSE NULL END
+    );
+
+    RETURN v_result;
+END;
+$$;
+
+
+-- 5. Secure Database RPC: Update Job status
+CREATE OR REPLACE FUNCTION public.update_mechanic_job_status(p_token UUID, p_status TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_booking_id UUID;
+    v_current_status TEXT;
+    v_paid_at TIMESTAMPTZ;
+BEGIN
+    SELECT id, status, paid_at INTO v_booking_id, v_current_status, v_paid_at
+    FROM public.bookings
+    WHERE mechanic_token = p_token;
+
+    IF NOT FOUND THEN
+        RETURN FALSE;
+    END IF;
+
+    -- Expiry check
+    IF v_current_status = 'paid' AND v_paid_at IS NOT NULL AND (v_paid_at + interval '5 minutes') < now() THEN
+        RETURN FALSE;
+    END IF;
+
+    -- Status validations & timestamps logging
+    IF p_status = 'en_route' THEN
+        UPDATE public.bookings 
+        SET status = 'en_route' 
+        WHERE id = v_booking_id;
+    ELSIF p_status = 'in_progress' THEN
+        UPDATE public.bookings 
+        SET status = 'in_progress', mechanic_started_at = COALESCE(mechanic_started_at, now()) 
+        WHERE id = v_booking_id;
+    ELSE
+        RETURN FALSE;
+    END IF;
+
+    RETURN TRUE;
+END;
+$$;
+
+
+-- 6. Secure Database RPC: Complete work and build invoice
+CREATE OR REPLACE FUNCTION public.complete_mechanic_job_with_invoice(p_token UUID, p_parts JSONB)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_booking_id UUID;
+    v_user_id UUID;
+    v_current_status TEXT;
+    v_paid_at TIMESTAMPTZ;
+    v_base_charge NUMERIC := 400.0;
+    v_parts_total NUMERIC := 0.0;
+    v_invoice_id UUID;
+    v_part RECORD;
+BEGIN
+    SELECT id, user_id, status, paid_at INTO v_booking_id, v_user_id, v_current_status, v_paid_at
+    FROM public.bookings
+    WHERE mechanic_token = p_token;
+
+    IF NOT FOUND THEN
+        RETURN FALSE;
+    END IF;
+
+    IF v_current_status = 'paid' AND v_paid_at IS NOT NULL AND (v_paid_at + interval '5 minutes') < now() THEN
+        RETURN FALSE;
+    END IF;
+
+    IF v_current_status IN ('completed', 'paid') THEN
+        RETURN FALSE;
+    END IF;
+
+    -- Calculate invoice items sum
+    SELECT COALESCE(SUM((val->>'amount')::NUMERIC), 0.0) INTO v_parts_total
+    FROM jsonb_array_elements(p_parts) AS val;
+
+    -- Insert invoice
+    INSERT INTO public.invoices (booking_id, base_charge, parts_total, total_amount, payment_method, status, created_at)
+    VALUES (v_booking_id, v_base_charge, v_parts_total, v_base_charge + v_parts_total, 'cash', 'unpaid', now())
+    RETURNING id INTO v_invoice_id;
+
+    -- Insert individual items
+    FOR v_part IN SELECT (val->>'description')::TEXT AS descr, (val->>'amount')::NUMERIC AS amt FROM jsonb_array_elements(p_parts) AS val
+    LOOP
+        INSERT INTO public.invoice_items (invoice_id, description, amount, created_at)
+        VALUES (v_invoice_id, v_part.descr, v_part.amt, now());
+    END LOOP;
+
+    -- Mark booking completed
+    UPDATE public.bookings
+    SET status = 'completed', mechanic_completed_at = COALESCE(mechanic_completed_at, now())
+    WHERE id = v_booking_id;
+
+    RETURN TRUE;
+END;
+$$;
+
+
+-- 7. Secure Database RPC: Record payment confirmation
+CREATE OR REPLACE FUNCTION public.mark_mechanic_job_paid(p_token UUID, p_method TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    v_booking_id UUID;
+    v_user_id UUID;
+    v_current_status TEXT;
+BEGIN
+    SELECT id, user_id, status INTO v_booking_id, v_user_id, v_current_status
+    FROM public.bookings
+    WHERE mechanic_token = p_token;
+
+    IF NOT FOUND THEN
+        RETURN FALSE;
+    END IF;
+
+    IF v_current_status = 'paid' THEN
+        RETURN TRUE;
+    END IF;
+
+    -- Update invoice to paid
+    UPDATE public.invoices
+    SET status = 'paid', payment_method = p_method, paid_at = now()
+    WHERE booking_id = v_booking_id;
+
+    -- Update booking status to paid
+    UPDATE public.bookings
+    SET status = 'paid', paid_at = now()
+    WHERE id = v_booking_id;
+
+    RETURN TRUE;
+END;
+$$;

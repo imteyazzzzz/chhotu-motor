@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Field Mechanic Portal | Chhotu Motorcycles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
+</head>
+<body class="antialiased text-[#F4F1E8] bg-[#14161A]">
+
+  <!-- Main mobile-first wrapper -->
+  <main class="min-h-screen flex flex-col justify-center items-center p-4">
+    <div class="w-full max-w-md bg-[#1B1E24] border border-[#3A3F49] rounded-lg shadow-xl overflow-hidden relative flex flex-col">
+      
+      <!-- Top header branding -->
+      <div class="p-4 border-b border-[#3A3F49] bg-[#14161A]/80 flex justify-between items-center shrink-0">
+        <span class="font-display font-semibold text-xs tracking-wider">CHHOTU <span class="text-[#FF5A1F]">PORTAL</span></span>
+        <span id="header-status-badge" class="hidden px-2 py-0.5 rounded text-[9px] uppercase font-mono tracking-wider font-semibold">STATUS</span>
+      </div>
+
+      <!-- Content view screens wrapper -->
+      <div class="flex-1 p-5 min-h-[350px]">
+        
+        <!-- 1. LOADING STATE -->
+        <div id="state-loading" class="flex flex-col justify-center items-center h-full min-h-[300px] space-y-3">
+          <span class="inline-block h-8 w-8 border-4 border-[#FF5A1F] border-t-transparent rounded-full animate-spin"></span>
+          <p class="text-xs text-[#B9B6AC] font-mono uppercase tracking-wider">Verifying Link Credentials...</p>
+        </div>
+
+        <!-- 2. EXPIRED / INVALID STATE -->
+        <div id="state-expired" class="hidden flex flex-col justify-center items-center h-full min-h-[300px] text-center space-y-4">
+          <div class="w-12 h-12 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div>
+            <h2 class="font-display text-sm font-bold text-red-500 uppercase tracking-wide">LINK EXPIRED</h2>
+            <p class="text-xs text-[#B9B6AC] mt-1.5 leading-relaxed">This temporary job portal link is no longer active. If you still need access, ask the dispatcher to send a new link.</p>
+          </div>
+        </div>
+
+        <!-- 3. ACTIVE JOB INFO & STATE HANDLERS -->
+        <div id="state-active-job" class="hidden space-y-5">
+          <!-- Client/Bike Info Card (Collapsible) -->
+          <div class="card bg-[#14161A]/40 border border-[#3A3F49]/40 overflow-hidden">
+            <button onclick="toggleCustomerDetails()" class="w-full p-3.5 flex justify-between items-center text-left hover:bg-[#14161A]/60">
+              <div>
+                <h4 class="font-mono text-xs font-bold text-[#FF5A1F]" id="job-ref-title">#BK-12345</h4>
+                <p class="text-[10px] text-[#B9B6AC] font-mono mt-0.5" id="job-bike-model">Pulsar 150 · BA-2-PA-1234</p>
+              </div>
+              <span id="details-arrow-icon" class="text-xs text-[#B9B6AC]"><i class="fa-solid fa-chevron-down"></i></span>
+            </button>
+
+            <!-- Collapsible inner content -->
+            <div id="job-cust-details-body" class="hidden p-4 border-t border-[#3A3F49]/40 space-y-3 text-xs bg-[#14161A]/20">
+              <div class="space-y-1">
+                <p><span class="text-[#B9B6AC]">Name:</span> <strong id="job-cust-name" class="text-[#F4F1E8]">Rohan Sharma</strong></p>
+                <p class="flex items-center gap-2">
+                  <span class="text-[#B9B6AC]">Phone:</span> 
+                  <strong id="job-cust-phone" class="text-[#F4F1E8] font-mono">+977 9813691072</strong>
+                  <a href="tel:" id="job-call-btn" class="px-2 py-0.5 bg-[#FFC530] text-[#14161A] font-mono text-[9px] rounded font-bold uppercase"><i class="fa-solid fa-phone"></i> Call</a>
+                </p>
+                <p><span class="text-[#B9B6AC]">Issue Description:</span> <span id="job-issue" class="italic text-[#F4F1E8]">"Chain is loose..."</span></p>
+                <p><span class="text-[#B9B6AC]">Location:</span> <strong id="job-location" class="text-[#F4F1E8]">Chabahil, Jorpati</strong></p>
+                <a href="#" id="job-maps-link" target="_blank" class="btn btn-outline w-full !py-1.5 !text-[11px] !min-height-[36px] mt-2 text-center"><i class="fa-solid fa-location-dot"></i> Open in Google Maps</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step Buttons View (Assigned / En Route) -->
+          <div id="view-step-actions" class="hidden space-y-4 pt-4 text-center">
+            <p class="text-xs text-[#B9B6AC]">Once you begin traveling or start repairs, update the status below.</p>
+            <button id="btn-primary-action" onclick="handlePrimaryAction()" class="btn btn-primary w-full text-sm">ON MY WAY</button>
+          </div>
+
+          <!-- Invoice Builder View (In Progress) -->
+          <div id="view-invoice-builder" class="hidden space-y-4">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Compile Invoice Items</h4>
+            
+            <!-- Items Table -->
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between items-center py-2 border-b border-[#3A3F49]/20 font-mono">
+                <span class="text-[#B9B6AC]">Base Inspection Charge</span>
+                <span class="text-[#F4F1E8]">Rs. 400</span>
+              </div>
+              
+              <!-- Dynamic Parts List -->
+              <div id="invoice-parts-list" class="space-y-2">
+                <!-- Dynamically populated parts -->
+              </div>
+            </div>
+
+            <!-- Add Part Form -->
+            <div class="card p-3 bg-[#14161A]/40 border-[#3A3F49]/60 space-y-3">
+              <span class="text-[10px] font-mono text-[#B9B6AC] uppercase block">Add Spare Parts Used</span>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="part-name" class="field-input text-xs !py-1.5 !min-height-[36px]" placeholder="e.g. Engine Oil">
+                <input type="number" id="part-price" class="field-input text-xs !py-1.5 !min-height-[36px] font-mono" placeholder="Price (Rs.)">
+              </div>
+              <button type="button" onclick="addPartItem()" class="btn btn-outline w-full !py-1 !text-xs !min-height-[34px]"><i class="fa-solid fa-plus"></i> Add Part</button>
+            </div>
+
+            <!-- Total display -->
+            <div class="flex justify-between items-center pt-3 border-t border-[#3A3F49] font-mono font-bold text-sm">
+              <span>Running Total:</span>
+              <span class="text-[#FF5A1F]">Rs. <span id="running-invoice-total">400</span></span>
+            </div>
+
+            <button onclick="generateCompletedInvoice()" class="btn btn-primary w-full text-xs mt-2" id="btn-complete-invoice"><i class="fa-solid fa-file-invoice-dollar"></i> Generate Invoice & Complete Job</button>
+          </div>
+
+          <!-- Payment Collection View (Completed) -->
+          <div id="view-payment-collection" class="hidden space-y-4">
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Payment Options</h4>
+            <div class="text-center font-mono py-2">
+              <p class="text-xs text-[#B9B6AC] uppercase">Invoice Total Amount</p>
+              <h3 class="text-2xl font-bold text-[#FF5A1F] mt-0.5">Rs. <span id="payment-invoice-total">0</span></h3>
+            </div>
+
+            <!-- Radio select method -->
+            <div class="grid grid-cols-2 gap-3 font-display uppercase tracking-wider text-xs">
+              <label class="card p-3 text-center cursor-pointer flex flex-col items-center justify-center border-2 border-[#3A3F49] gap-1 transition-all" id="label-pay-cash">
+                <input type="radio" name="payment_method" value="cash" checked onchange="togglePaymentView('cash')" class="hidden">
+                <i class="fa-solid fa-money-bill-1 text-lg mb-1"></i> Cash Payment
+              </label>
+              <label class="card p-3 text-center cursor-pointer flex flex-col items-center justify-center border-2 border-[#3A3F49] gap-1 transition-all" id="label-pay-upi">
+                <input type="radio" name="payment_method" value="upi" onchange="togglePaymentView('upi')" class="hidden">
+                <i class="fa-solid fa-qrcode text-lg mb-1"></i> UPI QR Scan
+              </label>
+            </div>
+
+            <!-- Cash block -->
+            <div id="payment-cash-block" class="pt-4 space-y-2">
+              <p class="text-[11px] text-[#B9B6AC] text-center">Mark this job paid once you have physically collected cash from the customer.</p>
+              <button onclick="confirmPaymentReceived('cash')" id="btn-confirm-cash" class="btn btn-primary w-full text-xs">Mark Cash Received</button>
+            </div>
+
+            <!-- UPI block -->
+            <div id="payment-upi-block" class="hidden pt-4 text-center space-y-4">
+              <div class="bg-white p-3 inline-block rounded-md shadow-lg">
+                <!-- Dynamic QR code target img -->
+                <img id="upi-qr-image" src="" alt="UPI payment QR Code" class="w-[180px] h-[180px]">
+              </div>
+              <p class="text-[11px] text-[#B9B6AC] max-w-xs mx-auto">Instruct customer to scan QR code using any UPI app (eSewa, Fonepay, GPay, PhonePe) to pay.</p>
+              <button onclick="confirmPaymentReceived('upi')" id="btn-confirm-upi" class="btn btn-primary w-full text-xs">Payment Confirmed</button>
+            </div>
+          </div>
+
+          <!-- Paid State & Expiry Countdown -->
+          <div id="view-payment-success" class="hidden flex flex-col items-center justify-center py-6 text-center space-y-6">
+            <!-- Dynamic Checkmark Pop Animation -->
+            <div class="success-check-circle scale-125" aria-hidden="true">
+              <svg viewBox="0 0 52 52">
+                <circle class="scc-bg" cx="26" cy="26" r="24"/>
+                <circle class="scc-circle" cx="26" cy="26" r="24"/>
+                <path class="scc-check" d="M15 27l7 7 15-15"/>
+              </svg>
+            </div>
+            
+            <div class="space-y-1">
+              <h2 class="font-display text-sm font-bold text-green-400 uppercase tracking-wide">PAYMENT CONFIRMED</h2>
+              <p class="text-[11px] text-[#B9B6AC] font-mono">Job completed & closed successfully.</p>
+            </div>
+
+            <div class="card p-4 border-red-500/20 bg-red-950/5 text-center space-y-1 max-w-xs" aria-live="polite">
+              <p class="text-[10px] text-[#B9B6AC] uppercase font-mono">This link will expire in</p>
+              <div id="expiry-countdown-timer" class="font-mono text-2xl font-bold text-[#FF5A1F] tracking-wide">05:00</div>
+              <p class="text-[9px] text-[#B9B6AC] leading-tight">For customer privacy, all location and booking details are purged on expiry.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Global Action errors display -->
+        <div id="global-portal-error" class="hidden mt-4 text-xs text-red-400 font-semibold bg-red-500/10 p-3.5 border border-red-500/20 rounded font-mono">
+          Update failed. Check connection and retry.
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/job.js"></script>
+</body>
+</html>
