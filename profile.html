@@ -394,6 +394,7 @@
                   </div>
                 </div>
                 <p class="text-[10px] text-[#B9B6AC] italic">Note: Real account deletion uses a backend helper trigger. Direct client deletion is restricted.</p>
+                <p id="delete-error" class="hidden text-xs text-red-400 font-mono mt-2"></p>
               </div>
             </div>
           </section>
@@ -436,6 +437,11 @@
                   <button type="submit" id="btn-bike-save" class="btn btn-primary !py-2 !px-4 !text-xs">Save Bike</button>
                 </div>
               </form>
+
+              <!-- Inline Error Container -->
+              <div id="bike-crud-error" class="hidden bg-[#14161A] border border-red-500/40 rounded-md p-4 text-xs text-red-400 mt-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span id="bike-crud-error-text"></span>
+              </div>
             </div>
 
             <!-- Bikes Grid List -->
@@ -466,6 +472,7 @@
                     <button type="submit" class="btn btn-primary !py-1 !px-3 !text-[11px]">Save</button>
                   </div>
                 </form>
+                <p id="home-addr-error" class="hidden text-[10px] text-red-400 font-mono mt-2"></p>
               </div>
 
               <!-- Office Address Card -->
@@ -484,6 +491,7 @@
                     <button type="submit" class="btn btn-primary !py-1 !px-3 !text-[11px]">Save</button>
                   </div>
                 </form>
+                <p id="office-addr-error" class="hidden text-[10px] text-red-400 font-mono mt-2"></p>
               </div>
 
             </div>

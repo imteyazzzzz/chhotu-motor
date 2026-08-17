@@ -133,6 +133,11 @@
         </button>
       </div>
       <p class="text-xs text-[#B9B6AC] mt-3 font-mono">Tip: Search with your registered phone number (including country code, e.g., +9779813691072) to see all your requests.</p>
+      
+      <!-- Inline Error Panel -->
+      <div id="tracking-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-4 text-xs text-red-400 mt-4">
+        <i class="fa-solid fa-triangle-exclamation"></i> <span id="tracking-error-text"></span>
+      </div>
     </div>
 
     <!-- Logged In Bookings List (Hidden initially) -->
@@ -164,8 +169,11 @@
           <span class="text-xs font-mono uppercase text-[#B9B6AC]" id="status-meta-id">Booking ID: --</span>
           <h2 class="text-2xl font-bold font-display text-[#F4F1E8] mt-1" id="status-bike-title">BIKE MODEL</h2>
         </div>
-        <div class="px-3 py-1 text-xs font-mono uppercase rounded font-semibold border border-[#FF5A1F]/30 bg-[#FF5A1F]/10 text-[#FF5A1F]" id="status-badge">
-          PENDING
+        <div class="flex items-center gap-3">
+          <button id="btn-track-another" class="btn btn-outline !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-arrow-left"></i> Track Another</button>
+          <div class="px-3 py-1 text-xs font-mono uppercase rounded font-semibold border border-[#FF5A1F]/30 bg-[#FF5A1F]/10 text-[#FF5A1F]" id="status-badge">
+            PENDING
+          </div>
         </div>
       </div>
 
@@ -355,6 +363,8 @@
 
   // Load a single booking's timeline
   function displayBooking(booking) {
+    lookupPanel.classList.add("hidden");
+    historyPanel.classList.add("hidden");
     statusPanel.classList.add("hidden");
     
     // Set headers & badge
@@ -530,11 +540,28 @@
     }
   }
 
+  const trackingError = document.getElementById("tracking-error");
+  const trackingErrorText = document.getElementById("tracking-error-text");
+
+  function showTrackingError(msg) {
+    if (trackingError && trackingErrorText) {
+      trackingErrorText.textContent = msg;
+      trackingError.classList.remove("hidden");
+    }
+  }
+
+  function clearTrackingError() {
+    if (trackingError) {
+      trackingError.classList.add("hidden");
+    }
+  }
+
   // Lookup button click handler
   lookupBtn.addEventListener("click", async () => {
+    clearTrackingError();
     const val = lookupInput.value.trim();
     if (!val) {
-      alert("Please enter a booking ID or phone number.");
+      showTrackingError("Please enter a booking ID or phone number.");
       return;
     }
 
@@ -562,7 +589,7 @@
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        alert("No bookings found matching your search. Please check the ID or Phone Number.");
+        showTrackingError("No bookings found matching your search. Please check the ID or Phone Number.");
         statusPanel.classList.add("hidden");
       } else if (data.length === 1) {
         displayBooking(data[0]);
@@ -598,18 +625,32 @@
           });
         });
 
+        lookupPanel.classList.add("hidden"); // Hide lookup panel when list is shown
         historyPanel.classList.remove("hidden");
         statusPanel.classList.add("hidden");
       }
 
     } catch (err) {
       console.error(err);
-      alert("Error searching database: " + (err.message || err));
+      showTrackingError("Error searching database: " + (err.message || err));
     } finally {
       lookupBtn.disabled = false;
       lookupBtn.innerHTML = originalText;
     }
   });
+
+  // Track another button click handler
+  const btnTrackAnother = document.getElementById("btn-track-another");
+  if (btnTrackAnother) {
+    btnTrackAnother.addEventListener("click", () => {
+      lookupInput.value = "";
+      clearTrackingError();
+      statusPanel.classList.add("hidden");
+      historyPanel.classList.add("hidden");
+      lookupPanel.classList.remove("hidden");
+      document.getElementById("tracking-subtitle").innerText = "Look up details or check repair progress in real-time.";
+    });
+  }
 
   // Check initial parameters and session
   async function checkInitState() {

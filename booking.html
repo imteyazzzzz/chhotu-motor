@@ -665,7 +665,15 @@
         if (error) throw error;
       } catch (err) {
         console.error("Failed to save booking to Supabase:", err);
-        alert("Failed to save booking to database: " + (err.message || err));
+        if (successEl) successEl.classList.add("hidden");
+        if (errorEl) {
+          errorEl.classList.remove("hidden");
+          const detailsEl = errorEl.querySelector(".error-details");
+          if (detailsEl) {
+            detailsEl.textContent = `Error Details: ${err.message || err}`;
+            detailsEl.classList.remove("hidden");
+          }
+        }
         // Re-enable button on database failure
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;

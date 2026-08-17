@@ -703,6 +703,8 @@ function setupMotorcycleCRUD() {
       document.getElementById("crud-bike-id").value = "";
       form.reset();
       document.getElementById("crud-bike-model").focus();
+      const bikeErrorEl = document.getElementById("bike-crud-error");
+      if (bikeErrorEl) bikeErrorEl.classList.add("hidden");
     });
   }
 
@@ -711,6 +713,8 @@ function setupMotorcycleCRUD() {
       formCard.classList.add("hidden");
       form.reset();
       clearFieldError(document.getElementById("crud-bike-model"), document.getElementById("crud-bike-model-error"));
+      const bikeErrorEl = document.getElementById("bike-crud-error");
+      if (bikeErrorEl) bikeErrorEl.classList.add("hidden");
     });
   }
 
@@ -760,7 +764,12 @@ function setupMotorcycleCRUD() {
 
     } catch (err) {
       console.error(err);
-      alert("Failed to save motorcycle: " + (err.message || err));
+      const bikeErrorEl = document.getElementById("bike-crud-error");
+      const bikeErrorTxt = document.getElementById("bike-crud-error-text");
+      if (bikeErrorEl && bikeErrorTxt) {
+        bikeErrorTxt.textContent = "Failed to save motorcycle: " + (err.message || err);
+        bikeErrorEl.classList.remove("hidden");
+      }
     } finally {
       saveBtn.disabled = false;
       saveBtn.innerHTML = originalBtnText;
@@ -775,6 +784,9 @@ window.editBikeInline = function(bikeId) {
 
   const formCard = document.getElementById("bike-form-card");
   formCard.classList.remove("hidden");
+  
+  const bikeErrorEl = document.getElementById("bike-crud-error");
+  if (bikeErrorEl) bikeErrorEl.classList.add("hidden");
   
   document.getElementById("bike-form-title").textContent = "Edit Motorcycle";
   document.getElementById("crud-bike-id").value = bike.id;
@@ -811,7 +823,12 @@ window.deleteBike = async function(bikeId) {
 
   } catch (err) {
     console.error(err);
-    alert("Delete failed: " + (err.message || err));
+    const bikeErrorEl = document.getElementById("bike-crud-error");
+    const bikeErrorTxt = document.getElementById("bike-crud-error-text");
+    if (bikeErrorEl && bikeErrorTxt) {
+      bikeErrorTxt.textContent = "Delete failed: " + (err.message || err);
+      bikeErrorEl.classList.remove("hidden");
+    }
   }
 };
 
@@ -851,17 +868,20 @@ function setupAddressesController() {
   const homeForm = document.getElementById("home-edit-form");
   const btnCancelHome = document.getElementById("btn-cancel-home");
   const inpHome = document.getElementById("inp-home");
+  const homeErrEl = document.getElementById("home-addr-error");
 
   btnEditHome.addEventListener("click", () => {
     homeView.classList.add("hidden");
     homeForm.classList.remove("hidden");
     inpHome.value = savedAddresses.home_address || "";
     inpHome.focus();
+    if (homeErrEl) homeErrEl.classList.add("hidden");
   });
 
   btnCancelHome.addEventListener("click", () => {
     homeForm.classList.add("hidden");
     homeView.classList.remove("hidden");
+    if (homeErrEl) homeErrEl.classList.add("hidden");
   });
 
   homeForm.addEventListener("submit", async (e) => {
@@ -886,7 +906,10 @@ function setupAddressesController() {
 
     } catch (err) {
       console.error(err);
-      alert("Failed to save address: " + err.message);
+      if (homeErrEl) {
+        homeErrEl.textContent = "Failed to save address: " + err.message;
+        homeErrEl.classList.remove("hidden");
+      }
     }
   });
 
@@ -896,17 +919,20 @@ function setupAddressesController() {
   const officeForm = document.getElementById("office-edit-form");
   const btnCancelOffice = document.getElementById("btn-cancel-office");
   const inpOffice = document.getElementById("inp-office");
+  const officeErrEl = document.getElementById("office-addr-error");
 
   btnEditOffice.addEventListener("click", () => {
     officeView.classList.add("hidden");
     officeForm.classList.remove("hidden");
     inpOffice.value = savedAddresses.office_address || "";
     inpOffice.focus();
+    if (officeErrEl) officeErrEl.classList.add("hidden");
   });
 
   btnCancelOffice.addEventListener("click", () => {
     officeForm.classList.add("hidden");
     officeView.classList.remove("hidden");
+    if (officeErrEl) officeErrEl.classList.add("hidden");
   });
 
   officeForm.addEventListener("submit", async (e) => {
@@ -931,7 +957,10 @@ function setupAddressesController() {
 
     } catch (err) {
       console.error(err);
-      alert("Failed to save address: " + err.message);
+      if (officeErrEl) {
+        officeErrEl.textContent = "Failed to save address: " + err.message;
+        officeErrEl.classList.remove("hidden");
+      }
     }
   });
 }
@@ -1080,24 +1109,28 @@ function setupDangerZone() {
       delSubmit.disabled = true;
       delSubmit.textContent = "Deleting...";
 
-      try {
-        // Supabase client can't perform self-deletion with an anonymous key.
-        // It requires an Edge function with service-role permissions.
-        // For security, we alert the user of this design structure and perform a clean signOut locally.
-        alert(
-          "Design Constraint Alert:\n" +
-          "Destructive user deletion requires administrative API verification.\n" +
-          "A request has been simulated and your local session will now be closed."
-        );
+      const delErr = document.getElementById("delete-error");
+      if (delErr) {
+        delErr.textContent = "Destructive user deletion requires administrative API verification. A request has been simulated and your session will now close.";
+        delErr.className = "text-xs text-orange-400 font-semibold mt-2";
+        delErr.classList.remove("hidden");
+      }
 
-        if (window.supabaseClient) {
-          await window.supabaseClient.auth.signOut();
-        }
-        window.location.href = "index.html";
+      try {
+        setTimeout(async () => {
+          if (window.supabaseClient) {
+            await window.supabaseClient.auth.signOut();
+          }
+          window.location.href = "index.html";
+        }, 3000);
 
       } catch (err) {
         console.error(err);
-        alert(err.message || err);
+        if (delErr) {
+          delErr.textContent = err.message || err;
+          delErr.className = "text-xs text-red-400 font-mono mt-2";
+          delErr.classList.remove("hidden");
+        }
         delSubmit.disabled = false;
         delSubmit.textContent = "Delete Permanently";
       }
