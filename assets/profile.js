@@ -148,6 +148,24 @@ function initTabs() {
     tab.addEventListener("click", () => {
       const targetPanel = tab.getAttribute("aria-controls").replace("panel-", "");
       
+      // Clear personal details messages & forms on tab switch
+      const accountSuccess = document.getElementById("account-success");
+      const accountError = document.getElementById("account-error");
+      if (accountSuccess) accountSuccess.classList.add("hidden");
+      if (accountError) accountError.classList.add("hidden");
+      
+      const personalForm = document.getElementById("personal-edit-form");
+      const personalView = document.getElementById("personal-view-mode");
+      if (personalForm && personalView) {
+        personalForm.classList.add("hidden");
+        personalView.classList.remove("hidden");
+      }
+      const passwordForm = document.getElementById("password-change-form");
+      if (passwordForm) {
+        passwordForm.classList.add("hidden");
+        passwordForm.reset();
+      }
+
       // Update Active Panel view
       tabPanels.forEach(panelName => {
         const panelEl = document.getElementById(`panel-${panelName}`);

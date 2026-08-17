@@ -305,6 +305,8 @@
     tabSignup.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8] transition-all";
     formSignin.classList.remove("hidden");
     formSignup.classList.add("hidden");
+    successEl.classList.add("hidden");
+    errorEl.classList.add("hidden");
   });
 
   tabSignup.addEventListener("click", () => {
@@ -312,6 +314,8 @@
     tabSignin.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8] transition-all";
     formSignup.classList.remove("hidden");
     formSignin.classList.add("hidden");
+    successEl.classList.add("hidden");
+    errorEl.classList.add("hidden");
   });
 
   // Handle Sign In submission
