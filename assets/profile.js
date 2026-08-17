@@ -188,9 +188,9 @@ function initTabs() {
         // Handle styling replacements based on desktop list vs mobile pill shape
         if (t.id.startsWith("m-tab-")) {
           if (isActive) {
-            t.className = "px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold transition-all";
+            t.className = "w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold transition-all";
           } else {
-            t.className = "px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all";
+            t.className = "w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all";
           }
         } else {
           if (isActive) {
@@ -984,11 +984,18 @@ async function loadUserNotifications() {
   }
 
   // Populate checkboxes state
-  document.getElementById("pref-booking-whatsapp").checked = savedNotifs.booking_whatsapp;
-  document.getElementById("pref-booking-sms").checked = savedNotifs.booking_sms;
-  document.getElementById("pref-booking-email").checked = savedNotifs.booking_email;
-  document.getElementById("pref-promo-whatsapp").checked = savedNotifs.promo_whatsapp;
-  document.getElementById("pref-promo-email").checked = savedNotifs.promo_email;
+  const setCheckedState = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.checked = val;
+      el.setAttribute("aria-checked", String(val));
+    }
+  };
+  setCheckedState("pref-booking-whatsapp", savedNotifs.booking_whatsapp);
+  setCheckedState("pref-booking-sms", savedNotifs.booking_sms);
+  setCheckedState("pref-booking-email", savedNotifs.booking_email);
+  setCheckedState("pref-promo-whatsapp", savedNotifs.promo_whatsapp);
+  setCheckedState("pref-promo-email", savedNotifs.promo_email);
 }
 
 function setupNotificationsController() {
@@ -1006,6 +1013,7 @@ function setupNotificationsController() {
 
     el.addEventListener("change", async () => {
       const isChecked = el.checked;
+      el.setAttribute("aria-checked", String(isChecked));
       
       // Update local state
       savedNotifs[pref.dbCol] = isChecked;

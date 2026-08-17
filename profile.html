@@ -210,15 +210,15 @@
           <button id="m-btn-edit-profile" class="btn btn-outline !p-2 shrink-0" aria-label="Edit Profile"><i class="fa-solid fa-user-gear"></i></button>
         </div>
 
-        <!-- Mobile Horizontal Tab Scroll (Sticky below header) -->
-        <div class="lg:hidden sticky top-16 bg-[#14161A] py-3 z-20 border-b border-[#3A3F49]">
-          <div class="flex gap-2 overflow-x-auto scrollbar-none whitespace-nowrap px-1" role="tablist" aria-label="Mobile Profile Tabs">
-            <button role="tab" aria-selected="true" aria-controls="panel-overview" id="m-tab-overview" class="px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold transition-all">Overview</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-account" id="m-tab-account" class="px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Account Details</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-bookings" id="m-tab-bookings" class="px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">My Bookings</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-bikes" id="m-tab-bikes" class="px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Saved Bikes</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-addresses" id="m-tab-addresses" class="px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Saved Addresses</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-notifications" id="m-tab-notifications" class="px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Notifications</button>
+        <!-- Mobile Vertical Tab List -->
+        <div class="lg:hidden bg-[#14161A] py-3 z-20 border-b border-[#3A3F49]">
+          <div class="flex flex-col gap-2 w-full px-1" role="tablist" aria-label="Mobile Profile Tabs">
+            <button role="tab" aria-selected="true" aria-controls="panel-overview" id="m-tab-overview" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold transition-all">Overview</button>
+            <button role="tab" aria-selected="false" aria-controls="panel-account" id="m-tab-account" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Account Details</button>
+            <button role="tab" aria-selected="false" aria-controls="panel-bookings" id="m-tab-bookings" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">My Bookings</button>
+            <button role="tab" aria-selected="false" aria-controls="panel-bikes" id="m-tab-bikes" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Saved Bikes</button>
+            <button role="tab" aria-selected="false" aria-controls="panel-addresses" id="m-tab-addresses" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Saved Addresses</button>
+            <button role="tab" aria-selected="false" aria-controls="panel-notifications" id="m-tab-notifications" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Notifications</button>
           </div>
         </div>
 
@@ -514,7 +514,7 @@
                     <p class="text-xs text-[#B9B6AC]">Get status updates on booking, dispatched mechanic, and completion.</p>
                   </div>
                   <label class="switch">
-                    <input type="checkbox" id="pref-booking-whatsapp" checked>
+                    <input type="checkbox" id="pref-booking-whatsapp" role="switch" aria-checked="true" checked>
                     <span class="slider"></span>
                   </label>
                 </div>
@@ -525,7 +525,7 @@
                     <p class="text-xs text-[#B9B6AC]">Receive SMS text messages on status progress updates.</p>
                   </div>
                   <label class="switch">
-                    <input type="checkbox" id="pref-booking-sms">
+                    <input type="checkbox" id="pref-booking-sms" role="switch" aria-checked="false">
                     <span class="slider"></span>
                   </label>
                 </div>
@@ -536,7 +536,7 @@
                     <p class="text-xs text-[#B9B6AC]">Receive receipts, confirmation summaries, and status logs.</p>
                   </div>
                   <label class="switch">
-                    <input type="checkbox" id="pref-booking-email" checked>
+                    <input type="checkbox" id="pref-booking-email" role="switch" aria-checked="true" checked>
                     <span class="slider"></span>
                   </label>
                 </div>
@@ -552,7 +552,7 @@
                     <p class="text-xs text-[#B9B6AC]">Occasional coupon codes, seasonal service checks, and discount reminders.</p>
                   </div>
                   <label class="switch">
-                    <input type="checkbox" id="pref-promo-whatsapp">
+                    <input type="checkbox" id="pref-promo-whatsapp" role="switch" aria-checked="false">
                     <span class="slider"></span>
                   </label>
                 </div>
@@ -563,7 +563,7 @@
                     <p class="text-xs text-[#B9B6AC]">Service reminders, monthly discount updates, and bike tips.</p>
                   </div>
                   <label class="switch">
-                    <input type="checkbox" id="pref-promo-email">
+                    <input type="checkbox" id="pref-promo-email" role="switch" aria-checked="false">
                     <span class="slider"></span>
                   </label>
                 </div>
