@@ -75,7 +75,7 @@
   </style>
 </head>
 
-<body class="antialiased text-[#F4F1E8]">
+<body class="antialiased text-[#F4F1E8] overflow-x-hidden">
 
   <!-- =====================================================================
      SHARED HEADER START — keep identical across all pages.
@@ -195,7 +195,7 @@
       </aside>
 
       <!-- ============ RIGHT PANEL / MOBILE STACK ============ -->
-      <div class="lg:col-span-3 space-y-6">
+      <div class="lg:col-span-3 space-y-6 min-w-0">
 
         <!-- Mobile-Only Profile Summary Header Card -->
         <div class="lg:hidden card p-5 flex items-center gap-4">
@@ -238,19 +238,19 @@
 
             <!-- Stats Grid -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div class="card p-5 text-center space-y-1">
+              <div class="card p-3 sm:p-5 text-center space-y-1">
                 <div id="stat-active-bookings" class="font-mono text-2xl font-bold text-[#FF5A1F]">0</div>
                 <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Active Bookings</div>
               </div>
-              <div class="card p-5 text-center space-y-1">
+              <div class="card p-3 sm:p-5 text-center space-y-1">
                 <div id="stat-total-bookings" class="font-mono text-2xl font-bold text-[#F4F1E8]">0</div>
                 <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Total Bookings</div>
               </div>
-              <div class="card p-5 text-center space-y-1">
+              <div class="card p-3 sm:p-5 text-center space-y-1">
                 <div id="stat-saved-bikes" class="font-mono text-2xl font-bold text-[#F4F1E8]">0</div>
                 <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Saved Bikes</div>
               </div>
-              <div class="card p-5 text-center space-y-1">
+              <div class="card p-3 sm:p-5 text-center space-y-1">
                 <div id="stat-saved-addresses" class="font-mono text-2xl font-bold text-[#F4F1E8]">0</div>
                 <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Saved Addresses</div>
               </div>
