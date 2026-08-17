@@ -13,6 +13,37 @@
 <link rel="stylesheet" href="assets/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/supabase.js"></script>
+<style>
+  /* ---- password show/hide toggle button ---- */
+  .pw-toggle{ background:transparent; border:0; cursor:pointer; padding:6px; line-height:1; }
+  .pw-toggle:focus-visible{ outline:2px solid #FF5A1F; outline-offset:2px; border-radius:4px; }
+
+  /* ---- animated success checkmark (plays each time #auth-success is unhidden) ---- */
+  .auth-success-pop{ animation: authPopIn .35s cubic-bezier(.2,.8,.2,1); }
+  @keyframes authPopIn{ from{ opacity:0; transform:scale(.92) translateY(6px); } to{ opacity:1; transform:scale(1) translateY(0); } }
+
+  .success-check-circle{ width:60px; height:60px; margin:0 auto 12px; }
+  .success-check-circle svg{ width:100%; height:100%; overflow:visible; }
+  .success-check-circle .scc-bg{
+    fill:none; stroke:#FF5A1F; stroke-opacity:.15; stroke-width:3;
+  }
+  .success-check-circle .scc-circle{
+    fill:none; stroke:#FF5A1F; stroke-width:3; stroke-linecap:round;
+    stroke-dasharray:150.8; stroke-dashoffset:150.8;
+    animation: sccCircle .5s cubic-bezier(.65,0,.45,1) forwards;
+  }
+  .success-check-circle .scc-check{
+    fill:none; stroke:#FF5A1F; stroke-width:4; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:28; stroke-dashoffset:28;
+    animation: sccCheck .3s cubic-bezier(.65,0,.45,1) .45s forwards;
+  }
+  @keyframes sccCircle{ to{ stroke-dashoffset:0; } }
+  @keyframes sccCheck{ to{ stroke-dashoffset:0; } }
+  @media (prefers-reduced-motion: reduce){
+    .auth-success-pop, .success-check-circle .scc-circle, .success-check-circle .scc-check{ animation:none !important; }
+    .success-check-circle .scc-circle, .success-check-circle .scc-check{ stroke-dashoffset:0 !important; }
+  }
+</style>
 </head>
 <body class="antialiased">
 
@@ -98,7 +129,12 @@
         </div>
         <div>
           <label class="field-label" for="signin-password">Password *</label>
-          <input id="signin-password" type="password" class="field-input" placeholder="••••••••" required>
+          <div class="relative">
+            <input id="signin-password" type="password" class="field-input" style="padding-right:2.75rem" placeholder="••••••••" required>
+            <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="signin-password" aria-label="Show password" aria-pressed="false">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
           <p class="field-error" id="signin-password-error">Please enter your password.</p>
         </div>
         <button type="submit" id="signin-submit" class="btn btn-primary w-full">
@@ -133,7 +169,12 @@
         </div>
         <div>
           <label class="field-label" for="signup-password">Password *</label>
-          <input id="signup-password" type="password" class="field-input" placeholder="Minimum 6 characters" required>
+          <div class="relative">
+            <input id="signup-password" type="password" class="field-input" style="padding-right:2.75rem" placeholder="Minimum 6 characters" required>
+            <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="signup-password" aria-label="Show password" aria-pressed="false">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
           <p class="field-error" id="signup-password-error">Please choose a password.</p>
         </div>
         <button type="submit" id="signup-submit" class="btn btn-primary w-full">
@@ -142,7 +183,14 @@
       </form>
 
       <!-- Feedback Messages -->
-      <div id="auth-success" class="hidden bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-4 text-sm">
+      <div id="auth-success" class="hidden bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-6 text-sm text-center">
+        <div class="success-check-circle" aria-hidden="true">
+          <svg viewBox="0 0 52 52">
+            <circle class="scc-bg" cx="26" cy="26" r="24"/>
+            <circle class="scc-circle" cx="26" cy="26" r="24"/>
+            <path class="scc-check" d="M15 27l7 7 15-15"/>
+          </svg>
+        </div>
         <p class="text-[#FF5A1F] font-semibold mb-1" id="success-title"></p>
         <p class="text-[#B9B6AC]" id="success-desc"></p>
       </div>
@@ -223,11 +271,34 @@
       document.getElementById("success-title").innerHTML = title;
       document.getElementById("success-desc").innerText = desc;
       successEl.classList.remove("hidden");
+      // restart the pop-in + checkmark-draw animation every time a new success is shown
+      successEl.classList.remove("auth-success-pop");
+      successEl.querySelectorAll(".scc-circle, .scc-check").forEach(el => {
+        el.style.animation = "none";
+        void el.offsetWidth; // force reflow so the animation restarts
+        el.style.animation = "";
+      });
+      void successEl.offsetWidth;
+      successEl.classList.add("auth-success-pop");
     } else {
       document.getElementById("error-desc").innerText = desc;
       errorEl.classList.remove("hidden");
     }
   }
+
+  // ---- Password show/hide toggle ----
+  document.querySelectorAll(".pw-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.target);
+      const icon = btn.querySelector("i");
+      const willShow = input.type === "password";
+      input.type = willShow ? "text" : "password";
+      icon.classList.toggle("fa-eye", !willShow);
+      icon.classList.toggle("fa-eye-slash", willShow);
+      btn.setAttribute("aria-label", willShow ? "Hide password" : "Show password");
+      btn.setAttribute("aria-pressed", String(willShow));
+    });
+  });
 
   tabSignin.addEventListener("click", () => {
     tabSignin.className = "flex-1 pb-3 text-center font-display text-sm tracking-wider uppercase border-b-2 border-[#FF5A1F] text-[#FF5A1F] transition-all";
@@ -330,8 +401,32 @@
       });
 
       if (error) throw error;
-      
-      showMessage("success", "<i class='fa-solid fa-envelope-circle-check'></i> REGISTRATION COMPLETE", "Account created successfully! Please check your email inbox to verify your account, or sign in now.");
+
+      // Supabase returns an active session immediately when the project does NOT
+      // require email confirmation. If so, the new user is already logged in.
+      let session = data && data.session;
+
+      if (!session) {
+        // Fallback: attempt an immediate sign-in with the same credentials.
+        // This still only succeeds if "Confirm email" is switched off in the
+        // Supabase project's Auth settings — Supabase blocks sign-in otherwise.
+        try {
+          const retry = await window.supabaseClient.auth.signInWithPassword({
+            email: emailInput.value.trim(),
+            password: passwordInput.value
+          });
+          if (!retry.error) session = retry.data.session;
+        } catch (_) { /* fall through to the email-verification message below */ }
+      }
+
+      if (session) {
+        submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Signing you in...`;
+        showMessage("success", "<i class='fa-solid fa-circle-check'></i> ACCOUNT CREATED", "You're all set — signed in automatically. Redirecting you...");
+        setTimeout(() => { window.location.href = "booking.html"; }, 1500);
+        return; // keep button in loading state through the redirect
+      }
+
+      showMessage("success", "<i class='fa-solid fa-envelope-circle-check'></i> REGISTRATION COMPLETE", "Account created! Your Supabase project requires email verification, so please check your inbox, confirm your address, then sign in.");
       formSignup.reset();
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
