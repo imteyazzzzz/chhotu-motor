@@ -212,17 +212,12 @@
       lightbox.classList.remove("hidden");
 
       try {
-        // Request secure signed URL since the bucket is private
-        const path = selectedBooking.payment_screenshot_url;
-        const { data, error } = await window.supabaseClient.storage
-          .from("payment-screenshots")
-          .createSignedUrl(path, 60);
-
-        if (error) throw error;
-        img.src = data.signedUrl;
-
+        if (!selectedBooking.payment_screenshot_url) {
+          throw new Error("No screenshot proof data found.");
+        }
+        img.src = selectedBooking.payment_screenshot_url;
       } catch (err) {
-        console.error("Failed to generate screenshot signed URL:", err);
+        console.error("Failed to load screenshot:", err);
         img.alt = "Failed to load proof image: " + err.message;
       }
     }

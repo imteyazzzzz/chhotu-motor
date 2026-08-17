@@ -1293,34 +1293,64 @@ setTimeout(() => {
       const originalText = submitBtn.innerHTML;
       
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Uploading...`;
+      submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Processing...`;
       
+      const fileToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = (error) => reject(error);
+        });
+      };
+
       try {
-        // 1. Upload new screenshot file
-        const fileExt = reuploadFile.name.split(".").pop();
-        const randName = `${Date.now()}_re_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-        const filePath = `screenshots/${randName}`;
-        
-        const { error: uploadErr } = await window.supabaseClient.storage
-          .from("payment-screenshots")
-          .upload(filePath, reuploadFile);
-          
-        if (uploadErr) throw uploadErr;
+        submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Converting Image...`;
+        const base64Image = await fileToBase64(reuploadFile);
+
+        submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Saving Proof...`;
         
         // 2. Update booking columns back to submitted
-        const { error: dbErr } = await window.supabaseClient
+        const { data: updatedRows, error: dbErr } = await window.supabaseClient
           .from("bookings")
           .update({
             status: "pending_verification",
             payment_status: "submitted",
-            payment_screenshot_url: filePath,
+            payment_screenshot_url: base64Image,
             upi_reference: utr || null,
             rejection_reason: null
           })
-          .eq("id", bookingId);
+          .eq("id", bookingId)
+          .select();
           
         if (dbErr) throw dbErr;
         
+        const bInfo = updatedRows && updatedRows[0] ? updatedRows[0] : null;
+
+        // 3. Asynchronously fire n8n webhook
+        const payload = {
+          form_type: "booking_payment_n8n_reupload",
+          supabase_booking_id: bookingId,
+          name: bInfo ? bInfo.name : "",
+          phone: bInfo ? bInfo.phone : "",
+          bikeModel: bInfo ? `${bInfo.bike_brand} ${bInfo.bike_model}`.trim() : "",
+          serviceType: bInfo ? bInfo.service_type : "",
+          location: bInfo ? bInfo.location : "",
+          preferredDate: bInfo ? bInfo.preferred_date : "",
+          preferredTime: bInfo ? bInfo.preferred_time : "",
+          issueDescription: bInfo ? bInfo.issue_description : "",
+          booking_charge: 249,
+          upi_reference: utr || null,
+          screenshot_base64: base64Image,
+          submittedAt: new Date().toISOString()
+        };
+
+        fetch("https://imteefy.duckdns.org/webhook/chhotu-payment-verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).catch(e => console.error("Asynchronous webhook failed:", e));
+
         closeReuploadModal();
         
         // Reload UI list
