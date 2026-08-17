@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auth Debugger | Chhotu Motorcycles</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
+</head>
+<body class="bg-[#14161A] text-[#F4F1E8] p-6 font-mono text-sm">
+  <div class="max-w-xl mx-auto space-y-6">
+    <div>
+      <h1 class="text-xl font-bold text-[#FF5A1F] uppercase">Supabase Role Debugger</h1>
+      <p class="text-xs text-[#B9B6AC]">Run diagnostics to find out why Admin/Staff login isn't granting access.</p>
+    </div>
+
+    <!-- Diagnostic Cards -->
+    <div class="bg-[#1B1E24] border border-[#3A3F49] p-4 rounded-md space-y-4">
+      <h3 class="font-bold border-b border-[#3A3F49] pb-1 text-xs uppercase tracking-wider text-[#B9B6AC]">1. Client Status</h3>
+      <div id="client-status">Checking Supabase SDK...</div>
+    </div>
+
+    <div class="bg-[#1B1E24] border border-[#3A3F49] p-4 rounded-md space-y-4">
+      <h3 class="font-bold border-b border-[#3A3F49] pb-1 text-xs uppercase tracking-wider text-[#B9B6AC]">2. Authenticated Session</h3>
+      <div id="session-info">Loading active session...</div>
+    </div>
+
+    <div class="bg-[#1B1E24] border border-[#3A3F49] p-4 rounded-md space-y-4">
+      <h3 class="font-bold border-b border-[#3A3F49] pb-1 text-xs uppercase tracking-wider text-[#B9B6AC]">3. Profile Row in Database</h3>
+      <div id="profile-info">Checking database profile...</div>
+    </div>
+
+    <!-- Sign In Form (if not logged in) -->
+    <div id="signin-card" class="bg-[#1B1E24] border border-[#3A3F49] p-4 rounded-md space-y-4 hidden">
+      <h3 class="font-bold border-b border-[#3A3F49] pb-1 text-xs uppercase tracking-wider text-amber-500">Sign In to Test</h3>
+      <form id="debug-signin-form" class="space-y-3">
+        <div>
+          <label class="block text-[10px] text-[#B9B6AC] uppercase mb-1">Email</label>
+          <input type="email" id="debug-email" class="w-full bg-[#14161A] border border-[#3A3F49] p-2 rounded text-[#F4F1E8]" required>
+        </div>
+        <div>
+          <label class="block text-[10px] text-[#B9B6AC] uppercase mb-1">Password</label>
+          <input type="password" id="debug-password" class="w-full bg-[#14161A] border border-[#3A3F49] p-2 rounded text-[#F4F1E8]" required>
+        </div>
+        <button type="submit" class="w-full bg-[#FF5A1F] hover:bg-[#FF5A1F]/90 text-black py-2 rounded font-bold">Sign In</button>
+      </form>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex gap-4">
+      <button onclick="runDiagnostics()" class="bg-[#FF5A1F]/10 hover:bg-[#FF5A1F]/20 text-[#FF5A1F] border border-[#FF5A1F]/30 px-4 py-2 rounded text-xs">Run Diagnostic</button>
+      <button onclick="signOut()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2 rounded text-xs">Sign Out</button>
+      <a href="auth.html" class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-2 rounded text-xs flex items-center justify-center">Go to Auth Page</a>
+    </div>
+  </div>
+
+  <script>
+    async function runDiagnostics() {
+      // 1. Client Check
+      const clientStatus = document.getElementById("client-status");
+      if (!window.supabaseClient) {
+        clientStatus.innerHTML = `<span class="text-red-500 font-bold">🔴 FAILED:</span> Supabase client is null. Check script links in auth-debug.html or browser logs.`;
+        return;
+      }
+      clientStatus.innerHTML = `<span class="text-green-500 font-bold">🟢 READY:</span> Connected to URL: <span class="text-[#FF5A1F] font-semibold">${window.supabaseClient.supabaseUrl}</span>`;
+
+      // 2. Session Check
+      const sessionInfo = document.getElementById("session-info");
+      const profileInfo = document.getElementById("profile-info");
+      const signinCard = document.getElementById("signin-card");
+
+      try {
+        const { data: { session }, error: sessionErr } = await window.supabaseClient.auth.getSession();
+        if (sessionErr) throw sessionErr;
+
+        if (!session || !session.user) {
+          sessionInfo.innerHTML = `<span class="text-amber-500 font-bold">⚠️ NO ACTIVE SESSION:</span> You are not logged in. Please fill in the sign-in form below.`;
+          profileInfo.innerHTML = `<span class="text-[#B9B6AC]">Awaiting sign in...</span>`;
+          signinCard.classList.remove("hidden");
+          return;
+        }
+
+        signinCard.classList.add("hidden");
+        sessionInfo.innerHTML = `
+          <span class="text-green-500 font-bold">🟢 LOGGED IN:</span><br>
+          <span class="text-xs text-[#B9B6AC]">
+            - User ID (UUID): <span class="text-white font-semibold font-mono">${session.user.id}</span><br>
+            - Email: <span class="text-white">${session.user.email}</span><br>
+            - Email Confirmed At: <span class="text-white">${session.user.email_confirmed_at || '<span class="text-red-400 font-bold">NOT CONFIRMED</span>'}</span>
+          </span>
+        `;
+
+        // 3. Profiles DB Row Check
+        profileInfo.innerHTML = `Querying profiles table...`;
+        const { data: profile, error: dbErr } = await window.supabaseClient
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .maybeSingle();
+
+        if (dbErr) {
+          profileInfo.innerHTML = `
+            <span class="text-red-500 font-bold">🔴 DATABASE ERROR:</span><br>
+            <span class="text-xs text-red-400 font-mono">
+              Code: ${dbErr.code}<br>
+              Message: ${dbErr.message}
+            </span>
+          `;
+          return;
+        }
+
+        if (!profile) {
+          profileInfo.innerHTML = `
+            <span class="text-red-500 font-bold">🔴 PROFILE NOT FOUND:</span><br>
+            <span class="text-xs text-[#B9B6AC] leading-relaxed">
+              No row exists in <code class="bg-[#14161A] px-1 py-0.5 rounded text-white font-mono">public.profiles</code> for UUID <code class="text-white">${session.user.id}</code>.<br>
+              This means the user sign up trigger did not run properly. Run this script in your Supabase SQL Editor to insert it manually:<br>
+              <pre class="bg-[#14161A] p-3 rounded border border-[#3A3F49] text-amber-500 mt-2 font-mono text-[11px] overflow-x-auto select-all">
+INSERT INTO public.profiles (id, full_name, phone, role)
+VALUES ('${session.user.id}', '${session.user.user_metadata?.full_name || "Admin"}', '${session.user.user_metadata?.phone || ""}', 'admin');</pre>
+            </span>
+          `;
+          return;
+        }
+
+        const isAuthorized = ["admin", "staff"].includes(profile.role);
+        const authStatus = isAuthorized 
+          ? `<span class="text-green-500 font-bold">🟢 AUTHORIZED (Redirects to admin-dashboard.html)</span>`
+          : `<span class="text-red-400 font-bold">🔴 UNAUTHORIZED (Redirects to booking.html because role is '${profile.role}')</span>`;
+
+        profileInfo.innerHTML = `
+          <span class="text-green-500 font-bold">🟢 ROW FOUND:</span><br>
+          <span class="text-xs text-[#B9B6AC]">
+            - ID: <span class="text-white">${profile.id}</span><br>
+            - Name: <span class="text-white">${profile.full_name || 'N/A'}</span><br>
+            - Phone: <span class="text-white">${profile.phone || 'N/A'}</span><br>
+            - <span class="text-[#FF5A1F] font-bold">Role: ${profile.role}</span><br>
+            - Status: ${authStatus}
+          </span>
+          
+          <div class="mt-4 p-3 bg-[#14161A] rounded border border-[#3A3F49]/40">
+            <p class="text-[10px] uppercase text-[#B9B6AC] mb-1 font-mono">To force role update, run this query in Supabase SQL editor:</p>
+            <pre class="text-amber-500 text-[11px] select-all font-mono">UPDATE public.profiles SET role = 'admin' WHERE id = '${profile.id}';</pre>
+          </div>
+        `;
+
+      } catch (err) {
+        sessionInfo.innerHTML = `<span class="text-red-500 font-bold">🔴 EXCEPTION:</span> ${err.message || err}`;
+      }
+    }
+
+    // Sign In form handler
+    document.getElementById("debug-signin-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("debug-email").value.trim();
+      const password = document.getElementById("debug-password").value;
+
+      try {
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        alert("Sign in successful!");
+        await runDiagnostics();
+      } catch (err) {
+        alert("Sign in failed: " + (err.message || err));
+      }
+    });
+
+    async function signOut() {
+      if (window.supabaseClient) {
+        await window.supabaseClient.auth.signOut();
+        alert("Signed out successfully.");
+        await runDiagnostics();
+      }
+    }
+
+    // Initial check
+    window.addEventListener("load", () => {
+      setTimeout(runDiagnostics, 500);
+    });
+  </script>
+</body>
+</html>
