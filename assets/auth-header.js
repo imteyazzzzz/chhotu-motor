@@ -19,43 +19,47 @@ async function updateAuthHeader() {
       
       // 1. Desktop Buttons
       if (dBtnAuth) {
-        dBtnAuth.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
-        dBtnAuth.href = "#";
-        dBtnAuth.className = "btn btn-outline !py-2 !px-4 !text-xs !text-red-400 border-red-500/40 hover:!text-red-300 hover:bg-red-500/10";
-        dBtnAuth.onclick = async (e) => {
+        dBtnAuth.innerHTML = `<i class="fa-solid fa-user"></i> My Profile`;
+        dBtnAuth.href = "profile.html";
+        dBtnAuth.className = "btn btn-primary !py-2 !px-4 !text-xs";
+        dBtnAuth.onclick = null;
+      }
+      if (dBtnTrack) {
+        dBtnTrack.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
+        dBtnTrack.href = "#";
+        dBtnTrack.className = "btn btn-outline !py-2 !px-4 !text-xs !text-red-400 border-red-500/40 hover:!text-red-300 hover:bg-red-500/10";
+        dBtnTrack.onclick = async (e) => {
           e.preventDefault();
           const { error } = await window.supabaseClient.auth.signOut();
           if (error) alert("Error signing out: " + error.message);
           window.location.reload();
         };
-      }
-      if (dBtnTrack) {
-        dBtnTrack.innerHTML = `<i class="fa-solid fa-route"></i> My Repairs`;
-        dBtnTrack.href = "tracking.html";
-        dBtnTrack.className = "btn btn-primary !py-2 !px-4 !text-xs";
       }
 
       // 2. Mobile Buttons
       if (mBtnAuth) {
-        mBtnAuth.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
-        mBtnAuth.href = "#";
-        mBtnAuth.className = "btn btn-outline w-full text-center !text-red-400 border-red-500/40 hover:bg-red-500/10";
-        mBtnAuth.onclick = async (e) => {
+        mBtnAuth.innerHTML = `<i class="fa-solid fa-user"></i> My Profile`;
+        mBtnAuth.href = "profile.html";
+        mBtnAuth.className = "btn btn-primary w-full text-center";
+        mBtnAuth.onclick = null;
+      }
+      if (mBtnTrack) {
+        mBtnTrack.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> Sign Out`;
+        mBtnTrack.href = "#";
+        mBtnTrack.className = "btn btn-outline w-full text-center !text-red-400 border-red-500/40 hover:bg-red-500/10";
+        mBtnTrack.onclick = async (e) => {
           e.preventDefault();
           const { error } = await window.supabaseClient.auth.signOut();
           if (error) alert("Error signing out: " + error.message);
           window.location.reload();
         };
       }
-      if (mBtnTrack) {
-        mBtnTrack.innerHTML = `<i class="fa-solid fa-route"></i> My Repairs`;
-        mBtnTrack.href = "tracking.html";
-        mBtnTrack.className = "btn btn-primary w-full text-center";
-      }
 
       // Redirect logged-in users away from the auth page
       if (window.location.pathname.endsWith("auth.html")) {
-        window.location.href = "booking.html";
+        // If there's a redirect query parameter, use it
+        const redirectParam = new URLSearchParams(window.location.search).get("redirect");
+        window.location.href = redirectParam || "booking.html";
       }
 
     } else {
