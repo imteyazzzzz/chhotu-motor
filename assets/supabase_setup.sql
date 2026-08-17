@@ -1,4 +1,4 @@
-r5ct6-- =========================================================================
+-- =========================================================================
 -- CHHOTU MOTORCYCLES WORKSHOP — COMPLETE DATABASE SETUP & MIGRATION
 -- Run this script in the Supabase Dashboard SQL Editor.
 -- Safe to re-run multiple times (idempotent).
