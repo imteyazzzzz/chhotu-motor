@@ -11,7 +11,8 @@ ADD COLUMN IF NOT EXISTS booking_charge_amount NUMERIC DEFAULT 249.0,
 ADD COLUMN IF NOT EXISTS refund_status TEXT DEFAULT 'none',
 ADD COLUMN IF NOT EXISTS rejection_reason TEXT,
 ADD COLUMN IF NOT EXISTS verified_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
-ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ;
+ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS registration_no TEXT;
 
 -- 2. Alter bookings to add final payment tracking columns
 ALTER TABLE public.bookings

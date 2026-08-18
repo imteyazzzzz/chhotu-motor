@@ -146,38 +146,56 @@
                 <p class="field-error" id="b-service-error">Please select a service type.</p>
               </div>
 
-              <!-- Bike Brand & Bike Model -->
-              <div class="grid sm:grid-cols-2 gap-5">
-                <div>
-                  <label class="field-label" for="b-brand">Bike Brand *</label>
-                  <select id="b-brand" name="bikeBrand" class="field-input" required>
-                    <option value="">Select Brand</option>
-                    <option value="Bajaj">Bajaj</option>
-                    <option value="Honda">Honda</option>
-                    <option value="Yamaha">Yamaha</option>
-                    <option value="Hero">Hero</option>
-                    <option value="TVS">TVS</option>
-                    <option value="Royal Enfield">Royal Enfield</option>
-                    <option value="Suzuki">Suzuki</option>
-                    <option value="KTM">KTM</option>
-                    <option value="Other">Other Brand</option>
-                  </select>
-                  <p class="field-error" id="b-brand-error">Please select a brand.</p>
+              <!-- Saved Motorcycles Selector (Only visible for logged-in users with saved bikes) -->
+              <div id="b-saved-bikes-wrap" class="hidden">
+                <label class="field-label" for="b-saved-bike">Select Saved Motorcycle *</label>
+                <select id="b-saved-bike" class="field-input">
+                  <!-- Dynamically populated -->
+                </select>
+                <p class="text-[10px] text-[#B9B6AC] mt-1 font-mono">Select a motorcycle from your profile, or choose "+ Add New Motorcycle".</p>
+              </div>
+
+              <!-- New Bike Inputs (Hidden if a saved bike is selected) -->
+              <div id="b-new-bike-fields" class="space-y-4">
+                <div class="grid sm:grid-cols-2 gap-5">
+                  <div>
+                    <label class="field-label" for="b-brand">Bike Brand *</label>
+                    <select id="b-brand" name="bikeBrand" class="field-input" required>
+                      <option value="">Select Brand</option>
+                      <option value="Bajaj">Bajaj</option>
+                      <option value="Honda">Honda</option>
+                      <option value="Yamaha">Yamaha</option>
+                      <option value="Hero">Hero</option>
+                      <option value="TVS">TVS</option>
+                      <option value="Royal Enfield">Royal Enfield</option>
+                      <option value="Suzuki">Suzuki</option>
+                      <option value="KTM">KTM</option>
+                      <option value="Other">Other Brand</option>
+                    </select>
+                    <p class="field-error" id="b-brand-error">Please select a brand.</p>
+                  </div>
+                  <div>
+                    <label class="field-label" for="b-bike">Bike Model *</label>
+                    <input id="b-bike" name="bikeModel" type="text" class="field-input"
+                      placeholder="e.g. Pulsar 150, Shine, FZ" required>
+                    <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
+                  </div>
                 </div>
-                <div>
-                  <label class="field-label" for="b-bike">Bike Model *</label>
-                  <input id="b-bike" name="bikeModel" type="text" class="field-input"
-                    placeholder="e.g. Pulsar 150, Shine, FZ" required>
-                  <p class="field-error" id="b-bike-error">Please enter your bike model.</p>
+
+                <!-- Specify Brand (Hidden by default) -->
+                <div id="b-brand-other-wrap" class="hidden">
+                  <label class="field-label" for="b-brand-other">Specify Brand *</label>
+                  <input id="b-brand-other" name="brandOther" type="text" class="field-input"
+                    placeholder="e.g. Vespa, Aprilia, Ducati">
+                  <p class="field-error" id="b-brand-other-error">Please specify your bike brand.</p>
                 </div>
               </div>
 
-              <!-- Specify Brand (Hidden by default) -->
-              <div id="b-brand-other-wrap" class="hidden">
-                <label class="field-label" for="b-brand-other">Specify Brand *</label>
-                <input id="b-brand-other" name="brandOther" type="text" class="field-input"
-                  placeholder="e.g. Vespa, Aprilia, Ducati">
-                <p class="field-error" id="b-brand-other-error">Please specify your bike brand.</p>
+              <!-- Registration Number Field -->
+              <div>
+                <label class="field-label" for="b-reg-no">Registration Number (Optional)</label>
+                <input id="b-reg-no" name="registrationNo" type="text" class="field-input font-mono uppercase"
+                  placeholder="e.g. BA 97 PA 1234">
               </div>
 
               <!-- Location / Address -->
@@ -622,6 +640,75 @@
                 phoneInput.value = phoneVal;
               }
             }
+
+            // Fetch user's saved motorcycles
+            const { data: savedBikes, error: bikesErr } = await window.supabaseClient
+              .from("motorcycles")
+              .select("*")
+              .eq("user_id", loggedInUserId);
+
+            if (!bikesErr && savedBikes && savedBikes.length > 0) {
+              const savedBikesWrap = document.getElementById("b-saved-bikes-wrap");
+              const savedBikesSelect = document.getElementById("b-saved-bike");
+              const newBikeFields = document.getElementById("b-new-bike-fields");
+
+              // Populate select list options
+              savedBikesSelect.innerHTML = `<option value="">-- Select Saved Motorcycle --</option>` +
+                savedBikes.map(bike => `<option value="${bike.id}" data-brand="${bike.brand}" data-model="${bike.model}" data-reg="${bike.registration_no || ''}">${bike.brand} ${bike.model} ${bike.registration_no ? '(' + bike.registration_no + ')' : ''}</option>`).join("") +
+                `<option value="new">+ Add New Motorcycle</option>`;
+
+              savedBikesWrap.classList.remove("hidden");
+              newBikeFields.classList.add("hidden"); // hide manual inputs by default
+
+              // Make manual inputs not required by default (we will populate them from selection)
+              document.getElementById("b-brand").required = false;
+              document.getElementById("b-bike").required = false;
+
+              savedBikesSelect.addEventListener("change", (e) => {
+                const val = e.target.value;
+                if (val === "new") {
+                  newBikeFields.classList.remove("hidden");
+                  document.getElementById("b-brand").value = "";
+                  document.getElementById("b-bike").value = "";
+                  document.getElementById("b-reg-no").value = "";
+                  document.getElementById("b-brand").required = true;
+                  document.getElementById("b-bike").required = true;
+                  syncBrandUI();
+                } else if (val === "") {
+                  newBikeFields.classList.add("hidden");
+                  document.getElementById("b-brand").value = "";
+                  document.getElementById("b-bike").value = "";
+                  document.getElementById("b-reg-no").value = "";
+                  document.getElementById("b-brand").required = false;
+                  document.getElementById("b-bike").required = false;
+                  syncBrandUI();
+                } else {
+                  // A saved bike is selected
+                  newBikeFields.classList.add("hidden");
+                  const selectedOption = savedBikesSelect.options[savedBikesSelect.selectedIndex];
+                  const brand = selectedOption.getAttribute("data-brand");
+                  const model = selectedOption.getAttribute("data-model");
+                  const reg = selectedOption.getAttribute("data-reg");
+
+                  // Auto-fill hidden brand/model/reg so form validates successfully
+                  document.getElementById("b-brand").value = brand;
+                  document.getElementById("b-bike").value = model;
+                  document.getElementById("b-reg-no").value = reg;
+                  
+                  // Ensure brand other is synced if selected brand is "Other"
+                  if (brand !== "Bajaj" && brand !== "Honda" && brand !== "Yamaha" && brand !== "Hero" && brand !== "TVS" && brand !== "Royal Enfield" && brand !== "Suzuki" && brand !== "KTM") {
+                    document.getElementById("b-brand").value = "Other";
+                    document.getElementById("b-brand-other").value = brand;
+                  } else {
+                    document.getElementById("b-brand-other").value = "";
+                  }
+                  
+                  document.getElementById("b-brand").required = false;
+                  document.getElementById("b-bike").required = false;
+                  syncBrandUI();
+                }
+              });
+            }
           }
         } catch (err) {
           console.error("Error retrieving auth session:", err);
@@ -851,12 +938,14 @@
         submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Saving Booking...`;
 
         // B. Save booking record in 'pending_verification' status
+        const regNoVal = document.getElementById("b-reg-no").value.trim();
         const insertData = {
           user_id: loggedInUserId,
           name: nameInput.value.trim(),
           phone: combinedPhone,
           bike_brand: brandVal === "Other" ? brandOtherVal : brandVal,
           bike_model: modelVal,
+          registration_no: regNoVal || null,
           service_type: serviceSelect.value,
           location: locationInput.value.trim() || null,
           coordinates: coordsVal || null,
@@ -881,6 +970,25 @@
         if (dbErr) throw dbErr;
         if (insertedRows && insertedRows[0]) {
           supabaseBookingId = insertedRows[0].id;
+        }
+
+        // C. If user is logged in and submitted a NEW motorcycle, save it to public.motorcycles
+        const savedBikesSelect = document.getElementById("b-saved-bike");
+        const savedBikesWrap = document.getElementById("b-saved-bikes-wrap");
+        const isNewBike = savedBikesWrap.classList.contains("hidden") || (savedBikesSelect && savedBikesSelect.value === "new");
+
+        if (loggedInUserId && isNewBike) {
+          const finalBrand = brandVal === "Other" ? brandOtherVal : brandVal;
+          if (finalBrand && modelVal) {
+            await window.supabaseClient
+              .from("motorcycles")
+              .insert([{
+                user_id: loggedInUserId,
+                brand: finalBrand,
+                model: modelVal,
+                registration_no: regNoVal || null
+              }]);
+          }
         }
 
       } catch (err) {
