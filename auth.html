@@ -638,7 +638,10 @@
     } catch (err) {
       console.error(err);
       const errMsg = (err.message || err).toLowerCase();
-      if (errMsg.includes("already registered") || errMsg.includes("already exists") || errMsg.includes("email")) {
+      if (errMsg.includes("profiles_phone_unique") || (errMsg.includes("duplicate") && errMsg.includes("phone"))) {
+        showFieldError(phoneInput, document.getElementById("signup-phone-error"), "This phone number is already registered to another account.");
+        phoneInput.focus();
+      } else if (errMsg.includes("already registered") || errMsg.includes("already exists") || errMsg.includes("email")) {
         showFieldError(emailInput, document.getElementById("signup-email-error"), "This email address is already registered.");
         emailInput.focus();
       } else if (errMsg.includes("password")) {
