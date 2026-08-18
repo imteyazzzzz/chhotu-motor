@@ -229,5 +229,55 @@ CREATE POLICY "Admin/Staff can view all profiles" ON public.profiles
     );
 
 
--- 8. Force Supabase PostgREST schema cache to reload
+-- 8. Clean up any empty strings to NULL to allow multiple accounts without phone numbers
+UPDATE public.profiles
+SET phone = NULL
+WHERE phone = '';
+
+-- Clean up any duplicate phone numbers (keep only the first row per duplicate phone)
+WITH duplicates AS (
+    SELECT id, ROW_NUMBER() OVER(PARTITION BY phone ORDER BY created_at ASC) as rn
+    FROM public.profiles
+    WHERE phone IS NOT NULL
+)
+UPDATE public.profiles
+SET phone = NULL
+WHERE id IN (
+    SELECT id FROM duplicates WHERE rn > 1
+);
+
+-- Add unique constraint on phone column of profiles table
+ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_phone_unique;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_phone_unique UNIQUE (phone);
+
+-- 9. Update handle_new_user trigger function to use NULL instead of empty string for phone
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, full_name, phone, avatar_url, role)
+    VALUES (
+        new.id,
+        COALESCE(new.raw_user_meta_data->>'full_name', 'Customer'),
+        NULLIF(new.raw_user_meta_data->>'phone', ''),
+        COALESCE(new.raw_user_meta_data->>'avatar_url', ''),
+        'customer'
+    )
+    ON CONFLICT (id) DO UPDATE SET
+        full_name = EXCLUDED.full_name,
+        phone = COALESCE(NULLIF(EXCLUDED.phone, ''), public.profiles.phone);
+
+    INSERT INTO public.addresses (user_id)
+    VALUES (new.id)
+    ON CONFLICT (user_id) DO NOTHING;
+
+    INSERT INTO public.notification_preferences (user_id)
+    VALUES (new.id)
+    ON CONFLICT (user_id) DO NOTHING;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- 10. Force Supabase PostgREST schema cache to reload
 NOTIFY pgrst, 'reload schema';
