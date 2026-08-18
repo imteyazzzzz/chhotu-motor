@@ -28,6 +28,7 @@ async function checkAdminAuth() {
     }
 
     currentAdmin = session.user;
+    window.currentAdmin = currentAdmin;
     
     // Fetch profile role check
     const { data: profile, error } = await window.supabaseClient
@@ -43,6 +44,7 @@ async function checkAdminAuth() {
     }
 
     adminProfile = profile;
+    window.adminProfile = adminProfile;
 
     // Wait for DOM to load to inject layout
     if (document.readyState === "loading") {
