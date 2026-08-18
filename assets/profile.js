@@ -141,6 +141,28 @@ function populateProfileHeaders() {
 // ---- Tab Switching Controller ----
 const tabPanels = ["overview", "account", "bookings", "bikes", "addresses", "notifications"];
 
+// Synchronize mobile accordion panels visibility and open state with active tab
+function syncAccordionState() {
+  tabPanels.forEach(panelName => {
+    const panel = document.getElementById(`panel-${panelName}`);
+    if (panel) {
+      const accordionItem = panel.closest(".accordion-item");
+      if (accordionItem) {
+        const content = accordionItem.querySelector(".accordion-content");
+        if (!panel.classList.contains("hidden")) {
+          // This panel is active, so open the accordion
+          accordionItem.classList.add("open");
+          content.classList.add("open");
+        } else {
+          // This panel is inactive, so close the accordion
+          accordionItem.classList.remove("open");
+          content.classList.remove("open");
+        }
+      }
+    }
+  });
+}
+
 function initTabs() {
   const tabsList = document.querySelectorAll("nav[role='tablist'] button[role='tab'], div[role='tablist'] button[role='tab']");
   
@@ -203,8 +225,27 @@ function initTabs() {
 
       // Lazy load data based on selected tab panel
       lazyLoadTab(targetPanel);
+      
+      // Synchronize mobile accordion panels visibility and open state
+      syncAccordionState();
     });
   });
+
+  // Wire up Mobile Accordion Headers
+  const accordionHeaders = document.querySelectorAll(".accordion-header");
+  accordionHeaders.forEach(header => {
+    header.addEventListener("click", (e) => {
+      e.preventDefault();
+      const targetPanelName = header.getAttribute("data-target");
+      const targetTabBtn = document.getElementById(`tab-${targetPanelName}`);
+      if (targetTabBtn) {
+        targetTabBtn.click();
+      }
+    });
+  });
+
+  // Call initial synchronization to open default accordion
+  syncAccordionState();
 
   // Wire up "Edit Account" quick button to switch directly to the Account Details tab
   const triggerEditTab = () => {

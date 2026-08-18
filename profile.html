@@ -176,7 +176,7 @@
         border-color: rgba(255, 90, 31, 0.4);
     }
 </style>
-<link rel="stylesheet" href="assets/style.css?v=1.0.1">
+<link rel="stylesheet" href="assets/style.css?v=1.0.2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase.js"></script>
   <style>
@@ -373,369 +373,400 @@
             <p id="m-phone" class="font-mono text-xs text-[#B9B6AC] truncate mt-0.5">--</p>
           </div>
           <button id="m-btn-edit-profile" class="btn btn-outline !p-2 shrink-0" aria-label="Edit Profile"><i class="fa-solid fa-user-gear"></i></button>
-        </div>
-
-        <!-- Mobile Vertical Tab List -->
-        <div class="lg:hidden bg-[#14161A] py-3 z-20 border-b border-[#3A3F49]">
-          <div class="flex flex-col gap-2 w-full px-1" role="tablist" aria-label="Mobile Profile Tabs">
-            <button role="tab" aria-selected="true" aria-controls="panel-overview" id="m-tab-overview" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold transition-all">Overview</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-account" id="m-tab-account" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Account Details</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-bookings" id="m-tab-bookings" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">My Bookings</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-bikes" id="m-tab-bikes" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Saved Bikes</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-addresses" id="m-tab-addresses" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Saved Addresses</button>
-            <button role="tab" aria-selected="false" aria-controls="panel-notifications" id="m-tab-notifications" class="w-full text-left px-4 py-2.5 rounded-md font-display text-xs uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC] transition-all">Notifications</button>
-          </div>
-        </div>
-
-        <!-- ============ TAB PANELS ============ -->
+        </div>        <!-- ============ TAB PANELS / MOBILE ACCORDIONS ============ -->
         <div class="space-y-6">
 
-          <!-- 1. OVERVIEW PANEL -->
-          <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="space-y-6">
-            <!-- Quick Actions Card -->
-            <div class="card p-6 space-y-4">
-              <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49] pb-2">Quick Actions</h3>
-              <div class="grid sm:grid-cols-2 gap-4">
-                <a href="booking.html" class="btn btn-primary w-full flex items-center justify-center gap-2 py-3"><i class="fa-solid fa-calendar-plus"></i> Book New Repair</a>
-                <a href="tel:+9779813691072" class="btn btn-outline w-full flex items-center justify-center gap-2 py-3"><i class="fa-solid fa-phone"></i> Call Emergency Desk</a>
+          <!-- Accordion 1: Overview -->
+          <div class="accordion-item border border-[#3A3F49] rounded-lg lg:border-0 lg:bg-transparent overflow-hidden bg-[#1B1E24]">
+            <!-- Accordion Header (Only visible on mobile) -->
+            <button type="button" class="accordion-header lg:hidden w-full flex items-center justify-between p-4 bg-[#1B1E24] hover:bg-[#22262E] transition-colors min-h-[48px]" data-target="overview">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#B9B6AC]">dashboard</span>
+                <span class="font-display text-sm uppercase text-[#F4F1E8]">Overview</span>
               </div>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div class="card p-3 sm:p-5 text-center space-y-1">
-                <div id="stat-active-bookings" class="font-mono text-2xl font-bold text-[#FF5A1F]">0</div>
-                <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Active Bookings</div>
-              </div>
-              <div class="card p-3 sm:p-5 text-center space-y-1">
-                <div id="stat-total-bookings" class="font-mono text-2xl font-bold text-[#F4F1E8]">0</div>
-                <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Total Bookings</div>
-              </div>
-              <div class="card p-3 sm:p-5 text-center space-y-1">
-                <div id="stat-saved-bikes" class="font-mono text-2xl font-bold text-[#F4F1E8]">0</div>
-                <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Saved Bikes</div>
-              </div>
-              <div class="card p-3 sm:p-5 text-center space-y-1">
-                <div id="stat-saved-addresses" class="font-mono text-2xl font-bold text-[#F4F1E8]">0</div>
-                <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Saved Addresses</div>
-              </div>
-            </div>
-
-            <!-- Latest Booking Snapshot -->
-            <div id="overview-booking-wrap" class="card p-6 space-y-4">
-              <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49] pb-2">Most Recent Booking</h3>
-              <div id="overview-booking-content">
-                <!-- Dynamically populated or empty state -->
-                <p class="text-sm text-[#B9B6AC] py-4">No recent bookings found.</p>
-              </div>
-            </div>
-          </section>
-
-          <!-- 2. ACCOUNT DETAILS PANEL -->
-          <section id="panel-account" role="tabpanel" aria-labelledby="tab-account" class="space-y-6 hidden">
-            <!-- Dynamic Success / Error Toast Binders -->
-            <div id="account-success" class="hidden auth-success-pop bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-4 text-center">
-              <p class="text-[#FF5A1F] text-xs font-semibold"><i class="fa-solid fa-circle-check"></i> Profile updated successfully.</p>
-            </div>
-            <div id="account-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-3 text-xs text-red-400"></div>
-
-            <!-- Personal Info Card -->
-            <div class="card p-6 space-y-4 relative" id="personal-info-card">
-              <div class="flex justify-between items-center border-b border-[#3A3F49] pb-2">
-                <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">Personal Information</h3>
-                <button id="btn-edit-personal" class="text-xs text-[#FF5A1F] hover:underline" aria-label="Edit Profile Details"><i class="fa-solid fa-pencil"></i> Edit</button>
-              </div>
-
-              <!-- VIEW MODE (shown by default) -->
-              <div id="personal-view-mode" class="space-y-3">
-                <div class="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-[10px] text-[#B9B6AC] uppercase tracking-wider">Full Name</label>
-                    <p id="v-name" class="text-sm mt-0.5">--</p>
-                  </div>
-                  <div>
-                    <label class="text-[10px] text-[#B9B6AC] uppercase tracking-wider">Phone Number</label>
-                    <p id="v-phone" class="text-sm mt-0.5">--</p>
-                  </div>
-                </div>
-                <div>
-                  <label class="text-[10px] text-[#B9B6AC] uppercase tracking-wider flex items-center gap-1">Email Address <i class="fa-solid fa-lock text-[9px]"></i></label>
-                  <p id="v-email" class="text-sm mt-0.5 text-[#B9B6AC] font-mono">--</p>
-                  <p class="text-[10px] text-[#B9B6AC] mt-1 font-mono italic">Email address cannot be changed — contact support if you need to update it.</p>
-                </div>
-              </div>
-
-              <!-- EDIT MODE (hidden by default) -->
-              <form id="personal-edit-form" class="space-y-4 hidden" novalidate>
-                <div class="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="field-label" for="e-name">Full Name *</label>
-                    <input id="e-name" type="text" class="field-input" required>
-                    <p class="field-error" id="e-name-error">Please enter your name.</p>
-                  </div>
-                  <div>
-                    <label class="field-label" for="e-phone">Phone Number *</label>
-                    <div class="flex gap-2">
-                      <select id="e-phone-code" class="field-input !w-[100px] shrink-0" required>
-                        <option value="+977">+977 (NP)</option>
-                        <option value="+91">+91 (IN)</option>
-                        <option value="+1">+1 (US)</option>
-                      </select>
-                      <input id="e-phone" type="tel" class="field-input flex-1" required>
+              <span class="material-symbols-outlined text-[#B9B6AC] chevron">expand_more</span>
+            </button>
+            <!-- Accordion Content -->
+            <div class="accordion-content lg:block lg:max-h-none lg:opacity-100 lg:overflow-visible">
+              <div class="p-4 lg:p-0 bg-[#111317] lg:bg-transparent border-t border-[#3A3F49] lg:border-t-0">
+                <!-- 1. OVERVIEW PANEL -->
+                <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" class="space-y-6">
+                  <!-- Quick Actions Card -->
+                  <div class="card p-6 space-y-4">
+                    <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49] pb-2">Quick Actions</h3>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                      <a href="booking.html" class="btn btn-primary w-full flex items-center justify-center gap-2 py-3"><i class="fa-solid fa-calendar-plus"></i> Book New Repair</a>
+                      <a href="tel:+9779813691072" class="btn btn-outline w-full flex items-center justify-center gap-2 py-3"><i class="fa-solid fa-phone"></i> Call Emergency Desk</a>
                     </div>
-                    <p class="field-error" id="e-phone-error">Please enter a valid phone number.</p>
                   </div>
-                </div>
-                <div class="flex justify-end gap-3 pt-2">
-                  <button type="button" id="btn-cancel-personal" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
-                  <button type="submit" id="btn-save-personal" class="btn btn-primary !py-2 !px-4 !text-xs">Save Changes</button>
-                </div>
-              </form>
-            </div>
 
-            <!-- Change Password Accordion Card -->
-            <div class="card p-6 space-y-4">
-              <div class="flex justify-between items-center border-b border-[#3A3F49] pb-2">
-                <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">Security</h3>
-                <button id="btn-toggle-password" class="text-xs text-[#FF5A1F] hover:underline"><i class="fa-solid fa-shield-halved"></i> Change Password</button>
-              </div>
-
-              <form id="password-change-form" class="space-y-4 hidden" novalidate>
-                <div class="grid sm:grid-cols-3 gap-4">
-                  <div>
-                    <label class="field-label" for="pw-current">Current Password *</label>
-                    <div class="relative">
-                      <input id="pw-current" type="password" class="field-input" style="padding-right:2.5rem" placeholder="••••••••" required>
-                      <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="pw-current" aria-label="Show password" aria-pressed="false">
-                        <i class="fa-solid fa-eye"></i>
-                      </button>
+                  <!-- Stats Grid -->
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="card p-3 sm:p-5 text-center space-y-1">
+                      <div id="stat-active-bookings" class="font-mono text-2xl font-bold text-[#FF5A1F]">0</div>
+                      <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Active Bookings</div>
                     </div>
-                    <p class="field-error" id="pw-current-error">Current password is required.</p>
-                  </div>
-                  <div>
-                    <label class="field-label" for="pw-new">New Password *</label>
-                    <div class="relative">
-                      <input id="pw-new" type="password" class="field-input" style="padding-right:2.5rem" placeholder="Min 6 chars" required>
-                      <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="pw-new" aria-label="Show password" aria-pressed="false">
-                        <i class="fa-solid fa-eye"></i>
-                      </button>
+                    <div class="card p-3 sm:p-5 text-center space-y-1">
+                      <div id="stat-total-bookings" class="font-mono text-2xl font-bold text-[#F4F1E8]">0</div>
+                      <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Total Bookings</div>
                     </div>
-                    <p class="field-error" id="pw-new-error">New password must be at least 6 characters.</p>
-                  </div>
-                  <div>
-                    <label class="field-label" for="pw-confirm">Confirm New Password *</label>
-                    <div class="relative">
-                      <input id="pw-confirm" type="password" class="field-input" style="padding-right:2.5rem" placeholder="••••••••" required>
-                      <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="pw-confirm" aria-label="Show password" aria-pressed="false">
-                        <i class="fa-solid fa-eye"></i>
-                      </button>
+                    <div class="card p-3 sm:p-5 text-center space-y-1">
+                      <div id="stat-saved-bikes" class="font-mono text-2xl font-bold text-[#F4F1E8]">0</div>
+                      <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Saved Bikes</div>
                     </div>
-                    <p class="field-error" id="pw-confirm-error">Passwords must match.</p>
+                    <div class="card p-3 sm:p-5 text-center space-y-1">
+                      <div id="stat-saved-addresses" class="font-mono text-2xl font-bold text-[#F4F1E8]">0</div>
+                      <div class="text-[10px] text-[#B9B6AC] uppercase tracking-wider font-display">Saved Addresses</div>
+                    </div>
                   </div>
-                </div>
-                <div class="flex justify-end gap-3 pt-2">
-                  <button type="button" id="btn-cancel-password" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
-                  <button type="submit" id="btn-save-password" class="btn btn-primary !py-2 !px-4 !text-xs">Update Password</button>
-                </div>
-              </form>
-            </div>
 
-            <!-- Danger Zone Card -->
-            <div class="card p-6 space-y-4 border border-red-500/30">
-              <h3 class="font-display text-sm text-red-400 tracking-wide uppercase border-b border-red-500/20 pb-2">Danger Zone</h3>
-              <div id="danger-collapsed">
-                <p class="text-xs text-[#B9B6AC] mb-4">Deleting your account is permanent. This will delete all your booking history, saved bikes, and addresses. This cannot be undone.</p>
-                <button id="btn-delete-trigger" class="btn btn-outline !text-red-400 border-red-500/40 hover:bg-red-500/10 !py-2 !px-4 !text-xs">Delete My Account</button>
-              </div>
-
-              <!-- Delete Account Confirmation Panel -->
-              <div id="danger-confirm" class="space-y-4 hidden">
-                <p class="text-xs text-red-400 font-semibold">To verify, please type <span class="font-mono bg-red-500/10 px-1 py-0.5 rounded">DELETE</span> in the box below to permanently delete your account.</p>
-                <div class="flex flex-col sm:flex-row gap-3">
-                  <input id="delete-confirm-input" type="text" class="field-input flex-1 sm:max-w-xs" placeholder="Type DELETE">
-                  <div class="flex gap-2">
-                    <button id="btn-delete-cancel" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
-                    <button id="btn-delete-confirm" disabled class="btn btn-primary bg-red-600 border-red-600 text-white hover:bg-red-700 !py-2 !px-4 !text-xs disabled:opacity-40 disabled:cursor-not-allowed">Delete Permanently</button>
+                  <!-- Latest Booking Snapshot -->
+                  <div id="overview-booking-wrap" class="card p-6 space-y-4">
+                    <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49] pb-2">Most Recent Booking</h3>
+                    <div id="overview-booking-content">
+                      <!-- Dynamically populated or empty state -->
+                      <p class="text-sm text-[#B9B6AC] py-4">No recent bookings found.</p>
+                    </div>
                   </div>
-                </div>
-                <p class="text-[10px] text-[#B9B6AC] italic">Note: Real account deletion uses a backend helper trigger. Direct client deletion is restricted.</p>
-                <p id="delete-error" class="hidden text-xs text-red-400 font-mono mt-2"></p>
+                </section>
               </div>
             </div>
-          </section>
+          </div>
 
-          <!-- 3. MY BOOKINGS PANEL -->
-          <section id="panel-bookings" role="tabpanel" aria-labelledby="tab-bookings" class="space-y-6 hidden">
-            <div class="flex justify-between items-center border-b border-[#3A3F49] pb-2">
-              <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">My Bookings</h3>
-              <a href="booking.html" class="btn btn-primary !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-plus"></i> New Booking</a>
-            </div>
+          <!-- Accordion 2: Account Details -->
+          <div class="accordion-item border border-[#3A3F49] rounded-lg lg:border-0 lg:bg-transparent overflow-hidden bg-[#1B1E24]">
+            <button type="button" class="accordion-header lg:hidden w-full flex items-center justify-between p-4 bg-[#1B1E24] hover:bg-[#22262E] transition-colors min-h-[48px]" data-target="account">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#B9B6AC]">person</span>
+                <span class="font-display text-sm uppercase text-[#F4F1E8]">Account Details</span>
+              </div>
+              <span class="material-symbols-outlined text-[#B9B6AC] chevron">expand_more</span>
+            </button>
+            <div class="accordion-content lg:block lg:max-h-none lg:opacity-100 lg:overflow-visible">
+              <div class="p-4 lg:p-0 bg-[#111317] lg:bg-transparent border-t border-[#3A3F49] lg:border-t-0">
+                <!-- 2. ACCOUNT DETAILS PANEL -->
+                <section id="panel-account" role="tabpanel" aria-labelledby="tab-account" class="space-y-6 hidden">
+                  <!-- Dynamic Success / Error Toast Binders -->
+                  <div id="account-success" class="hidden auth-success-pop bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-4 text-center">
+                    <p class="text-[#FF5A1F] text-xs font-semibold"><i class="fa-solid fa-circle-check"></i> Profile updated successfully.</p>
+                  </div>
+                  <div id="account-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-3 text-xs text-red-400"></div>
 
-            <div id="bookings-list-content" class="space-y-4">
-              <!-- Dynamically populated bookings list -->
-            </div>
-          </section>
+                  <!-- Personal Info Card -->
+                  <div class="card p-6 space-y-4 relative" id="personal-info-card">
+                    <div class="flex justify-between items-center border-b border-[#3A3F49] pb-2">
+                      <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">Personal Information</h3>
+                      <button id="btn-edit-personal" class="text-xs text-[#FF5A1F] hover:underline" aria-label="Edit Profile Details"><i class="fa-solid fa-pencil"></i> Edit</button>
+                    </div>
 
-          <!-- 4. MY MOTORCYCLES PANEL -->
-          <section id="panel-bikes" role="tabpanel" aria-labelledby="tab-bikes" class="space-y-6 hidden">
-            <div class="flex justify-between items-center border-b border-[#3A3F49] pb-2">
-              <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">My Motorcycles</h3>
-              <button id="btn-add-bike-trigger" class="btn btn-primary !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-plus"></i> Add Bike</button>
-            </div>
+                    <!-- VIEW MODE (shown by default) -->
+                    <div id="personal-view-mode" class="space-y-3">
+                      <div class="grid sm:grid-cols-3 gap-2 py-1.5 border-b border-[#3A3F49]/40">
+                        <span class="text-xs text-[#B9B6AC] uppercase font-mono tracking-wider">Full Name</span>
+                        <span id="lbl-name" class="sm:col-span-2 text-sm font-semibold">John Doe</span>
+                      </div>
+                      <div class="grid sm:grid-cols-3 gap-2 py-1.5 border-b border-[#3A3F49]/40">
+                        <span class="text-xs text-[#B9B6AC] uppercase font-mono tracking-wider">Email Address</span>
+                        <span id="lbl-email" class="sm:col-span-2 text-sm font-mono truncate">john.doe@example.com</span>
+                      </div>
+                      <div class="grid sm:grid-cols-3 gap-2 py-1.5 border-b border-[#3A3F49]/40">
+                        <span class="text-xs text-[#B9B6AC] uppercase font-mono tracking-wider">Phone Number</span>
+                        <span id="lbl-phone" class="sm:col-span-2 text-sm font-mono">+1 555-0198</span>
+                      </div>
+                    </div>
 
-            <!-- Inline Add/Edit Bike Card Form -->
-            <div id="bike-form-card" class="card p-6 space-y-4 hidden">
-              <h4 id="bike-form-title" class="font-display text-xs uppercase text-[#FF5A1F]">Add New Motorcycle</h4>
-              <form id="bike-crud-form" class="grid sm:grid-cols-2 gap-4 items-end" novalidate>
-                <input type="hidden" id="crud-bike-id" value="">
-                <div>
-                  <label class="field-label" for="crud-bike-model">Bike Brand & Model *</label>
-                  <input id="crud-bike-model" type="text" class="field-input" placeholder="e.g. Pulsar 150, Activa 6G" required>
-                  <p class="field-error" id="crud-bike-model-error">Bike model is required.</p>
-                </div>
-                <div>
-                  <label class="field-label" for="crud-bike-reg">Registration No. (Optional)</label>
-                  <input id="crud-bike-reg" type="text" class="field-input" placeholder="e.g. BA-2-PA-1234">
-                </div>
-                <div class="sm:col-span-2 flex justify-end gap-3 mt-2">
-                  <button type="button" id="btn-bike-cancel" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
-                  <button type="submit" id="btn-bike-save" class="btn btn-primary !py-2 !px-4 !text-xs">Save Bike</button>
-                </div>
-              </form>
+                    <!-- EDIT MODE (hidden by default) -->
+                    <form id="personal-edit-form" class="space-y-4 hidden" novalidate>
+                      <div>
+                        <label class="field-label" for="e-name">Full Name *</label>
+                        <input id="e-name" type="text" class="field-input" placeholder="Your name" required>
+                        <p class="field-error" id="e-name-error">Full name is required.</p>
+                      </div>
+                      <div>
+                        <label class="field-label" for="e-phone">Phone Number *</label>
+                        <input id="e-phone" type="tel" class="field-input" placeholder="98XXXXXXXX" required>
+                        <p class="field-error" id="e-phone-error">Enter a valid 10-digit mobile number starting with 9.</p>
+                      </div>
+                      <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="btn-cancel-personal" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
+                        <button type="submit" id="btn-save-personal" class="btn btn-primary !py-2 !px-4 !text-xs">Save Changes</button>
+                      </div>
+                    </form>
+                  </div>
 
-              <!-- Inline Error Container -->
-              <div id="bike-crud-error" class="hidden bg-[#14161A] border border-red-500/40 rounded-md p-4 text-xs text-red-400 mt-2">
-                <i class="fa-solid fa-triangle-exclamation"></i> <span id="bike-crud-error-text"></span>
+                  <!-- Change Password Card -->
+                  <div class="card p-6 space-y-4 relative" id="change-password-card">
+                    <div class="flex justify-between items-center border-b border-[#3A3F49] pb-2">
+                      <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">Password & Security</h3>
+                      <button id="btn-edit-password" class="text-xs text-[#FF5A1F] hover:underline" aria-label="Edit Profile Details"><i class="fa-solid fa-lock"></i> Change Password</button>
+                    </div>
+
+                    <div id="password-view-mode" class="text-sm text-[#B9B6AC] py-1">
+                      Passwords must be at least 6 characters. Re-authenticating is required.
+                    </div>
+
+                    <!-- EDIT MODE PASSWORD (hidden by default) -->
+                    <form id="password-change-form" class="space-y-4 hidden" novalidate>
+                      <div>
+                        <label class="field-label" for="e-pass-new">New Password *</label>
+                        <input id="e-pass-new" type="password" class="field-input" placeholder="New Password" required minlength="6">
+                        <p class="field-error" id="e-pass-new-error">Password must be at least 6 characters.</p>
+                      </div>
+                      <div>
+                        <label class="field-label" for="e-pass-confirm">Confirm New Password *</label>
+                        <input id="e-pass-confirm" type="password" class="field-input" placeholder="Confirm Password" required minlength="6">
+                        <p class="field-error" id="e-pass-confirm-error">Passwords do not match.</p>
+                      </div>
+                      <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" id="btn-cancel-password" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
+                        <button type="submit" id="btn-save-password" class="btn btn-primary !py-2 !px-4 !text-xs">Update Password</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <!-- Delete Account Risk Area -->
+                  <div class="card p-6 border-red-500/20 space-y-4">
+                    <h3 class="font-display text-sm text-red-500 tracking-wide uppercase border-b border-red-500/20 pb-2">Danger Zone</h3>
+                    <p class="text-xs text-[#B9B6AC] leading-relaxed">Once you delete your account, there is no going back. All service records, address credentials, and active warranty slots will be permanently purged.</p>
+                    <div class="flex items-center justify-between gap-4 pt-2">
+                      <button id="btn-delete-account" class="btn btn-outline !border-red-500/40 !text-red-400 hover:bg-red-500/10 !py-2 !px-4 !text-xs">Delete Account Profile</button>
+                    </div>
+                    <p class="text-[10px] text-[#B9B6AC] italic">Note: Real account deletion uses a backend helper trigger. Direct client deletion is restricted.</p>
+                    <p id="delete-error" class="hidden text-xs text-red-400 font-mono mt-2"></p>
+                  </div>
+                </section>
               </div>
             </div>
+          </div>
 
-            <!-- Bikes Grid List -->
-            <div id="bikes-grid" class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-              <!-- Dynamically populated saved bikes -->
+          <!-- Accordion 3: My Bookings -->
+          <div class="accordion-item border border-[#3A3F49] rounded-lg lg:border-0 lg:bg-transparent overflow-hidden bg-[#1B1E24]">
+            <button type="button" class="accordion-header lg:hidden w-full flex items-center justify-between p-4 bg-[#1B1E24] hover:bg-[#22262E] transition-colors min-h-[48px]" data-target="bookings">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#B9B6AC]">list_alt</span>
+                <span class="font-display text-sm uppercase text-[#F4F1E8]">My Bookings</span>
+              </div>
+              <span class="material-symbols-outlined text-[#B9B6AC] chevron">expand_more</span>
+            </button>
+            <div class="accordion-content lg:block lg:max-h-none lg:opacity-100 lg:overflow-visible">
+              <div class="p-4 lg:p-0 bg-[#111317] lg:bg-transparent border-t border-[#3A3F49] lg:border-t-0">
+                <!-- 3. MY BOOKINGS PANEL -->
+                <section id="panel-bookings" role="tabpanel" aria-labelledby="tab-bookings" class="space-y-6 hidden">
+                  <div class="flex justify-between items-center border-b border-[#3A3F49] pb-2">
+                    <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">My Bookings</h3>
+                    <a href="booking.html" class="btn btn-primary !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-plus"></i> New Booking</a>
+                  </div>
+
+                  <div id="bookings-list-content" class="space-y-4">
+                    <!-- Dynamically populated bookings list -->
+                  </div>
+                </section>
+              </div>
             </div>
-          </section>
+          </div>
 
-          <!-- 5. SAVED ADDRESSES PANEL -->
-          <section id="panel-addresses" role="tabpanel" aria-labelledby="tab-addresses" class="space-y-6 hidden">
-            <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49] pb-2">Saved Addresses</h3>
-            
-            <div class="grid sm:grid-cols-2 gap-6">
-              
-              <!-- Home Address Card -->
-              <div class="card p-6 space-y-4 relative" id="card-addr-home">
-                <div class="flex items-center justify-between border-b border-[#3A3F49] pb-2">
-                  <h4 class="font-display text-xs text-[#ECEAE4] flex items-center gap-2"><i class="fa-solid fa-house text-[#FF5A1F]"></i> Home Address</h4>
-                  <button id="btn-edit-home" class="text-[11px] text-[#FF5A1F] hover:underline">Edit</button>
-                </div>
-                <div id="home-view" class="text-sm text-[#B9B6AC] min-h-[4rem] flex flex-col justify-between">
-                  <p id="txt-home-val">Not set</p>
-                </div>
-                <form id="home-edit-form" class="space-y-3 hidden">
-                  <textarea id="inp-home" rows="3" class="field-input" placeholder="Enter your home address..."></textarea>
-                  <div class="flex justify-end gap-2">
-                    <button type="button" id="btn-cancel-home" class="btn btn-outline !py-1 !px-3 !text-[11px]">Cancel</button>
-                    <button type="submit" class="btn btn-primary !py-1 !px-3 !text-[11px]">Save</button>
-                  </div>
-                </form>
-                <p id="home-addr-error" class="hidden text-[10px] text-red-400 font-mono mt-2"></p>
+          <!-- Accordion 4: Saved Bikes -->
+          <div class="accordion-item border border-[#3A3F49] rounded-lg lg:border-0 lg:bg-transparent overflow-hidden bg-[#1B1E24]">
+            <button type="button" class="accordion-header lg:hidden w-full flex items-center justify-between p-4 bg-[#1B1E24] hover:bg-[#22262E] transition-colors min-h-[48px]" data-target="bikes">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#B9B6AC]">two_wheeler</span>
+                <span class="font-display text-sm uppercase text-[#F4F1E8]">Saved Bikes</span>
               </div>
-
-              <!-- Office Address Card -->
-              <div class="card p-6 space-y-4 relative" id="card-addr-office">
-                <div class="flex items-center justify-between border-b border-[#3A3F49] pb-2">
-                  <h4 class="font-display text-xs text-[#ECEAE4] flex items-center gap-2"><i class="fa-solid fa-briefcase text-[#FF5A1F]"></i> Office Address</h4>
-                  <button id="btn-edit-office" class="text-[11px] text-[#FF5A1F] hover:underline">Edit</button>
-                </div>
-                <div id="office-view" class="text-sm text-[#B9B6AC] min-h-[4rem] flex flex-col justify-between">
-                  <p id="txt-office-val">Not set</p>
-                </div>
-                <form id="office-edit-form" class="space-y-3 hidden">
-                  <textarea id="inp-office" rows="3" class="field-input" placeholder="Enter your office address..."></textarea>
-                  <div class="flex justify-end gap-2">
-                    <button type="button" id="btn-cancel-office" class="btn btn-outline !py-1 !px-3 !text-[11px]">Cancel</button>
-                    <button type="submit" class="btn btn-primary !py-1 !px-3 !text-[11px]">Save</button>
+              <span class="material-symbols-outlined text-[#B9B6AC] chevron">expand_more</span>
+            </button>
+            <div class="accordion-content lg:block lg:max-h-none lg:opacity-100 lg:overflow-visible">
+              <div class="p-4 lg:p-0 bg-[#111317] lg:bg-transparent border-t border-[#3A3F49] lg:border-t-0">
+                <!-- 4. MY MOTORCYCLES PANEL -->
+                <section id="panel-bikes" role="tabpanel" aria-labelledby="tab-bikes" class="space-y-6 hidden">
+                  <div class="flex justify-between items-center border-b border-[#3A3F49] pb-2">
+                    <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">My Motorcycles</h3>
+                    <button id="btn-add-bike-trigger" class="btn btn-primary !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-plus"></i> Add Bike</button>
                   </div>
-                </form>
-                <p id="office-addr-error" class="hidden text-[10px] text-red-400 font-mono mt-2"></p>
-              </div>
 
+                  <!-- Inline Add/Edit Bike Card Form -->
+                  <div id="bike-form-card" class="card p-6 space-y-4 hidden">
+                    <h4 id="bike-form-title" class="font-display text-xs uppercase text-[#FF5A1F]">Add New Motorcycle</h4>
+                    <form id="bike-crud-form" class="grid sm:grid-cols-2 gap-4 items-end" novalidate>
+                      <input type="hidden" id="crud-bike-id" value="">
+                      <div>
+                        <label class="field-label" for="crud-bike-model">Bike Brand & Model *</label>
+                        <input id="crud-bike-model" type="text" class="field-input" placeholder="e.g. Pulsar 150, Activa 6G" required>
+                        <p class="field-error" id="crud-bike-model-error">Bike model is required.</p>
+                      </div>
+                      <div>
+                        <label class="field-label" for="crud-bike-reg">Registration No. (Optional)</label>
+                        <input id="crud-bike-reg" type="text" class="field-input" placeholder="e.g. BA-2-PA-1234">
+                      </div>
+                      <div class="sm:col-span-2 flex justify-end gap-3 mt-2">
+                        <button type="button" id="btn-bike-cancel" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
+                        <button type="submit" id="btn-bike-save" class="btn btn-primary !py-2 !px-4 !text-xs">Save Bike</button>
+                      </div>
+                    </form>
+
+                    <!-- Inline Error Container -->
+                    <div id="bike-crud-error" class="hidden bg-[#14161A] border border-red-500/40 rounded-md p-4 text-xs text-red-400 mt-2">
+                      <i class="fa-solid fa-triangle-exclamation"></i> <span id="bike-crud-error-text"></span>
+                    </div>
+                  </div>
+
+                  <!-- Bikes Grid List -->
+                  <div id="bikes-grid" class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- Dynamically populated saved bikes -->
+                  </div>
+                </section>
+              </div>
             </div>
-          </section>
+          </div>
 
-          <!-- 6. NOTIFICATION PREFERENCES PANEL -->
-          <section id="panel-notifications" role="tabpanel" aria-labelledby="tab-notifications" class="space-y-6 hidden">
-            <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49] pb-2">Notification Preferences</h3>
-
-            <!-- Preferences Form/Switches -->
-            <div class="card p-6 space-y-6">
-              
-              <!-- 1. Transactional -->
-              <div class="space-y-4">
-                <h4 class="font-display text-xs uppercase text-[#ECEAE4] border-b border-[#3A3F49]/40 pb-1">Booking Status Updates</h4>
-                
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h5 class="text-sm font-semibold">WhatsApp Alerts</h5>
-                    <p class="text-xs text-[#B9B6AC]">Get status updates on booking, dispatched mechanic, and completion.</p>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="pref-booking-whatsapp" role="switch" aria-checked="true" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h5 class="text-sm font-semibold">SMS Alerts</h5>
-                    <p class="text-xs text-[#B9B6AC]">Receive SMS text messages on status progress updates.</p>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="pref-booking-sms" role="switch" aria-checked="false">
-                    <span class="slider"></span>
-                  </label>
-                </div>
-
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h5 class="text-sm font-semibold">Email Notifications</h5>
-                    <p class="text-xs text-[#B9B6AC]">Receive receipts, confirmation summaries, and status logs.</p>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="pref-booking-email" role="switch" aria-checked="true" checked>
-                    <span class="slider"></span>
-                  </label>
-                </div>
+          <!-- Accordion 5: Saved Addresses -->
+          <div class="accordion-item border border-[#3A3F49] rounded-lg lg:border-0 lg:bg-transparent overflow-hidden bg-[#1B1E24]">
+            <button type="button" class="accordion-header lg:hidden w-full flex items-center justify-between p-4 bg-[#1B1E24] hover:bg-[#22262E] transition-colors min-h-[48px]" data-target="addresses">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#B9B6AC]">map</span>
+                <span class="font-display text-sm uppercase text-[#F4F1E8]">Saved Addresses</span>
               </div>
+              <span class="material-symbols-outlined text-[#B9B6AC] chevron">expand_more</span>
+            </button>
+            <div class="accordion-content lg:block lg:max-h-none lg:opacity-100 lg:overflow-visible">
+              <div class="p-4 lg:p-0 bg-[#111317] lg:bg-transparent border-t border-[#3A3F49] lg:border-t-0">
+                <!-- 5. SAVED ADDRESSES PANEL -->
+                <section id="panel-addresses" role="tabpanel" aria-labelledby="tab-addresses" class="space-y-6 hidden">
+                  <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49] pb-2">Saved Addresses</h3>
+                  
+                  <div class="grid sm:grid-cols-2 gap-6">
+                    
+                    <!-- Home Address Card -->
+                    <div class="card p-6 space-y-4 relative" id="card-addr-home">
+                      <div class="flex items-center justify-between border-b border-[#3A3F49] pb-2">
+                        <h4 class="font-display text-xs text-[#ECEAE4] flex items-center gap-2"><i class="fa-solid fa-house text-[#FF5A1F]"></i> Home Address</h4>
+                        <button id="btn-edit-home" class="text-[11px] text-[#FF5A1F] hover:underline">Edit</button>
+                      </div>
+                      <div id="home-view" class="text-sm text-[#B9B6AC] min-h-[4rem] flex flex-col justify-between">
+                        <p id="txt-home-val">Not set</p>
+                      </div>
+                      <form id="home-edit-form" class="space-y-3 hidden">
+                        <textarea id="inp-home" rows="3" class="field-input" placeholder="Enter your home address..."></textarea>
+                        <div class="flex justify-end gap-2">
+                          <button type="button" id="btn-cancel-home" class="btn btn-outline !py-1 !px-3 !text-[11px]">Cancel</button>
+                          <button type="submit" class="btn btn-primary !py-1 !px-3 !text-[11px]">Save</button>
+                        </div>
+                      </form>
+                      <p id="home-addr-error" class="hidden text-[10px] text-red-400 font-mono mt-2"></p>
+                    </div>
 
-              <!-- 2. Marketing -->
-              <div class="space-y-4">
-                <h4 class="font-display text-xs uppercase text-[#ECEAE4] border-b border-[#3A3F49]/40 pb-1">Promotions & Offers</h4>
-                
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h5 class="text-sm font-semibold">WhatsApp Promotions</h5>
-                    <p class="text-xs text-[#B9B6AC]">Occasional coupon codes, seasonal service checks, and discount reminders.</p>
-                  </div>
-                  <label class="switch">
-                    <input type="checkbox" id="pref-promo-whatsapp" role="switch" aria-checked="false">
-                    <span class="slider"></span>
-                  </label>
-                </div>
+                    <!-- Office Address Card -->
+                    <div class="card p-6 space-y-4 relative" id="card-addr-office">
+                      <div class="flex items-center justify-between border-b border-[#3A3F49] pb-2">
+                        <h4 class="font-display text-xs text-[#ECEAE4] flex items-center gap-2"><i class="fa-solid fa-briefcase text-[#FF5A1F]"></i> Office Address</h4>
+                        <button id="btn-edit-office" class="text-[11px] text-[#FF5A1F] hover:underline">Edit</button>
+                      </div>
+                      <div id="office-view" class="text-sm text-[#B9B6AC] min-h-[4rem] flex flex-col justify-between">
+                        <p id="txt-office-val">Not set</p>
+                      </div>
+                      <form id="office-edit-form" class="space-y-3 hidden">
+                        <textarea id="inp-office" rows="3" class="field-input" placeholder="Enter your office address..."></textarea>
+                        <div class="flex justify-end gap-2">
+                          <button type="button" id="btn-cancel-office" class="btn btn-outline !py-1 !px-3 !text-[11px]">Cancel</button>
+                          <button type="submit" class="btn btn-primary !py-1 !px-3 !text-[11px]">Save</button>
+                        </div>
+                      </form>
+                      <p id="office-addr-error" class="hidden text-[10px] text-red-400 font-mono mt-2"></p>
+                    </div>
 
-                <div class="flex items-center justify-between">
-                  <div>
-                    <h5 class="text-sm font-semibold">Email Promotions</h5>
-                    <p class="text-xs text-[#B9B6AC]">Service reminders, monthly discount updates, and bike tips.</p>
                   </div>
-                  <label class="switch">
-                    <input type="checkbox" id="pref-promo-email" role="switch" aria-checked="false">
-                    <span class="slider"></span>
-                  </label>
-                </div>
+                </section>
               </div>
-
             </div>
-          </section>
+          </div>
+
+          <!-- Accordion 6: Notifications -->
+          <div class="accordion-item border border-[#3A3F49] rounded-lg lg:border-0 lg:bg-transparent overflow-hidden bg-[#1B1E24]">
+            <button type="button" class="accordion-header lg:hidden w-full flex items-center justify-between p-4 bg-[#1B1E24] hover:bg-[#22262E] transition-colors min-h-[48px]" data-target="notifications">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#B9B6AC]">notifications</span>
+                <span class="font-display text-sm uppercase text-[#F4F1E8]">Notifications</span>
+              </div>
+              <span class="material-symbols-outlined text-[#B9B6AC] chevron">expand_more</span>
+            </button>
+            <div class="accordion-content lg:block lg:max-h-none lg:opacity-100 lg:overflow-visible">
+              <div class="p-4 lg:p-0 bg-[#111317] lg:bg-transparent border-t border-[#3A3F49] lg:border-t-0">
+                <!-- 6. NOTIFICATION PREFERENCES PANEL -->
+                <section id="panel-notifications" role="tabpanel" aria-labelledby="tab-notifications" class="space-y-6 hidden">
+                  <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49] pb-2">Notification Preferences</h3>
+
+                  <!-- Preferences Form/Switches -->
+                  <div class="card p-6 space-y-6">
+                    
+                    <!-- 1. Transactional -->
+                    <div class="space-y-4">
+                      <h4 class="font-display text-xs uppercase text-[#ECEAE4] border-b border-[#3A3F49]/40 pb-1">Booking Status Updates</h4>
+                      
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h5 class="text-sm font-semibold">WhatsApp Alerts</h5>
+                          <p class="text-xs text-[#B9B6AC]">Get status updates on booking, dispatched mechanic, and completion.</p>
+                        </div>
+                        <label class="switch">
+                          <input type="checkbox" id="pref-booking-whatsapp" role="switch" aria-checked="true" checked>
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h5 class="text-sm font-semibold">SMS Alerts</h5>
+                          <p class="text-xs text-[#B9B6AC]">Receive SMS text messages on status progress updates.</p>
+                        </div>
+                        <label class="switch">
+                          <input type="checkbox" id="pref-booking-sms" role="switch" aria-checked="false">
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h5 class="text-sm font-semibold">Email Notifications</h5>
+                          <p class="text-xs text-[#B9B6AC]">Receive receipts, confirmation summaries, and status logs.</p>
+                        </div>
+                        <label class="switch">
+                          <input type="checkbox" id="pref-booking-email" role="switch" aria-checked="true" checked>
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- 2. Marketing -->
+                    <div class="space-y-4">
+                      <h4 class="font-display text-xs uppercase text-[#ECEAE4] border-b border-[#3A3F49]/40 pb-1">Promotions & Offers</h4>
+                      
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h5 class="text-sm font-semibold">WhatsApp Promotions</h5>
+                          <p class="text-xs text-[#B9B6AC]">Occasional coupon codes, seasonal service checks, and discount reminders.</p>
+                        </div>
+                        <label class="switch">
+                          <input type="checkbox" id="pref-promo-whatsapp" role="switch" aria-checked="false">
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h5 class="text-sm font-semibold">Email Promotions</h5>
+                          <p class="text-xs text-[#B9B6AC]">Service reminders, monthly discount updates, and bike tips.</p>
+                        </div>
+                        <label class="switch">
+                          <input type="checkbox" id="pref-promo-email" role="switch" aria-checked="false">
+                          <span class="slider"></span>
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
 
         </div>
 
@@ -882,7 +913,7 @@
 
   <script src="assets/main.js"></script>
   <script src="assets/forms.js"></script>
-  <script src="assets/profile.js?v=1.0.1"></script>
+  <script src="assets/profile.js?v=1.0.2"></script>
   <script src="assets/agentation-bundle.js"></script>
 </body>
 
