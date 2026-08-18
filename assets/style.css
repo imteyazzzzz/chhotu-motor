@@ -271,16 +271,64 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible{
 
 /* ---- Form elements ---- */
 .field-input{
-  width: 100%;
-  background: var(--charcoal);
-  border: 1px solid var(--steel);
-  border-radius: 4px;
-  padding: 0.85rem 1rem;
-  color: var(--off-white);
-  font-family: var(--font-body);
-  min-height: 48px;
+  width: 100% !important;
+  background: var(--charcoal) !important;
+  border: 1px solid var(--steel) !important;
+  border-radius: 4px !important;
+  padding: 0.85rem 1rem !important;
+  color: var(--off-white) !important;
+  font-family: var(--font-body) !important;
+  min-height: 48px !important;
 }
-.field-input:focus{ border-color: var(--orange); }
+.field-input:focus{
+  border-color: var(--orange) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px var(--orange) !important;
+}
+
+/* Global overrides to defeat Tailwind Forms resets */
+input[type="text"],
+input[type="tel"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+  background-color: var(--charcoal) !important;
+  color: var(--off-white) !important;
+  border: 1px solid var(--steel) !important;
+  border-radius: 4px !important;
+  padding: 0.85rem 1rem !important;
+}
+
+input[type="text"]:focus,
+input[type="tel"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--orange) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px var(--orange) !important;
+}
+
+input[type="text"]::placeholder,
+input[type="tel"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="number"]::placeholder,
+input[type="search"]::placeholder,
+textarea::placeholder {
+  color: var(--off-white-dim) !important;
+  opacity: 1 !important;
+}
 .field-label{
   font-family: var(--font-mono);
   font-size: 0.72rem;
