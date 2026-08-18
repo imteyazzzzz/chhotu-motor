@@ -1345,7 +1345,7 @@ setTimeout(() => {
           submittedAt: new Date().toISOString()
         };
 
-        fetch("https://imteefy.duckdns.org/webhook/chhotu-payment-verify", {
+        fetch("https://imteefy.duckdns.org/webhook-test/chhotu-payment-verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
