@@ -321,6 +321,48 @@ function initEmergencyWhatsApp() {
 
 /* ---- Emergency banner call/WhatsApp shortcuts already use tel: / wa.me directly in HTML ---- */
 
+/* ---- Dynamic Header Authentication State Updates ---- */
+async function updateNavigationAuth() {
+  if (!window.supabaseClient) return;
+
+  const desktopAuthBtn = document.getElementById("d-btn-auth");
+  const mobileAuthBtn = document.getElementById("m-btn-auth");
+  if (!desktopAuthBtn && !mobileAuthBtn) return;
+
+  try {
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    if (session && session.user) {
+      let targetPage = "profile.html";
+      let label = "My Profile";
+      let icon = "fa-user-circle";
+
+      // Query database for custom administrative role check
+      const { data: profile } = await window.supabaseClient
+        .from("profiles")
+        .select("role")
+        .eq("id", session.user.id)
+        .maybeSingle();
+
+      if (profile && (profile.role === "admin" || profile.role === "staff")) {
+        targetPage = "admin-dashboard.html";
+        label = "Admin Panel";
+        icon = "fa-gauge-high";
+      }
+
+      if (desktopAuthBtn) {
+        desktopAuthBtn.href = targetPage;
+        desktopAuthBtn.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
+      }
+      if (mobileAuthBtn) {
+        mobileAuthBtn.href = targetPage;
+        mobileAuthBtn.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load navigation auth state:", err);
+  }
+}
+
 /* ---- Bootstrap ---- */
 document.addEventListener("DOMContentLoaded", () => {
   initMobileMenu();
@@ -332,4 +374,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initFloatingButtonsVisibility();
   initTestimonialAutoScroll();
   initEmergencyWhatsApp();
+  updateNavigationAuth();
 });
