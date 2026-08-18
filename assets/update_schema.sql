@@ -208,5 +208,26 @@ END;
 $$;
 
 
--- 7. Force Supabase PostgREST schema cache to reload
+-- 7. Solve infinite recursion on profiles policy by creating a SECURITY DEFINER function
+CREATE OR REPLACE FUNCTION public.check_user_is_admin_or_staff(user_uuid UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM public.profiles
+        WHERE id = user_uuid AND role IN ('admin', 'staff')
+    );
+END;
+$$;
+
+DROP POLICY IF EXISTS "Admin/Staff can view all profiles" ON public.profiles;
+CREATE POLICY "Admin/Staff can view all profiles" ON public.profiles
+    FOR SELECT USING (
+        public.check_user_is_admin_or_staff(auth.uid())
+    );
+
+
+-- 8. Force Supabase PostgREST schema cache to reload
 NOTIFY pgrst, 'reload schema';
