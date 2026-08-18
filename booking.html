@@ -19,8 +19,140 @@
     href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#93000a",
+                        "secondary-fixed": "#ffdf9d",
+                        "surface-container-low": "#1a1c20",
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "tertiary-fixed": "#66ff8e",
+                        "secondary-fixed-dim": "#f7be28",
+                        "surface-bright": "#37393e",
+                        "surface-highlight": "#22262E",
+                        "surface-variant": "#333539",
+                        "surface-container-lowest": "#0c0e12",
+                        "on-tertiary-fixed": "#002109",
+                        "on-tertiary": "#003915",
+                        "border-muted": "#3A3F49",
+                        "on-primary": "#5e1700",
+                        "surface": "#111317",
+                        "inverse-primary": "#ae3200",
+                        "tertiary-container": "#00a84c",
+                        "surface-dim": "#111317",
+                        "on-primary-fixed": "#3a0b00",
+                        "text-primary": "#F4F1E8",
+                        "on-background": "#e2e2e8",
+                        "background": "#111317",
+                        "surface-container": "#1e2024",
+                        "on-primary-fixed-variant": "#852400",
+                        "status-error": "#EF4444",
+                        "primary-container": "#ff5a1f",
+                        "tertiary-fixed-dim": "#3de273",
+                        "outline-variant": "#5b4038",
+                        "on-primary-container": "#541400",
+                        "primary": "#ffb59e",
+                        "surface-elevated": "#1B1E24",
+                        "primary-fixed": "#ffdbd0",
+                        "text-muted": "#B9B6AC",
+                        "on-secondary-container": "#543e00",
+                        "secondary": "#fac12b",
+                        "outline": "#ab897f",
+                        "status-success": "#3FBF6E",
+                        "secondary-container": "#dba500",
+                        "on-surface-variant": "#e4beb3",
+                        "on-tertiary-fixed-variant": "#005322",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#ffb59e",
+                        "error": "#ffb4ab",
+                        "on-surface": "#e2e2e8",
+                        "on-tertiary-container": "#003212",
+                        "surface-container-highest": "#333539",
+                        "surface-container-high": "#282a2e",
+                        "on-secondary-fixed": "#251a00",
+                        "inverse-surface": "#e2e2e8",
+                        "on-error": "#690005",
+                        "tertiary": "#3de273",
+                        "inverse-on-surface": "#2f3035",
+                        "on-secondary": "#3f2e00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "40px",
+                        "sm": "8px",
+                        "container-max": "1280px",
+                        "unit": "4px",
+                        "xxl": "64px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "button-text": ["Oswald"],
+                        "label-mono-sm": ["JetBrains Mono"],
+                        "label-mono-xs": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Oswald"],
+                        "display-lg-mobile": ["Oswald"],
+                        "headline-md": ["Oswald"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "button-text": ["15px", { "lineHeight": "1", "letterSpacing": "0.04em", "fontWeight": "600" }],
+                        "label-mono-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "label-mono-xs": ["10px", { "lineHeight": "1", "letterSpacing": "0.2em", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "0.02em", "fontWeight": "700" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    .hazard-stripe {
+        background: repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 10px,
+            rgba(255, 90, 31, 0.1) 10px,
+            rgba(255, 90, 31, 0.1) 20px
+        );
+    }
+    .glow-overlay {
+        background: radial-gradient(circle at center, rgba(255, 90, 31, 0.15) 0%, transparent 70%);
+    }
+    .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+    }
+</style>
+<link rel="stylesheet" href="assets/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase.js"></script>
 </head>
@@ -90,21 +222,32 @@
 <main>
 
   <!-- ============ PAGE HEADER ============ -->
-  <section class="border-b border-[#3A3F49] py-14">
-    <div class="max-w-4xl mx-auto px-4 md:px-8 text-center reveal">
-      <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">SECURE BOOKING WIZARD</p>
-      <h1 class="text-4xl md:text-5xl font-bold mb-4 text-[#F4F1E8]">BOOK A REPAIR SERVICE</h1>
-      <p class="text-[#B9B6AC] text-sm">Kathmandu's 24/7 on-demand motorcycle workshop. Fill in the details to request emergency roadside assistance, a home visit, or a workshop appointment.</p>
-    </div>
-  </section>
+  <header class="mb-8 max-w-7xl mx-auto px-4 md:px-8 pt-10">
+    <h1 class="font-display-lg-mobile md:font-display-lg text-text-primary uppercase mb-1">Secure Repair Booking</h1>
+    <p class="font-label-mono-sm text-label-mono-sm text-text-muted uppercase tracking-widest">Protocol Initiation Sequence</p>
+  </header>
 
   <!-- ============ MAIN CONTENT ============ -->
-  <section class="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16">
-    <div class="grid lg:grid-cols-3 gap-10">
+  <section class="max-w-7xl mx-auto px-4 md:px-8 pb-16">
+    <div class="grid lg:grid-cols-12 gap-8">
 
         <!-- ============ BOOKING FORM ============ -->
-        <div class="lg:col-span-2 reveal">
-          <form id="booking-form" class="card p-6 md:p-8 space-y-6" novalidate>
+        <div class="lg:col-span-8 reveal space-y-8">
+          <!-- Progress Indicator -->
+          <div class="flex items-center w-full mb-8">
+            <div class="flex flex-col items-center relative">
+              <div id="step-1-indicator" class="w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10">01</div>
+              <span id="step-1-label" class="text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap">Details</span>
+            </div>
+            <div id="step-divider" class="flex-1 h-px bg-border-muted mx-3 transition-colors duration-300"></div>
+            <div class="flex flex-col items-center relative">
+              <div id="step-2-indicator" class="w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10">02</div>
+              <span id="step-2-label" class="text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap">Deposit</span>
+            </div>
+          </div>
+
+          <form id="booking-form" class="bg-surface-elevated border border-border-muted p-6 md:p-8 space-y-6 relative overflow-hidden group" novalidate>
+            <div class="absolute top-0 left-0 w-1 h-full bg-border-muted group-hover:bg-primary-container transition-colors duration-300"></div>
             <input type="hidden" id="b-coords" name="coordinates" value="">
 
             <!-- STEP 1: Booking Fields (Full Name, Phone, Service, Bike, Location, Date, Issue) -->
@@ -137,21 +280,31 @@
               <!-- Service Type -->
               <div id="b-service-wrap">
                 <label class="field-label" for="b-service">Service Type *</label>
-                <select id="b-service" name="serviceType" class="field-input" required>
-                  <option value="">Select a service</option>
-                  <option value="emergency">Emergency Repair / Roadside Assistance</option>
-                  <option value="home-visit">Scheduled Home / Office Visit</option>
-                  <option value="workshop">Workshop Visit / Appointment</option>
-                </select>
+                <div class="relative">
+                  <select id="b-service" name="serviceType" class="field-input appearance-none" required>
+                    <option value="">Select a service</option>
+                    <option value="emergency">Emergency Repair / Roadside Assistance</option>
+                    <option value="home-visit">Scheduled Home / Office Visit</option>
+                    <option value="workshop">Workshop Visit / Appointment</option>
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#B9B6AC]">
+                    <span class="material-symbols-outlined text-sm">expand_more</span>
+                  </div>
+                </div>
                 <p class="field-error" id="b-service-error">Please select a service type.</p>
               </div>
 
               <!-- Saved Motorcycles Selector (Only visible for logged-in users with saved bikes) -->
               <div id="b-saved-bikes-wrap" class="hidden">
                 <label class="field-label" for="b-saved-bike">Select Saved Motorcycle *</label>
-                <select id="b-saved-bike" class="field-input">
-                  <!-- Dynamically populated -->
-                </select>
+                <div class="relative">
+                  <select id="b-saved-bike" class="field-input appearance-none">
+                    <!-- Dynamically populated -->
+                  </select>
+                  <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#B9B6AC]">
+                    <span class="material-symbols-outlined text-sm">expand_more</span>
+                  </div>
+                </div>
                 <p class="text-[10px] text-[#B9B6AC] mt-1 font-mono">Select a motorcycle from your profile, or choose "+ Add New Motorcycle".</p>
               </div>
 
@@ -160,18 +313,23 @@
                 <div class="grid sm:grid-cols-2 gap-5">
                   <div>
                     <label class="field-label" for="b-brand">Bike Brand *</label>
-                    <select id="b-brand" name="bikeBrand" class="field-input" required>
-                      <option value="">Select Brand</option>
-                      <option value="Bajaj">Bajaj</option>
-                      <option value="Honda">Honda</option>
-                      <option value="Yamaha">Yamaha</option>
-                      <option value="Hero">Hero</option>
-                      <option value="TVS">TVS</option>
-                      <option value="Royal Enfield">Royal Enfield</option>
-                      <option value="Suzuki">Suzuki</option>
-                      <option value="KTM">KTM</option>
-                      <option value="Other">Other Brand</option>
-                    </select>
+                    <div class="relative">
+                      <select id="b-brand" name="bikeBrand" class="field-input appearance-none" required>
+                        <option value="">Select Brand</option>
+                        <option value="Bajaj">Bajaj</option>
+                        <option value="Honda">Honda</option>
+                        <option value="Yamaha">Yamaha</option>
+                        <option value="Hero">Hero</option>
+                        <option value="TVS">TVS</option>
+                        <option value="Royal Enfield">Royal Enfield</option>
+                        <option value="Suzuki">Suzuki</option>
+                        <option value="KTM">KTM</option>
+                        <option value="Other">Other Brand</option>
+                      </select>
+                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#B9B6AC]">
+                        <span class="material-symbols-outlined text-sm">expand_more</span>
+                      </div>
+                    </div>
                     <p class="field-error" id="b-brand-error">Please select a brand.</p>
                   </div>
                   <div>
@@ -351,27 +509,55 @@
         </div>
 
         <!-- ============ SIDEBAR ============ -->
-        <aside class="reveal space-y-5" style="transition-delay:100ms">
-          <div class="gauge">
-            <div class="readout font-mono text-lg">24/7</div>
-            <div class="label">Emergency Hours</div>
+        <aside class="lg:col-span-4 space-y-6 mt-8 lg:mt-0 reveal" style="transition-delay:100ms">
+          <!-- Emergency Card -->
+          <div class="bg-surface-elevated border border-border-muted p-6 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-primary-container/5 pointer-events-none"></div>
+            <div class="absolute top-0 left-0 w-1 h-full bg-primary-container"></div>
+            <div class="flex items-center gap-2 mb-3 text-primary-container">
+              <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">warning</span>
+              <h3 class="font-button-text text-sm uppercase">Critical Emergency</h3>
+            </div>
+            <p class="text-xs text-text-muted mb-4">Stranded in a high-risk zone or need immediate breakdown extraction? Bypass the queue and call dispatch.</p>
+            <a href="tel:+9779813691072" class="w-full border border-primary-container text-primary-container font-button-text text-sm uppercase py-3 flex justify-center items-center gap-2 hover:bg-primary-container hover:text-surface-container-lowest transition-colors">
+              <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">call</span>
+              +977 981-369-1072
+            </a>
           </div>
-          <div class="card p-6">
-            <h3 class="font-display text-sm mb-3 text-[#FF5A1F]">SERVICE AREA</h3>
-            <p class="text-[#B9B6AC] text-sm mb-3">Jorpati, Boudha, Chabahil, and the greater Kathmandu Valley. Outside
-              this area? WhatsApp us your location and we'll confirm coverage.</p>
-            <ul class="text-sm text-[#B9B6AC] space-y-2">
-              <li class="flex gap-2"><i class="fa-solid fa-location-dot text-[#FF5A1F] mt-1"></i> Workshop: Jorpati,
-                Boudha Rd, Kathmandu 44600</li>
+
+          <!-- Service Area / Radius -->
+          <div class="bg-surface-elevated border border-border-muted p-6">
+            <div class="flex items-center gap-2 mb-4 text-text-primary">
+              <span class="material-symbols-outlined text-xl text-text-muted" style="font-variation-settings: 'FILL' 0;">radar</span>
+              <h3 class="font-button-text text-sm uppercase">Operational Radius</h3>
+            </div>
+            <div class="w-full h-48 bg-surface border border-border-muted mb-4 overflow-hidden relative group">
+              <div class="absolute inset-0 bg-surface/50 z-10 pointer-events-none group-hover:bg-transparent transition-colors"></div>
+              <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#111317_100%)] z-10 pointer-events-none"></div>
+              <!-- Map representation -->
+              <div class="bg-cover bg-center w-full h-full filter grayscale sepia-[.2] hue-rotate-[180deg]" data-alt="A dark stylized digital map of Kathmandu Valley" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCwi3RmUq7Paa1RzTPMZatZVzfM29EHr6rP_tM4B0fq2GBUoXX4QRkv8LP7HkBXSfH0xM6DtP6Xb0Q02hQsNw8Dou1PNDOsMn2-6tzzBCvewTjQTVItn53RtVRJ75u3r8mo21CaxYBXtBzBSsJigCHcaX1CJLPxSL-mGHe8NhSCe8QOyQFj3X8IPMfwXHSONK0XsHrHX20hhl69wh-1HLo9xSxIIMebQFf9un9e9tpBItlxxc0EkmUi')"></div>
+            </div>
+            <ul class="space-y-3 font-label-mono-sm text-[11px] text-text-muted">
+              <li class="flex justify-between border-b border-border-muted pb-1">
+                <span>Core Zone (Jorpati/Boudha)</span>
+                <span class="text-primary-container">ETA: 15 MIN</span>
+              </li>
+              <li class="flex justify-between border-b border-border-muted pb-1">
+                <span>Greater Valley Sector 1</span>
+                <span class="text-text-primary">ETA: 30 MIN</span>
+              </li>
+              <li class="flex justify-between border-b border-border-muted pb-1">
+                <span>Outer Valley Sector</span>
+                <span class="text-text-primary">ETA: 60 MIN</span>
+              </li>
             </ul>
           </div>
-          <div class="card p-6">
-            <h3 class="font-display text-sm mb-3 text-[#FF5A1F]">NEED IT FASTER?</h3>
-            <p class="text-[#B9B6AC] text-sm mb-4">For true emergencies, calling is faster than the form.</p>
-            <a href="tel:+9779813691072" class="btn btn-call w-full mb-3"><i class="fa-solid fa-phone"></i> Call +977
-              981-369-1072</a>
-            <a href="#" data-wa-message="Hi Chhotu Motorcycles, I need help booking a repair."
-              class="btn btn-outline w-full"><i class="fa-brands fa-whatsapp"></i> WhatsApp Instead</a>
+
+          <!-- Info Snippet -->
+          <div class="border border-border-muted border-dashed p-4">
+            <p class="font-label-mono-xs text-[10px] text-text-muted leading-relaxed">
+              <span class="text-primary-container font-bold">SYS_NOTE:</span> All deposits are secured via 256-bit AES encryption. Refunds are automatically processed upon service completion or verified cancellation prior to unit dispatch.
+            </p>
           </div>
         </aside>
 
@@ -903,6 +1089,13 @@
       fieldsStep.classList.add("hidden");
       paymentStep.classList.remove("hidden");
 
+      // Update indicators
+      document.getElementById("step-1-indicator").className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
+      document.getElementById("step-1-label").className = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
+      document.getElementById("step-divider").className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
+      document.getElementById("step-2-indicator").className = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
+      document.getElementById("step-2-label").className = "text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap";
+
       // Generate random transaction reference
       if (!paymentRef) {
         paymentRef = "DEP-" + Math.floor(100000 + Math.random() * 900000);
@@ -917,6 +1110,13 @@
     backBtn.addEventListener("click", () => {
       paymentStep.classList.add("hidden");
       fieldsStep.classList.remove("hidden");
+
+      // Revert indicators
+      document.getElementById("step-1-indicator").className = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
+      document.getElementById("step-1-label").className = "text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap";
+      document.getElementById("step-divider").className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
+      document.getElementById("step-2-indicator").className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
+      document.getElementById("step-2-label").className = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
     });
 
     // 3. Final Submit Handler (Step 2)
