@@ -693,7 +693,12 @@
 
               // Populate select list options
               savedBikesSelect.innerHTML = `<option value="">-- Select Saved Motorcycle --</option>` +
-                savedBikes.map(bike => `<option value="${bike.id}" data-brand="${bike.brand}" data-model="${bike.model}" data-reg="${bike.registration_no || ''}">${bike.brand} ${bike.model} ${bike.registration_no ? '(' + bike.registration_no + ')' : ''}</option>`).join("") +
+                savedBikes.map(bike => {
+                  const parts = (bike.model || "").trim().split(" ");
+                  const inferredBrand = parts[0] || "";
+                  const inferredModel = parts.slice(1).join(" ") || "";
+                  return `<option value="${bike.id}" data-brand="${inferredBrand}" data-model="${inferredModel}" data-reg="${bike.registration_no || ''}">${bike.model} ${bike.registration_no ? '(' + bike.registration_no + ')' : ''}</option>`;
+                }).join("") +
                 `<option value="new">+ Add New Motorcycle</option>`;
 
               savedBikesWrap.classList.remove("hidden");
@@ -1019,13 +1024,14 @@
         if (loggedInUserId && isNewBike) {
           const finalBrand = brandVal === "Other" ? brandOtherVal : brandVal;
           if (finalBrand && modelVal) {
+            const combinedModelName = `${finalBrand} ${modelVal}`.trim();
             await window.supabaseClient
               .from("motorcycles")
               .insert([{
                 user_id: loggedInUserId,
-                brand: finalBrand,
-                model: modelVal,
-                registration_no: regNoVal || null
+                model: combinedModelName,
+                registration_no: regNoVal || null,
+                type: 'motorcycle'
               }]);
           }
         }
