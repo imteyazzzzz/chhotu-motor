@@ -1,8 +1,19 @@
 -- =========================================================================
--- SCHEMA UPDATES: FINAL PAYMENT & AI VERIFICATION
+-- MASTER SCHEMA UPDATES: UPFRONT & FINAL PAYMENT COLUMNS
 -- =========================================================================
 
--- 1. Alter bookings to add final payment tracking columns
+-- 1. Alter bookings to add upfront payment tracking fields
+ALTER TABLE public.bookings
+ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'none',
+ADD COLUMN IF NOT EXISTS payment_screenshot_url TEXT,
+ADD COLUMN IF NOT EXISTS upi_reference TEXT,
+ADD COLUMN IF NOT EXISTS booking_charge_amount NUMERIC DEFAULT 249.0,
+ADD COLUMN IF NOT EXISTS refund_status TEXT DEFAULT 'none',
+ADD COLUMN IF NOT EXISTS rejection_reason TEXT,
+ADD COLUMN IF NOT EXISTS verified_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ;
+
+-- 2. Alter bookings to add final payment tracking columns
 ALTER TABLE public.bookings
 ADD COLUMN IF NOT EXISTS final_payment_screenshot_url TEXT,
 ADD COLUMN IF NOT EXISTS final_payment_status TEXT DEFAULT 'unpaid',
@@ -195,3 +206,7 @@ BEGIN
     RETURN TRUE;
 END;
 $$;
+
+
+-- 7. Force Supabase PostgREST schema cache to reload
+NOTIFY pgrst, 'reload schema';
