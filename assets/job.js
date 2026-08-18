@@ -100,7 +100,7 @@ function renderPortalView() {
   // State sections toggle
   hideAllViews();
 
-  if (job.status === "pending" || job.status === "assigned" || job.status === "confirmed") {
+  if (job.status === "pending" || job.status === "assigned" || job.status === "confirmed" || job.status === "dispatched") {
     // 1. ASSIGNED STATE
     document.getElementById("state-active-job").classList.remove("hidden");
     document.getElementById("view-step-actions").classList.remove("hidden");
