@@ -461,31 +461,43 @@
 
                     <!-- VIEW MODE (shown by default) -->
                     <div id="personal-view-mode" class="space-y-3">
-                      <div class="grid sm:grid-cols-3 gap-2 py-1.5 border-b border-[#3A3F49]/40">
-                        <span class="text-xs text-[#B9B6AC] uppercase font-mono tracking-wider">Full Name</span>
-                        <span id="lbl-name" class="sm:col-span-2 text-sm font-semibold">John Doe</span>
+                      <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label class="text-[10px] text-[#B9B6AC] uppercase tracking-wider">Full Name</label>
+                          <p id="v-name" class="text-sm mt-0.5">--</p>
+                        </div>
+                        <div>
+                          <label class="text-[10px] text-[#B9B6AC] uppercase tracking-wider">Phone Number</label>
+                          <p id="v-phone" class="text-sm mt-0.5">--</p>
+                        </div>
                       </div>
-                      <div class="grid sm:grid-cols-3 gap-2 py-1.5 border-b border-[#3A3F49]/40">
-                        <span class="text-xs text-[#B9B6AC] uppercase font-mono tracking-wider">Email Address</span>
-                        <span id="lbl-email" class="sm:col-span-2 text-sm font-mono truncate">john.doe@example.com</span>
-                      </div>
-                      <div class="grid sm:grid-cols-3 gap-2 py-1.5 border-b border-[#3A3F49]/40">
-                        <span class="text-xs text-[#B9B6AC] uppercase font-mono tracking-wider">Phone Number</span>
-                        <span id="lbl-phone" class="sm:col-span-2 text-sm font-mono">+1 555-0198</span>
+                      <div>
+                        <label class="text-[10px] text-[#B9B6AC] uppercase tracking-wider flex items-center gap-1">Email Address <i class="fa-solid fa-lock text-[9px]"></i></label>
+                        <p id="v-email" class="text-sm mt-0.5 text-[#B9B6AC] font-mono">--</p>
+                        <p class="text-[10px] text-[#B9B6AC] mt-1 font-mono italic">Email address cannot be changed — contact support if you need to update it.</p>
                       </div>
                     </div>
 
                     <!-- EDIT MODE (hidden by default) -->
                     <form id="personal-edit-form" class="space-y-4 hidden" novalidate>
-                      <div>
-                        <label class="field-label" for="e-name">Full Name *</label>
-                        <input id="e-name" type="text" class="field-input" placeholder="Your name" required>
-                        <p class="field-error" id="e-name-error">Full name is required.</p>
-                      </div>
-                      <div>
-                        <label class="field-label" for="e-phone">Phone Number *</label>
-                        <input id="e-phone" type="tel" class="field-input" placeholder="98XXXXXXXX" required>
-                        <p class="field-error" id="e-phone-error">Enter a valid 10-digit mobile number starting with 9.</p>
+                      <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label class="field-label" for="e-name">Full Name *</label>
+                          <input id="e-name" type="text" class="field-input" required>
+                          <p class="field-error" id="e-name-error">Please enter your name.</p>
+                        </div>
+                        <div>
+                          <label class="field-label" for="e-phone">Phone Number *</label>
+                          <div class="flex gap-2">
+                            <select id="e-phone-code" class="field-input !w-[100px] shrink-0" required>
+                              <option value="+977">+977 (NP)</option>
+                              <option value="+91">+91 (IN)</option>
+                              <option value="+1">+1 (US)</option>
+                            </select>
+                            <input id="e-phone" type="tel" class="field-input flex-1" required>
+                          </div>
+                          <p class="field-error" id="e-phone-error">Please enter a valid phone number.</p>
+                        </div>
                       </div>
                       <div class="flex justify-end gap-3 pt-2">
                         <button type="button" id="btn-cancel-personal" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
@@ -494,28 +506,45 @@
                     </form>
                   </div>
 
-                  <!-- Change Password Card -->
-                  <div class="card p-6 space-y-4 relative" id="change-password-card">
+                  <!-- Change Password Accordion Card -->
+                  <div class="card p-6 space-y-4">
                     <div class="flex justify-between items-center border-b border-[#3A3F49] pb-2">
-                      <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">Password & Security</h3>
-                      <button id="btn-edit-password" class="text-xs text-[#FF5A1F] hover:underline" aria-label="Edit Profile Details"><i class="fa-solid fa-lock"></i> Change Password</button>
+                      <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">Security</h3>
+                      <button id="btn-toggle-password" class="text-xs text-[#FF5A1F] hover:underline"><i class="fa-solid fa-shield-halved"></i> Change Password</button>
                     </div>
 
-                    <div id="password-view-mode" class="text-sm text-[#B9B6AC] py-1">
-                      Passwords must be at least 6 characters. Re-authenticating is required.
-                    </div>
-
-                    <!-- EDIT MODE PASSWORD (hidden by default) -->
                     <form id="password-change-form" class="space-y-4 hidden" novalidate>
-                      <div>
-                        <label class="field-label" for="e-pass-new">New Password *</label>
-                        <input id="e-pass-new" type="password" class="field-input" placeholder="New Password" required minlength="6">
-                        <p class="field-error" id="e-pass-new-error">Password must be at least 6 characters.</p>
-                      </div>
-                      <div>
-                        <label class="field-label" for="e-pass-confirm">Confirm New Password *</label>
-                        <input id="e-pass-confirm" type="password" class="field-input" placeholder="Confirm Password" required minlength="6">
-                        <p class="field-error" id="e-pass-confirm-error">Passwords do not match.</p>
+                      <div class="grid sm:grid-cols-3 gap-4">
+                        <div>
+                          <label class="field-label" for="pw-current">Current Password *</label>
+                          <div class="relative">
+                            <input id="pw-current" type="password" class="field-input" style="padding-right:2.5rem" placeholder="••••••••" required>
+                            <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="pw-current" aria-label="Show password" aria-pressed="false">
+                              <i class="fa-solid fa-eye"></i>
+                            </button>
+                          </div>
+                          <p class="field-error" id="pw-current-error">Current password is required.</p>
+                        </div>
+                        <div>
+                          <label class="field-label" for="pw-new">New Password *</label>
+                          <div class="relative">
+                            <input id="pw-new" type="password" class="field-input" style="padding-right:2.5rem" placeholder="Min 6 chars" required>
+                            <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="pw-new" aria-label="Show password" aria-pressed="false">
+                              <i class="fa-solid fa-eye"></i>
+                            </button>
+                          </div>
+                          <p class="field-error" id="pw-new-error">New password must be at least 6 characters.</p>
+                        </div>
+                        <div>
+                          <label class="field-label" for="pw-confirm">Confirm New Password *</label>
+                          <div class="relative">
+                            <input id="pw-confirm" type="password" class="field-input" style="padding-right:2.5rem" placeholder="••••••••" required>
+                            <button type="button" class="pw-toggle absolute right-2 top-1/2 -translate-y-1/2 text-[#B9B6AC] hover:text-[#F4F1E8]" data-target="pw-confirm" aria-label="Show password" aria-pressed="false">
+                              <i class="fa-solid fa-eye"></i>
+                            </button>
+                          </div>
+                          <p class="field-error" id="pw-confirm-error">Passwords must match.</p>
+                        </div>
                       </div>
                       <div class="flex justify-end gap-3 pt-2">
                         <button type="button" id="btn-cancel-password" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
@@ -524,15 +553,27 @@
                     </form>
                   </div>
 
-                  <!-- Delete Account Risk Area -->
-                  <div class="card p-6 border-red-500/20 space-y-4">
-                    <h3 class="font-display text-sm text-red-500 tracking-wide uppercase border-b border-red-500/20 pb-2">Danger Zone</h3>
-                    <p class="text-xs text-[#B9B6AC] leading-relaxed">Once you delete your account, there is no going back. All service records, address credentials, and active warranty slots will be permanently purged.</p>
-                    <div class="flex items-center justify-between gap-4 pt-2">
-                      <button id="btn-delete-account" class="btn btn-outline !border-red-500/40 !text-red-400 hover:bg-red-500/10 !py-2 !px-4 !text-xs">Delete Account Profile</button>
+                  <!-- Danger Zone Card -->
+                  <div class="card p-6 space-y-4 border border-red-500/30">
+                    <h3 class="font-display text-sm text-red-400 tracking-wide uppercase border-b border-red-500/20 pb-2">Danger Zone</h3>
+                    <div id="danger-collapsed">
+                      <p class="text-xs text-[#B9B6AC] mb-4">Deleting your account is permanent. This will delete all your booking history, saved bikes, and addresses. This cannot be undone.</p>
+                      <button id="btn-delete-trigger" class="btn btn-outline !text-red-400 border-red-500/40 hover:bg-red-500/10 !py-2 !px-4 !text-xs">Delete My Account</button>
                     </div>
-                    <p class="text-[10px] text-[#B9B6AC] italic">Note: Real account deletion uses a backend helper trigger. Direct client deletion is restricted.</p>
-                    <p id="delete-error" class="hidden text-xs text-red-400 font-mono mt-2"></p>
+
+                    <!-- Delete Account Confirmation Panel -->
+                    <div id="danger-confirm" class="space-y-4 hidden">
+                      <p class="text-xs text-red-400 font-semibold">To verify, please type <span class="font-mono bg-red-500/10 px-1 py-0.5 rounded">DELETE</span> in the box below to permanently delete your account.</p>
+                      <div class="flex flex-col sm:flex-row gap-3">
+                        <input id="delete-confirm-input" type="text" class="field-input flex-1 sm:max-w-xs" placeholder="Type DELETE">
+                        <div class="flex gap-2">
+                          <button id="btn-delete-cancel" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
+                          <button id="btn-delete-confirm" disabled class="btn btn-primary bg-red-600 border-red-600 text-white hover:bg-red-700 !py-2 !px-4 !text-xs disabled:opacity-40 disabled:cursor-not-allowed">Delete Permanently</button>
+                        </div>
+                      </div>
+                      <p class="text-[10px] text-[#B9B6AC] italic">Note: Real account deletion uses a backend helper trigger. Direct client deletion is restricted.</p>
+                      <p id="delete-error" class="hidden text-xs text-red-400 font-mono mt-2"></p>
+                    </div>
                   </div>
                 </section>
               </div>
@@ -913,7 +954,7 @@
 
   <script src="assets/main.js"></script>
   <script src="assets/forms.js"></script>
-  <script src="assets/profile.js?v=1.0.3"></script>
+  <script src="assets/profile.js?v=1.0.4"></script>
   <script src="assets/agentation-bundle.js"></script>
 </body>
 
