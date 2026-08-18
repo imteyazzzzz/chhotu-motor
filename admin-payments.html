@@ -29,8 +29,8 @@
       <main class="flex-1 p-6 overflow-y-auto space-y-6">
         <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div>
-            <h1 class="text-2xl font-bold tracking-wide font-display">VERIFY UPFRONT PAYMENTS</h1>
-            <p class="text-xs text-[#B9B6AC] mt-1 font-mono">Review submitted screenshot proofs for Rs. 249 upfront deposits.</p>
+            <h1 class="text-2xl font-bold tracking-wide font-display">VERIFY REPAIR PAYMENTS</h1>
+            <p class="text-xs text-[#B9B6AC] mt-1 font-mono">Review submitted screenshot proofs for upfront deposits and final repair invoices.</p>
           </div>
           <div>
             <button onclick="loadQueueData()" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-rotate"></i> Refresh Queue</button>
@@ -127,8 +127,8 @@
       try {
         const { data: bookings, error } = await window.supabaseClient
           .from("bookings")
-          .select("*")
-          .eq("status", "pending_verification")
+          .select("*, invoices(*)")
+          .in("status", ["pending_verification", "payment_submitted"])
           .order("service_type", { ascending: true }) // prioritizes 'emergency' alphabetically
           .order("created_at", { ascending: true }); // oldest first
 
@@ -147,29 +147,41 @@
         rowsContainer.innerHTML = currentQueue.map(b => {
           const dt = new Date(b.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
           const isEmergency = b.service_type === "emergency";
+          const isFinal = b.status === "payment_submitted";
           
           const priorityRowClass = isEmergency 
             ? "bg-red-950/5 border-l-2 border-l-red-500/80 hover:bg-red-950/10" 
             : "hover:bg-[#22262E]/20";
 
-          const badgeHTML = isEmergency 
+          // Left badge info
+          let badgeHTML = isEmergency 
             ? `<span class="px-1.5 py-0.5 rounded text-[8px] uppercase font-bold bg-red-500/10 text-red-400 border border-red-500/20 mr-1"><i class="fa-solid fa-triangle-exclamation"></i> Emergency</span>`
             : `<span class="px-1.5 py-0.5 rounded text-[8px] uppercase font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 mr-1">${b.service_type}</span>`;
+          
+          // Type badge: Upfront or Final
+          const typeBadgeHTML = isFinal
+            ? `<span class="px-1.5 py-0.5 rounded text-[8px] uppercase font-bold bg-green-500/10 text-green-400 border border-green-500/20">Final Bill</span>`
+            : `<span class="px-1.5 py-0.5 rounded text-[8px] uppercase font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">Upfront Deposit</span>`;
+
+          const utr = isFinal ? b.final_payment_upi_reference : b.upi_reference;
+          const finalAmount = b.invoices && b.invoices[0] ? b.invoices[0].total_amount : 0;
+          const amountText = isFinal ? `Rs. ${finalAmount}` : "Rs. 249";
 
           return `
             <tr class="border-b border-[#3A3F49]/40 transition-colors ${priorityRowClass}">
               <td class="p-4">
-                <div class="font-semibold text-sm text-[#F4F1E8]">${b.name}</div>
+                <div class="font-semibold text-sm text-[#F4F1E8]">${b.name || "Guest"}</div>
                 <div class="text-[10px] text-[#B9B6AC] flex items-center gap-1.5 mt-0.5">
-                  <i class="fa-solid fa-phone text-[9px]"></i> ${b.phone}
+                  <i class="fa-solid fa-phone text-[9px]"></i> ${b.phone || "No Phone"}
                   <span>·</span>
                   ${badgeHTML}
+                  ${typeBadgeHTML}
                 </div>
               </td>
-              <td class="p-4 text-xs text-[#B9B6AC]">${b.bike_brand} ${b.bike_model}</td>
+              <td class="p-4 text-xs text-[#B9B6AC]">${b.bike_brand || ""} ${b.bike_model || "Motorcycle"}</td>
               <td class="p-4">
-                <div class="font-mono text-xs text-[#FF5A1F]">${b.upi_reference || "N/A"}</div>
-                <div class="text-[9px] text-[#B9B6AC] font-mono mt-0.5">Rs. 249.00</div>
+                <div class="font-mono text-xs text-[#FF5A1F]">${utr || "N/A"}</div>
+                <div class="text-[9px] text-[#B9B6AC] font-mono mt-0.5">${amountText}</div>
               </td>
               <td class="p-4 text-xs text-[#B9B6AC] font-mono">${dt}</td>
               <td class="p-4 text-right">
@@ -198,8 +210,13 @@
       const title = document.getElementById("lightbox-title");
       const utr = document.getElementById("lightbox-utr-display");
 
-      title.textContent = `Proof: ${selectedBooking.name} (${selectedBooking.bike_brand} ${selectedBooking.bike_model})`;
-      utr.textContent = `UTR/Ref: ${selectedBooking.upi_reference || "N/A"}`;
+      title.textContent = `Proof: ${selectedBooking.name || "Guest"} (${selectedBooking.bike_brand || ""} ${selectedBooking.bike_model || "Motorcycle"})`;
+      
+      const isFinal = selectedBooking.status === "payment_submitted";
+      const utrVal = isFinal ? selectedBooking.final_payment_upi_reference : selectedBooking.upi_reference;
+      const screenshotUrl = isFinal ? selectedBooking.final_payment_screenshot_url : selectedBooking.payment_screenshot_url;
+
+      utr.textContent = `UTR/Ref: ${utrVal || "N/A"}`;
       img.src = ""; // Clear old image state
 
       // Hook up actions
@@ -212,10 +229,10 @@
       lightbox.classList.remove("hidden");
 
       try {
-        if (!selectedBooking.payment_screenshot_url) {
+        if (!screenshotUrl) {
           throw new Error("No screenshot proof data found.");
         }
-        img.src = selectedBooking.payment_screenshot_url;
+        img.src = screenshotUrl;
       } catch (err) {
         console.error("Failed to load screenshot:", err);
         img.alt = "Failed to load proof image: " + err.message;
@@ -242,22 +259,51 @@
       const confirmApprove = confirm("Are you sure you want to verify and approve this payment?");
       if (!confirmApprove) return;
 
-      try {
-        const { error } = await window.supabaseClient
-          .from("bookings")
-          .update({
-            status: "pending", // Move into regular dispatch queue
-            payment_status: "verified",
-            verified_by: window.currentAdmin.id,
-            verified_at: new Date().toISOString()
-          })
-          .eq("id", bookingId);
+      const b = currentQueue.find(item => item.id === bookingId);
+      if (!b) return;
 
-        if (error) throw error;
+      try {
+        if (b.status === "payment_submitted") {
+          // Final Payment approval using updates RPC
+          const { error: dbErr } = await window.supabaseClient.rpc("update_booking_payment_by_agent", {
+            p_booking_id: bookingId,
+            p_status: "payment_verified",
+            p_final_status: "verified",
+            p_rejection_reason: null,
+            p_upi_extracted: b.final_payment_upi_extracted || "MANUAL_OVERRIDE",
+            p_amount_extracted: b.final_payment_amount_extracted || 0,
+            p_date_extracted: null
+          });
+
+          if (dbErr) throw dbErr;
+
+          // Record log details inside payment_audit_logs table
+          await window.supabaseClient.from("payment_audit_logs").insert([{
+            booking_id: bookingId,
+            extracted_amount: b.final_payment_amount_extracted || 0,
+            extracted_upi_ref: b.final_payment_upi_reference || null,
+            extracted_status: "verified",
+            decision: "verified",
+            log_details: `Manual admin override decision: [VERIFIED] by admin in Verify Payments queue.`
+          }]);
+        } else {
+          // Upfront Payment approval
+          const { error } = await window.supabaseClient
+            .from("bookings")
+            .update({
+              status: "pending", // Move into regular dispatch queue
+              payment_status: "verified",
+              verified_by: window.currentAdmin.id,
+              verified_at: new Date().toISOString()
+            })
+            .eq("id", bookingId);
+
+          if (error) throw error;
+        }
 
         closeLightbox();
         await loadQueueData();
-        alert("Payment verified successfully. Booking is now in dispatch queue.");
+        alert("Payment verified successfully.");
 
       } catch (err) {
         console.error("Approve payment failed:", err);
@@ -277,28 +323,57 @@
         return;
       }
 
+      const b = currentQueue.find(item => item.id === bookingId);
+      if (!b) return;
+
       const submitBtn = document.getElementById("btn-reject-confirm");
       const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
       submitBtn.innerHTML = "Processing...";
 
       try {
-        const { error } = await window.supabaseClient
-          .from("bookings")
-          .update({
-            status: "payment_rejected",
-            payment_status: "rejected",
-            rejection_reason: reason,
-            verified_by: window.currentAdmin.id,
-            verified_at: new Date().toISOString()
-          })
-          .eq("id", bookingId);
+        if (b.status === "payment_submitted") {
+          // Final Payment rejection
+          const { error: dbErr } = await window.supabaseClient.rpc("update_booking_payment_by_agent", {
+            p_booking_id: bookingId,
+            p_status: "completed_awaiting_payment",
+            p_final_status: "rejected",
+            p_rejection_reason: reason,
+            p_upi_extracted: b.final_payment_upi_extracted || "MANUAL_OVERRIDE",
+            p_amount_extracted: b.final_payment_amount_extracted || 0,
+            p_date_extracted: null
+          });
 
-        if (error) throw error;
+          if (dbErr) throw dbErr;
+
+          // Record log details inside payment_audit_logs table
+          await window.supabaseClient.from("payment_audit_logs").insert([{
+            booking_id: bookingId,
+            extracted_amount: b.final_payment_amount_extracted || 0,
+            extracted_upi_ref: b.final_payment_upi_reference || null,
+            extracted_status: "rejected",
+            decision: "rejected",
+            log_details: `Manual admin override decision: [REJECTED] by admin in Verify Payments queue. Reason: ${reason}`
+          }]);
+        } else {
+          // Upfront Payment rejection
+          const { error } = await window.supabaseClient
+            .from("bookings")
+            .update({
+              status: "payment_rejected",
+              payment_status: "rejected",
+              rejection_reason: reason,
+              verified_by: window.currentAdmin.id,
+              verified_at: new Date().toISOString()
+            })
+            .eq("id", bookingId);
+
+          if (error) throw error;
+        }
 
         closeRejectPrompt();
         await loadQueueData();
-        alert("Payment proof rejected. The customer will be notified on their profile dashboard to re-upload.");
+        alert("Payment proof rejected.");
 
       } catch (err) {
         console.error("Reject payment failed:", err);
