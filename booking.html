@@ -152,7 +152,7 @@
         -webkit-font-smoothing: antialiased;
     }
 </style>
-<link rel="stylesheet" href="assets/style.css?v=1.0.1">
+<link rel="stylesheet" href="assets/style.css?v=1.0.2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase.js"></script>
 </head>
@@ -234,15 +234,26 @@
         <!-- ============ BOOKING FORM ============ -->
         <div class="lg:col-span-8 reveal space-y-8">
           <!-- Progress Indicator -->
-          <div class="flex items-center w-full mb-8">
-            <div class="flex flex-col items-center relative">
-              <div id="step-1-indicator" class="w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10">01</div>
-              <span id="step-1-label" class="text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap">Details</span>
+          <div class="flex flex-col gap-2 w-full mb-8">
+            <div class="flex items-center w-full">
+              <div class="flex flex-col items-center relative">
+                <div id="step-1-indicator" class="w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10">01</div>
+                <span id="step-1-label" class="text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap">Details</span>
+              </div>
+              <div id="step-divider" class="flex-1 h-px bg-border-muted mx-3 transition-colors duration-300"></div>
+              <div class="flex flex-col items-center relative">
+                <div id="step-2-indicator" class="w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10">02</div>
+                <span id="step-2-label" class="text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap">Deposit</span>
+              </div>
             </div>
-            <div id="step-divider" class="flex-1 h-px bg-border-muted mx-3 transition-colors duration-300"></div>
-            <div class="flex flex-col items-center relative">
-              <div id="step-2-indicator" class="w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10">02</div>
-              <span id="step-2-label" class="text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap">Deposit</span>
+            <!-- Sub-step progress indicators for Step 2 -->
+            <div id="substep-progress" class="hidden justify-center items-center gap-2 mt-4">
+              <span id="substep-dot-a" class="w-2 h-2 rounded-full bg-primary-container transition-colors"></span>
+              <span id="substep-line-ab" class="w-8 h-px bg-border-muted transition-colors"></span>
+              <span id="substep-dot-b" class="w-2 h-2 rounded-full bg-border-muted transition-colors"></span>
+              <span id="substep-line-bc" class="w-8 h-px bg-border-muted transition-colors"></span>
+              <span id="substep-dot-c" class="w-2 h-2 rounded-full bg-border-muted transition-colors"></span>
+              <span id="substep-label" class="ml-2 font-mono text-[9px] text-[#B9B6AC] uppercase tracking-wider">Summary</span>
             </div>
           </div>
 
@@ -397,84 +408,117 @@
               <button type="button" id="b-continue-payment" class="btn btn-primary w-full sm:w-auto">
                 Continue to Payment <i class="fa-solid fa-arrow-right"></i>
               </button>
-            </div>
-
-            <!-- STEP 2: Upfront Booking Payment Step (QR Code & Screenshot Proof) -->
+                        <!-- STEP 2: Upfront Booking Payment Step (QR Code & Screenshot Proof) -->
             <div id="booking-payment-step" class="hidden space-y-6">
-              <h3 class="font-display text-sm font-bold text-[#FF5A1F] uppercase tracking-wider border-b border-[#3A3F49]/40 pb-2">Upfront Booking Charge</h3>
               
-              <!-- Amount Breakdown Table -->
-              <div class="card p-4 bg-[#14161A]/50 border border-[#3A3F49]/40 space-y-3 font-mono text-xs">
-                <div class="flex justify-between items-center text-[#B9B6AC]">
-                  <span>Refundable Booking Deposit</span>
-                  <span>Rs. 200</span>
-                </div>
-                <div class="flex justify-between items-center text-[#B9B6AC]">
-                  <span>Platform Fee (non-refundable)</span>
-                  <span>Rs. 49</span>
-                </div>
-                <div class="border-t border-[#3A3F49]/40 pt-2.5 flex justify-between items-center font-bold text-sm text-[#FF5A1F]">
-                  <span>Total to Pay Now</span>
-                  <span>Rs. 249</span>
-                </div>
-              </div>
-
-              <!-- UPI & QR Code -->
-              <div class="flex flex-col items-center justify-center py-5 bg-[#14161A]/30 border border-[#3A3F49]/30 rounded-lg space-y-4">
-                <div class="bg-white p-3.5 inline-block rounded-md shadow-lg">
-                  <img id="booking-upi-qr" src="" alt="UPI Scan QR" class="w-[180px] h-[180px]">
-                </div>
-                <div class="text-center">
-                  <p class="text-[11px] text-[#B9B6AC] uppercase font-mono tracking-wider">UPI ID: imteez@slc</p>
-                  <p class="text-xs text-[#F4F1E8] font-semibold mt-1">Scan QR using any UPI App to Pay Rs. 249</p>
-                </div>
+              <!-- STEP 2a: Summary -->
+              <div id="booking-payment-2a" class="space-y-6">
+                <h3 class="font-display text-sm font-bold text-[#FF5A1F] uppercase tracking-wider border-b border-[#3A3F49]/40 pb-2">Upfront Booking Charge</h3>
                 
-                <div class="text-[10px] text-[#B9B6AC] max-w-xs text-center border-t border-[#3A3F49]/20 pt-2 px-4 leading-normal">
-                  <i class="fa-solid fa-circle-info"></i> The Rs. 200 deposit is a safety block against fake roadside requests and is automatically applied as a discount on your final invoice.
-                </div>
-              </div>
-
-              <!-- Proof Upload -->
-              <div class="space-y-4">
-                <div>
-                  <label class="field-label">Upload Payment Screenshot *</label>
-                  <div id="booking-screenshot-dropzone" class="border-2 border-dashed border-[#3A3F49] hover:border-[#FF5A1F] transition-all rounded-lg p-5 flex flex-col items-center justify-center cursor-pointer text-center relative min-h-[120px]">
-                    <input type="file" id="booking-screenshot" accept="image/png, image/jpeg, image/jpg" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
-                    <div id="dropzone-prompt" class="space-y-2">
-                      <i class="fa-solid fa-cloud-arrow-up text-2xl text-[#FF5A1F]"></i>
-                      <p class="text-xs text-[#F4F1E8]">Tap to upload or drag & drop screenshot here</p>
-                      <p class="text-[10px] text-[#B9B6AC] font-mono">PNG, JPG or JPEG up to 5MB</p>
-                    </div>
-                    <div id="dropzone-preview" class="hidden w-full flex items-center justify-between gap-4 p-2 bg-[#14161A]/80 border border-[#3A3F49] rounded-md">
-                      <div class="flex items-center gap-3">
-                        <img id="screenshot-preview-thumb" src="" class="w-10 h-10 object-cover rounded border border-[#3A3F49]">
-                        <div class="text-left">
-                          <p id="screenshot-filename" class="text-xs text-[#F4F1E8] font-semibold max-w-[150px] truncate">screenshot.png</p>
-                          <p id="screenshot-filesize" class="text-[9px] text-[#B9B6AC] font-mono">1.2 MB</p>
-                        </div>
-                      </div>
-                      <button type="button" id="btn-remove-screenshot" class="text-red-500 hover:text-red-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
+                <!-- Amount Breakdown Table -->
+                <div class="card p-4 bg-[#14161A]/50 border border-[#3A3F49]/40 space-y-3 font-mono text-xs">
+                  <div class="flex justify-between items-center text-[#B9B6AC]">
+                    <span>Refundable Booking Deposit</span>
+                    <span>Rs. 200</span>
                   </div>
-                  <p class="field-error" id="b-screenshot-error">Please upload your payment screenshot.</p>
+                  <div class="flex justify-between items-center text-[#B9B6AC]">
+                    <span>Platform Fee (non-refundable)</span>
+                    <span>Rs. 49</span>
+                  </div>
+                  <div class="border-t border-[#3A3F49]/40 pt-2.5 flex justify-between items-center font-bold text-sm text-[#FF5A1F]">
+                    <span>Total to Pay Now</span>
+                    <span>Rs. 249</span>
+                  </div>
                 </div>
 
-                <div>
-                  <label class="field-label" for="booking-utr">UPI Transaction / Reference ID (UTR - Optional)</label>
-                  <input id="booking-utr" type="text" class="field-input font-mono" placeholder="e.g. 402931827492">
-                  <p class="text-[10px] text-[#B9B6AC] mt-1 font-mono">Optional but highly recommended to speed up verification.</p>
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[#3A3F49]/40">
+                  <button type="button" id="b-btn-back-fields" class="btn btn-outline flex-1 order-2 sm:order-1 text-center py-2.5">
+                    <i class="fa-solid fa-arrow-left"></i> Edit Details
+                  </button>
+                  <button type="button" id="b-btn-goto-2b" class="btn btn-primary flex-1 order-1 sm:order-2">
+                    Continue to Payment <i class="fa-solid fa-arrow-right"></i>
+                  </button>
                 </div>
               </div>
 
-              <!-- Actions -->
-              <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[#3A3F49]/40">
-                <button type="button" id="b-btn-back-fields" class="btn btn-outline flex-1 order-2 sm:order-1 text-center py-2.5">
-                  <i class="fa-solid fa-arrow-left"></i> Edit Details
-                </button>
-                <button type="submit" id="b-submit" class="btn btn-primary flex-1 order-1 sm:order-2">
-                  <i class="fa-solid fa-circle-check"></i> Submit for Verification
-                </button>
+              <!-- STEP 2b: Pay -->
+              <div id="booking-payment-2b" class="hidden space-y-6">
+                <h3 class="font-display text-sm font-bold text-[#FF5A1F] uppercase tracking-wider border-b border-[#3A3F49]/40 pb-2">Scan & Pay</h3>
+
+                <!-- UPI & QR Code -->
+                <div class="flex flex-col items-center justify-center py-5 bg-[#14161A]/30 border border-[#3A3F49]/30 rounded-lg space-y-4">
+                  <div class="bg-white p-3.5 inline-block rounded-md shadow-lg">
+                    <img id="booking-upi-qr" src="" alt="UPI Scan QR" class="w-[180px] h-[180px]">
+                  </div>
+                  <div class="text-center">
+                    <p class="text-[11px] text-[#B9B6AC] uppercase font-mono tracking-wider">UPI ID: imteez@slc</p>
+                    <p class="text-xs text-[#F4F1E8] font-semibold mt-1">Scan QR using any UPI App to Pay Rs. 249</p>
+                  </div>
+                  
+                  <div class="text-[10px] text-[#B9B6AC] max-w-xs text-center border-t border-[#3A3F49]/20 pt-2 px-4 leading-normal">
+                    <i class="fa-solid fa-circle-info"></i> The Rs. 200 deposit is a safety block against fake roadside requests and is automatically applied as a discount on your final invoice.
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[#3A3F49]/40">
+                  <button type="button" id="b-btn-back-2a" class="btn btn-outline flex-1 order-2 sm:order-1 text-center py-2.5">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Summary
+                  </button>
+                  <button type="button" id="b-btn-goto-2c" class="btn btn-primary flex-1 order-1 sm:order-2">
+                    I've Paid — Continue <i class="fa-solid fa-arrow-right"></i>
+                  </button>
+                </div>
               </div>
+
+              <!-- STEP 2c: Upload Proof -->
+              <div id="booking-payment-2c" class="hidden space-y-6">
+                <h3 class="font-display text-sm font-bold text-[#FF5A1F] uppercase tracking-wider border-b border-[#3A3F49]/40 pb-2">Submit Payment Proof</h3>
+
+                <!-- Proof Upload -->
+                <div class="space-y-4">
+                  <div>
+                    <label class="field-label">Upload Payment Screenshot *</label>
+                    <div id="booking-screenshot-dropzone" class="border-2 border-dashed border-[#3A3F49] hover:border-[#FF5A1F] transition-all rounded-lg p-5 flex flex-col items-center justify-center cursor-pointer text-center relative min-h-[120px]">
+                      <input type="file" id="booking-screenshot" accept="image/png, image/jpeg, image/jpg" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                      <div id="dropzone-prompt" class="space-y-2">
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-[#FF5A1F]"></i>
+                        <p class="text-xs text-[#F4F1E8]">Tap to upload or drag & drop screenshot here</p>
+                        <p class="text-[10px] text-[#B9B6AC] font-mono">PNG, JPG or JPEG up to 5MB</p>
+                      </div>
+                      <div id="dropzone-preview" class="hidden w-full flex items-center justify-between gap-4 p-2 bg-[#14161A]/80 border border-[#3A3F49]/40 rounded-md">
+                        <div class="flex items-center gap-3">
+                          <img id="screenshot-preview-thumb" src="" class="w-10 h-10 object-cover rounded border border-[#3A3F49]">
+                          <div class="text-left">
+                            <p id="screenshot-filename" class="text-xs text-[#F4F1E8] font-semibold max-w-[150px] truncate">screenshot.png</p>
+                            <p id="screenshot-filesize" class="text-[9px] text-[#B9B6AC] font-mono">1.2 MB</p>
+                          </div>
+                        </div>
+                        <button type="button" id="btn-remove-screenshot" class="text-red-500 hover:text-red-400 p-2"><i class="fa-solid fa-trash-can"></i></button>
+                      </div>
+                    </div>
+                    <p class="field-error" id="b-screenshot-error">Please upload your payment screenshot.</p>
+                  </div>
+
+                  <div>
+                    <label class="field-label" for="booking-utr">UPI Transaction / Reference ID (UTR - Optional)</label>
+                    <input id="booking-utr" type="text" class="field-input font-mono" placeholder="e.g. 402931827492">
+                    <p class="text-[10px] text-[#B9B6AC] mt-1 font-mono">Optional but highly recommended to speed up verification.</p>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[#3A3F49]/40">
+                  <button type="button" id="b-btn-back-2b" class="btn btn-outline flex-1 order-2 sm:order-1 text-center py-2.5">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Scan
+                  </button>
+                  <button type="submit" id="b-submit" class="btn btn-primary flex-1 order-1 sm:order-2" disabled>
+                    <i class="fa-solid fa-circle-check"></i> Submit for Verification
+                  </button>
+                </div>
+              </div>
+
             </div>
 
             <!-- Success state -->
@@ -535,7 +579,7 @@
               <div class="absolute inset-0 bg-surface/50 z-10 pointer-events-none group-hover:bg-transparent transition-colors"></div>
               <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#111317_100%)] z-10 pointer-events-none"></div>
               <!-- Map representation -->
-              <div class="bg-cover bg-center w-full h-full filter grayscale sepia-[.2] hue-rotate-[180deg]" data-alt="A dark stylized digital map of Kathmandu Valley" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCwi3RmUq7Paa1RzTPMZatZVzfM29EHr6rP_tM4B0fq2GBUoXX4QRkv8LP7HkBXSfH0xM6DtP6Xb0Q02hQsNw8Dou1PNDOsMn2-6tzzBCvewTjQTVItn53RtVRJ75u3r8mo21CaxYBXtBzBSsJigCHcaX1CJLPxSL-mGHe8NhSCe8QOyQFj3X8IPMfwXHSONK0XsHrHX20hhl69wh-1HLo9xSxIIMebQFf9un9e9tpBItlxxc0EkmUi')"></div>
+              <div class="bg-cover bg-center w-full h-full filter grayscale sepia-[.2] hue-rotate-[180deg]" data-alt="A dark stylized digital map of Kathmandu Valley" style="background-image: url('assets/kathmandu_map.jpg')"></div>
             </div>
             <ul class="space-y-3 font-label-mono-sm text-[11px] text-text-muted">
               <li class="flex justify-between border-b border-border-muted pb-1">
@@ -998,6 +1042,63 @@
       }
     });
 
+    function syncSubmitBtn() {
+      const submitBtn = document.getElementById("b-submit");
+      if (submitBtn) {
+        submitBtn.disabled = !selectedFile;
+      }
+    }
+
+    function showSubstep(stepName) {
+      const step2a = document.getElementById("booking-payment-2a");
+      const step2b = document.getElementById("booking-payment-2b");
+      const step2c = document.getElementById("booking-payment-2c");
+      
+      const substepProgress = document.getElementById("substep-progress");
+      const dotA = document.getElementById("substep-dot-a");
+      const lineAB = document.getElementById("substep-line-ab");
+      const dotB = document.getElementById("substep-dot-b");
+      const lineBC = document.getElementById("substep-line-bc");
+      const dotC = document.getElementById("substep-dot-c");
+      const label = document.getElementById("substep-label");
+
+      // Hide all sub-steps
+      if (step2a) step2a.classList.add("hidden");
+      if (step2b) step2b.classList.add("hidden");
+      if (step2c) step2c.classList.add("hidden");
+
+      if (substepProgress) {
+        substepProgress.classList.remove("hidden");
+        substepProgress.classList.add("flex");
+      }
+
+      if (stepName === "2a") {
+        if (step2a) step2a.classList.remove("hidden");
+        if (dotA) dotA.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineAB) lineAB.className = "w-8 h-px bg-border-muted transition-colors";
+        if (dotB) dotB.className = "w-2 h-2 rounded-full bg-border-muted transition-colors";
+        if (lineBC) lineBC.className = "w-8 h-px bg-border-muted transition-colors";
+        if (dotC) dotC.className = "w-2 h-2 rounded-full bg-border-muted transition-colors";
+        if (label) label.textContent = "Summary";
+      } else if (stepName === "2b") {
+        if (step2b) step2b.classList.remove("hidden");
+        if (dotA) dotA.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineAB) lineAB.className = "w-8 h-px bg-primary-container transition-colors";
+        if (dotB) dotB.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineBC) lineBC.className = "w-8 h-px bg-border-muted transition-colors";
+        if (dotC) dotC.className = "w-2 h-2 rounded-full bg-border-muted transition-colors";
+        if (label) label.textContent = "Payment";
+      } else if (stepName === "2c") {
+        if (step2c) step2c.classList.remove("hidden");
+        if (dotA) dotA.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineAB) lineAB.className = "w-8 h-px bg-primary-container transition-colors";
+        if (dotB) dotB.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineBC) lineBC.className = "w-8 h-px bg-primary-container transition-colors";
+        if (dotC) dotC.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (label) label.textContent = "Upload Proof";
+      }
+    }
+
     function handleFileSelect(file) {
       screenshotError.classList.add("hidden");
 
@@ -1026,6 +1127,8 @@
 
       dropzonePrompt.classList.add("hidden");
       dropzonePreview.classList.remove("hidden");
+      
+      syncSubmitBtn();
     }
 
     removeScreenshotBtn.addEventListener("click", (e) => {
@@ -1038,6 +1141,8 @@
       screenshotInput.value = "";
       dropzonePrompt.classList.remove("hidden");
       dropzonePreview.classList.add("hidden");
+      
+      syncSubmitBtn();
     }
 
     // 2. Step Navigation Trigger
@@ -1088,6 +1193,7 @@
       // Enter payment step
       fieldsStep.classList.add("hidden");
       paymentStep.classList.remove("hidden");
+      showSubstep("2a");
 
       // Update indicators
       document.getElementById("step-1-indicator").className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
@@ -1110,6 +1216,12 @@
     backBtn.addEventListener("click", () => {
       paymentStep.classList.add("hidden");
       fieldsStep.classList.remove("hidden");
+      
+      const substepProgress = document.getElementById("substep-progress");
+      if (substepProgress) {
+        substepProgress.classList.add("hidden");
+        substepProgress.classList.remove("flex");
+      }
 
       // Revert indicators
       document.getElementById("step-1-indicator").className = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
@@ -1118,6 +1230,35 @@
       document.getElementById("step-2-indicator").className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
       document.getElementById("step-2-label").className = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
     });
+
+    // Sub-step transition handlers
+    const btnGoto2b = document.getElementById("b-btn-goto-2b");
+    if (btnGoto2b) {
+      btnGoto2b.addEventListener("click", () => {
+        showSubstep("2b");
+      });
+    }
+
+    const btnGoto2c = document.getElementById("b-btn-goto-2c");
+    if (btnGoto2c) {
+      btnGoto2c.addEventListener("click", () => {
+        showSubstep("2c");
+      });
+    }
+
+    const btnBack2a = document.getElementById("b-btn-back-2a");
+    if (btnBack2a) {
+      btnBack2a.addEventListener("click", () => {
+        showSubstep("2a");
+      });
+    }
+
+    const btnBack2b = document.getElementById("b-btn-back-2b");
+    if (btnBack2b) {
+      btnBack2b.addEventListener("click", () => {
+        showSubstep("2b");
+      });
+    }
 
     // 3. Final Submit Handler (Step 2)
     form.addEventListener("submit", async (e) => {
