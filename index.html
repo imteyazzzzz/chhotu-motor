@@ -18,12 +18,129 @@
 <!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <!-- Tailwind (CDN, utility classes only — brand system lives in assets/style.css) -->
-<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#93000a",
+                        "secondary-fixed": "#ffdf9d",
+                        "surface-container-low": "#1a1c20",
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "tertiary-fixed": "#66ff8e",
+                        "secondary-fixed-dim": "#f7be28",
+                        "surface-bright": "#37393e",
+                        "surface-highlight": "#22262E",
+                        "surface-variant": "#333539",
+                        "surface-container-lowest": "#0c0e12",
+                        "on-tertiary-fixed": "#002109",
+                        "on-tertiary": "#003915",
+                        "border-muted": "#3A3F49",
+                        "on-primary": "#5e1700",
+                        "surface": "#111317",
+                        "inverse-primary": "#ae3200",
+                        "tertiary-container": "#00a84c",
+                        "surface-dim": "#111317",
+                        "on-primary-fixed": "#3a0b00",
+                        "text-primary": "#F4F1E8",
+                        "on-background": "#e2e2e8",
+                        "background": "#111317",
+                        "surface-container": "#1e2024",
+                        "on-primary-fixed-variant": "#852400",
+                        "status-error": "#EF4444",
+                        "primary-container": "#ff5a1f",
+                        "tertiary-fixed-dim": "#3de273",
+                        "outline-variant": "#5b4038",
+                        "on-primary-container": "#541400",
+                        "primary": "#ffb59e",
+                        "surface-elevated": "#1B1E24",
+                        "primary-fixed": "#ffdbd0",
+                        "text-muted": "#B9B6AC",
+                        "on-secondary-container": "#543e00",
+                        "secondary": "#fac12b",
+                        "outline": "#ab897f",
+                        "status-success": "#3FBF6E",
+                        "secondary-container": "#dba500",
+                        "on-surface-variant": "#e4beb3",
+                        "on-tertiary-fixed-variant": "#005322",
+                        "primary-fixed-dim": "#ffb59e",
+                        "on-error-container": "#ffdad6",
+                        "surface-tint": "#ffb59e",
+                        "error": "#ffb4ab",
+                        "on-surface": "#e2e2e8",
+                        "on-tertiary-container": "#003212",
+                        "surface-container-highest": "#333539",
+                        "surface-container-high": "#282a2e",
+                        "on-secondary-fixed": "#251a00",
+                        "inverse-surface": "#e2e2e8",
+                        "on-error": "#690005",
+                        "tertiary": "#3de273",
+                        "inverse-on-surface": "#2f3035",
+                        "on-secondary": "#3f2e00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "xl": "40px",
+                        "sm": "8px",
+                        "container-max": "1280px",
+                        "unit": "4px",
+                        "xxl": "64px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "button-text": ["Oswald"],
+                        "label-mono-sm": ["JetBrains Mono"],
+                        "label-mono-xs": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Oswald"],
+                        "display-lg-mobile": ["Oswald"],
+                        "headline-md": ["Oswald"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "button-text": ["15px", { "lineHeight": "1", "letterSpacing": "0.04em", "fontWeight": "600" }],
+                        "label-mono-sm": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "label-mono-xs": ["10px", { "lineHeight": "1", "letterSpacing": "0.2em", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "0.02em", "fontWeight": "700" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "1.2", "letterSpacing": "0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    .hazard-stripe {
+        background: repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 10px,
+            rgba(255, 90, 31, 0.1) 10px,
+            rgba(255, 90, 31, 0.1) 20px
+        );
+    }
+    .glow-overlay {
+        background: radial-gradient(circle at center, rgba(255, 90, 31, 0.15) 0%, transparent 70%);
+    }
+</style>
 <link rel="stylesheet" href="assets/style.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/supabase.js"></script>
 </head>
-<body class="antialiased">
+<body class="antialiased min-h-screen flex flex-col">
 
 <div class="sticky top-0 z-40">
   <!-- ============ EMERGENCY STRIP (ANNOUNCEMENT BAR) ============ -->
@@ -101,143 +218,132 @@
      SHARED HEADER END
      ===================================================================== -->
 
-<main>
+<main class="flex-grow">
+     <!-- Hero Section -->
+     <section class="relative min-h-[700px] flex items-center justify-center border-b border-border-muted overflow-hidden">
+       <div class="absolute inset-0 z-0">
+         <div class="bg-cover bg-center w-full h-full opacity-30 mix-blend-luminosity" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDO96Zha2D1ZbZBPJpVsAz0TTZexy4tQyiYWXbFpQAeqX8OPWysZ-xSZifjeRfmcEzpL2ssSFB6w1puVJmDTX_8vGm282S2Cqg7lLACbNH1x4X2BKWhq7JxixsYzxdQUJepmx4DYPyUPZbuGAibVbz4fnrJ4RkO50NsS3Hv_I-jCRBjUrjt9cYDBj6RjtR6mzYzchnyYK_Ws-oSC4czKr3z-GwWM5xeI8BumJZ286x9DEfE1hqiGFgo')"></div>
+         <div class="absolute inset-0 hazard-stripe"></div>
+       </div>
+       <div class="relative z-10 max-w-container-max mx-auto px-md md:px-xl w-full">
+         <div class="max-w-3xl">
+           <div class="inline-flex items-center gap-2 px-3 py-1 border border-border-muted bg-surface-elevated mb-6">
+             <span class="w-2 h-2 rounded-full bg-status-error animate-pulse"></span>
+             <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-widest">24/7 Emergency Service Active</span>
+           </div>
+           <h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-text-primary mb-6 uppercase tracking-tighter">
+             BROKEN DOWN? <br/>
+             <span class="text-primary-container">WE COME TO YOU.</span>
+           </h1>
+           <p class="font-body-lg text-body-lg text-text-muted mb-8 max-w-xl">
+             Kathmandu's premier rapid-response motorcycle technical unit. Operating 24/7.
+           </p>
+           <div class="flex flex-col sm:flex-row gap-4">
+             <a href="booking.html" class="font-button-text text-button-text uppercase px-8 py-4 bg-primary-container text-surface-container-lowest hover:bg-primary-container/90 transition-colors flex items-center justify-center gap-2">
+               <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">build</span>
+               Book Immediate Repair
+             </a>
+             <a href="tel:+9779813691072" class="font-button-text text-button-text uppercase px-8 py-4 border-2 border-border-muted text-text-primary hover:border-primary-container/40 transition-colors flex items-center justify-center gap-2">
+               <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">call</span>
+               Emergency Line
+             </a>
+           </div>
+         </div>
+       </div>
+     </section>
 
-  <!-- ============ HERO ============ -->
-  <section class="relative overflow-hidden border-b border-[#3A3F49]">
-    <div class="absolute inset-0 bg-[radial-gradient(80%_60%_at_80%_0%,rgba(255,90,31,0.14),transparent)]" aria-hidden="true"></div>
-    <div class="max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-28 relative grid md:grid-cols-2 gap-10 items-center">
-      <div class="reveal">
-        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-4">JORPATI · BOUDHA Rd · KATHMANDU</p>
-        <h1 class="text-4xl md:text-6xl font-bold leading-[1.05] mb-6">
-          BROKEN DOWN?<br>WE COME TO <span class="text-[#FF5A1F]">YOU.</span>
-        </h1>
-        <p class="text-[#B9B6AC] text-lg mb-8 max-w-md">
-          Chhotu Motorcycles Workshop runs round-the-clock roadside repair in Kathmandu, plus home visits and scheduled workshop appointments.
-        </p>
-        <div class="flex flex-wrap gap-4">
-          <a href="booking.html" class="btn btn-primary"><i class="fa-solid fa-screwdriver-wrench"></i> Book a Repair</a>
-          <a href="tel:+9779813691072" class="btn btn-call"><i class="fa-solid fa-phone"></i> Call Now</a>
-        </div>
-      </div>
-      <div class="reveal" style="transition-delay:120ms">
-        <div class="gauge">
-          <div class="grid grid-cols-2 gap-6">
-            <div>
-              <div class="readout" data-count="24">0</div>
-              <div class="label">Hrs / 7 Days Emergency Line</div>
-            </div>
-            <div>
-              <div class="readout"><span data-count="15">15</span>–<span data-count="20">20</span></div>
-              <div class="label">Min Avg. Response, In-City</div>
-            </div>
-            <div>
-              <div class="readout" data-count="3">0</div>
-              <div class="label">Service Modes Available</div>
-            </div>
-            <div>
-              <div class="readout" data-count="100">0</div>
-              <div class="label">% Genuine Parts Promise</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+     <!-- Stats/Gauges Section -->
+     <section class="py-xl border-b border-border-muted bg-surface-elevated">
+       <div class="max-w-container-max mx-auto px-md md:px-xl grid grid-cols-1 md:grid-cols-3 gap-8">
+         <!-- Gauge 1 -->
+         <div class="flex items-center gap-4 border border-border-muted p-4 relative overflow-hidden group hover:border-primary-container/40 transition-colors">
+           <div class="absolute inset-0 glow-overlay opacity-0 group-hover:opacity-100 transition-opacity"></div>
+           <div class="relative z-10 w-16 h-16 rounded-full border-2 border-primary-container flex items-center justify-center text-primary-container">
+             <span class="material-symbols-outlined text-3xl">schedule</span>
+           </div>
+           <div class="relative z-10">
+             <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">24/7</div>
+             <div class="font-label-mono-sm text-label-mono-sm text-text-muted uppercase">Operational Readiness</div>
+           </div>
+         </div>
+         <!-- Gauge 2 -->
+         <div class="flex items-center gap-4 border border-border-muted p-4 relative overflow-hidden group hover:border-primary-container/40 transition-colors">
+           <div class="absolute inset-0 glow-overlay opacity-0 group-hover:opacity-100 transition-opacity"></div>
+           <div class="relative z-10 w-16 h-16 rounded-full border-2 border-primary-container flex items-center justify-center text-primary-container">
+             <span class="material-symbols-outlined text-3xl">speed</span>
+           </div>
+           <div class="relative z-10">
+             <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">&lt;30m</div>
+             <div class="font-label-mono-sm text-label-mono-sm text-text-muted uppercase">Avg Response Time</div>
+           </div>
+         </div>
+         <!-- Gauge 3 -->
+         <div class="flex items-center gap-4 border border-border-muted p-4 relative overflow-hidden group hover:border-primary-container/40 transition-colors">
+           <div class="absolute inset-0 glow-overlay opacity-0 group-hover:opacity-100 transition-opacity"></div>
+           <div class="relative z-10 w-16 h-16 rounded-full border-2 border-primary-container flex items-center justify-center text-primary-container">
+             <span class="material-symbols-outlined text-3xl">verified</span>
+           </div>
+           <div class="relative z-10">
+             <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">100%</div>
+             <div class="font-label-mono-sm text-label-mono-sm text-text-muted uppercase">Genuine Parts</div>
+           </div>
+         </div>
+       </div>
+     </section>
 
-
-  <!-- ============ SERVICES OVERVIEW ============ -->
-  <section class="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
-    <div class="reveal mb-12 max-w-xl">
-      <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">WHAT WE FIX, AND HOW WE REACH YOU</p>
-      <h2 class="text-3xl md:text-4xl font-bold">THREE WAYS TO GET RUNNING AGAIN</h2>
-    </div>
-    <div class="grid md:grid-cols-3 gap-6">
-      <div class="card p-7 reveal">
-        <div class="w-12 h-12 rounded-md bg-[#FF5A1F]/10 text-[#FF5A1F] flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <h3 class="font-display text-lg mb-2">Emergency Repair</h3>
-        <p class="text-[#B9B6AC] text-sm mb-5">Broken down on the road? Our nearest mechanic comes to your exact location, any hour, any day.</p>
-        <a href="services.html#emergency" class="text-[#FF5A1F] font-mono text-xs tracking-wide">VIEW DETAILS →</a>
-      </div>
-      <div class="card p-7 reveal" style="transition-delay:100ms">
-        <div class="w-12 h-12 rounded-md bg-[#FF5A1F]/10 text-[#FF5A1F] flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-house-chimney"></i></div>
-        <h3 class="font-display text-lg mb-2">Home / Office Visit</h3>
-        <p class="text-[#B9B6AC] text-sm mb-5">Routine service, minor repairs, or a pre-trip check — scheduled at your home or office, no workshop trip needed.</p>
-        <a href="services.html#home-visit" class="text-[#FF5A1F] font-mono text-xs tracking-wide">VIEW DETAILS →</a>
-      </div>
-      <div class="card p-7 reveal" style="transition-delay:200ms">
-        <div class="w-12 h-12 rounded-md bg-[#FF5A1F]/10 text-[#FF5A1F] flex items-center justify-center text-xl mb-5"><i class="fa-solid fa-motorcycle"></i></div>
-        <h3 class="font-display text-lg mb-2">Workshop Appointment</h3>
-        <p class="text-[#B9B6AC] text-sm mb-5">Bring your bike in for full diagnostics, overhauls, or bigger jobs — book a slot, skip the wait.</p>
-        <a href="services.html#workshop" class="text-[#FF5A1F] font-mono text-xs tracking-wide">VIEW DETAILS →</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ WHY CHOOSE US / STATS ============ -->
-  <section class="bg-transparent md:bg-[#1B1E24] border-none md:border-y md:border-[#3A3F49] py-12 md:py-20">
-    <div class="max-w-7xl mx-auto px-4 md:px-8">
-      <div class="reveal max-w-xl mb-12">
-        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">WHY RIDERS CALL CHHOTU</p>
-        <h2 class="text-3xl md:text-4xl font-bold">BUILT FOR THE ROADSIDE, NOT JUST THE GARAGE</h2>
-      </div>
-      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
-        <div class="gauge reveal"><div class="readout" data-count="8">0</div><div class="label">Years Running</div></div>
-        <div class="gauge reveal" style="transition-delay:80ms"><div class="readout" data-count="4200">0</div><div class="label">Bikes Serviced</div></div>
-        <div class="gauge reveal" style="transition-delay:160ms"><div class="readout" data-count="4">0</div><div class="label">Mechanics On Team</div></div>
-        <div class="gauge reveal" style="transition-delay:240ms"><div class="readout" data-count="15">0</div><div class="label">Min Avg. Response</div></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ TESTIMONIALS PREVIEW ============ -->
-  <section class="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-20">
-    <div class="reveal mb-12 flex items-end justify-between flex-wrap gap-4">
-      <div class="max-w-xl">
-        <p class="font-mono text-xs tracking-[0.2em] text-[#FF5A1F] mb-3">FROM RIDERS WE'VE HELPED</p>
-        <h2 class="text-3xl md:text-4xl font-bold">WHAT KATHMANDU RIDERS SAY</h2>
-      </div>
-    </div>
-    <div class="testimonial-slider grid md:grid-cols-3 lg:grid-cols-5 gap-6">
-      <blockquote class="card p-7 reveal">
-        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
-        <p class="text-[#B9B6AC] text-sm mb-5">Bike died near Boudha at 11pm. Chhotu's mechanic reached me in under 25 minutes and had me riding home within the hour.</p>
-        <footer class="font-mono text-xs text-[#B9B6AC]">— Rejina T., Boudha</footer>
-      </blockquote>
-      <blockquote class="card p-7 reveal" style="transition-delay:100ms">
-        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
-        <p class="text-[#B9B6AC] text-sm mb-5">Booked a home visit for my scooter's annual service. Mechanic showed up on time, explained every part he replaced.</p>
-        <footer class="font-mono text-xs text-[#B9B6AC]">— Suman K., Jorpati</footer>
-      </blockquote>
-      <blockquote class="card p-7 reveal" style="transition-delay:200ms">
-        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
-        <p class="text-[#B9B6AC] text-sm mb-5">Took my bike in for a full overhaul before a long ride. Fair pricing, genuine parts, done a day early.</p>
-        <footer class="font-mono text-xs text-[#B9B6AC]">— Prakash D., Chabahil</footer>
-      </blockquote>
-      <blockquote class="card p-7 reveal" style="transition-delay:300ms">
-        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
-        <p class="text-[#B9B6AC] text-sm mb-5">Amazing roadside recovery! I was stuck in heavy rain with a punctured tire. They arrived fast and fixed it on the spot.</p>
-        <footer class="font-mono text-xs text-[#B9B6AC]">— Anish M., Kalanki</footer>
-      </blockquote>
-      <blockquote class="card p-7 reveal" style="transition-delay:400ms">
-        <i class="fa-solid fa-quote-left text-[#FF5A1F] mb-4"></i>
-        <p class="text-[#B9B6AC] text-sm mb-5">Highly recommend their home service. Very convenient for busy people. The mechanic was professional and knowledgeable.</p>
-        <footer class="font-mono text-xs text-[#B9B6AC]">— Prerna S., Lalitpur</footer>
-      </blockquote>
-    </div>
-  </section>
-
-  <!-- ============ CTA ============ -->
-  <section class="cta-section relative border-t border-[#3A3F49] overflow-hidden">
-    <div class="hazard-stripe"></div>
-    <div class="max-w-7xl mx-auto px-4 md:px-8 py-12 md:py-16 text-center reveal">
-      <h2 class="text-3xl md:text-5xl font-bold mb-5">DON'T PUSH YOUR BIKE. CALL CHHOTU.</h2>
-      <p class="text-[#B9B6AC] mb-8 max-w-xl mx-auto">Whichever service fits — emergency, home visit, or workshop — booking takes under a minute.</p>
-      <a href="booking.html" class="btn btn-primary text-base"><i class="fa-solid fa-calendar-check"></i> Book Now</a>
-    </div>
-  </section>
-
-</main>
+     <!-- Services Section (Bento Grid) -->
+     <section class="py-xxl md:py-[112px] border-b border-border-muted">
+       <div class="max-w-container-max mx-auto px-md md:px-xl">
+         <div class="mb-12">
+           <h2 class="font-headline-md text-headline-md text-text-primary uppercase mb-2">Operational Modes</h2>
+           <p class="font-body-md text-body-md text-text-muted">Select service protocol based on current mechanical status.</p>
+         </div>
+         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+           <!-- Service Card 1: Emergency -->
+           <div class="bg-surface-elevated border border-border-muted p-8 flex flex-col group hover:border-primary-container/40 transition-colors lg:col-span-2 lg:row-span-2 relative overflow-hidden">
+             <div class="absolute top-0 right-0 w-32 h-32 bg-primary-container/10 blur-3xl rounded-full"></div>
+             <div class="flex justify-between items-start mb-16 relative z-10">
+               <span class="material-symbols-outlined text-4xl text-primary-container" style="font-variation-settings: 'FILL' 1;">warning</span>
+               <span class="font-label-mono-xs text-label-mono-xs text-status-error uppercase border border-status-error/30 px-2 py-1 bg-status-error/10">Priority 1</span>
+             </div>
+             <div class="mt-auto relative z-10">
+               <h3 class="font-headline-md text-headline-md text-text-primary uppercase mb-4">Emergency Extraction</h3>
+               <p class="font-body-md text-body-md text-text-muted mb-6 max-w-md">Immediate roadside assistance. Diagnostic vehicle dispatched to your location within standard operating radius.</p>
+               <a href="booking.html?service=emergency" class="font-button-text text-button-text uppercase text-primary-container hover:text-primary-container/80 flex items-center gap-2">
+                 Initiate Protocol <span class="material-symbols-outlined">arrow_forward</span>
+               </a>
+             </div>
+           </div>
+           <!-- Service Card 2: Home Visit -->
+           <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col group hover:border-primary-container/40 transition-colors">
+             <div class="flex justify-between items-start mb-8">
+               <span class="material-symbols-outlined text-3xl text-text-primary">home</span>
+             </div>
+             <div class="mt-auto">
+               <h3 class="font-button-text text-button-text text-text-primary uppercase mb-2">Home Visit Diagnostics</h3>
+               <p class="font-body-md text-body-md text-text-muted text-sm mb-4">Scheduled on-site maintenance at your location.</p>
+               <a href="booking.html?service=home-visit" class="font-label-mono-sm text-label-mono-sm uppercase text-text-muted hover:text-text-primary transition-colors flex items-center gap-1">
+                 Schedule <span class="material-symbols-outlined text-sm">arrow_forward</span>
+               </a>
+             </div>
+           </div>
+           <!-- Service Card 3: Workshop -->
+           <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col group hover:border-primary-container/40 transition-colors">
+             <div class="flex justify-between items-start mb-8">
+               <span class="material-symbols-outlined text-3xl text-text-primary">engineering</span>
+             </div>
+             <div class="mt-auto">
+               <h3 class="font-button-text text-button-text text-text-primary uppercase mb-2">Base Workshop</h3>
+               <p class="font-body-md text-body-md text-text-muted text-sm mb-4">Full teardowns and complex mechanical overhauls.</p>
+               <a href="booking.html?service=workshop" class="font-label-mono-sm text-label-mono-sm uppercase text-text-muted hover:text-text-primary transition-colors flex items-center gap-1">
+                 View Facility <span class="material-symbols-outlined text-sm">arrow_forward</span>
+               </a>
+             </div>
+           </div>
+         </div>
+       </div>
+     </section>
+   </main>
 
 <!-- =====================================================================
      SHARED FOOTER START — keep identical across all pages.
