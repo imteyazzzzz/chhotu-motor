@@ -122,7 +122,7 @@ function renderPortalView() {
     document.getElementById("view-invoice-builder").classList.remove("hidden");
     renderRunningInvoice();
 
-  } else if (job.status === "completed") {
+  } else if (job.status === "completed" || job.status === "completed_awaiting_payment" || job.status === "payment_submitted") {
     // 4. COMPLETED / PAYMENT SELECTION STATE
     document.getElementById("state-active-job").classList.remove("hidden");
     document.getElementById("view-payment-collection").classList.remove("hidden");
@@ -133,13 +133,13 @@ function renderPortalView() {
     // Default selects cash
     togglePaymentView("cash");
 
-  } else if (job.status === "paid") {
+  } else if (job.status === "paid" || job.status === "payment_verified") {
     // 5. PAID STATE (Expirations countdown starts)
     document.getElementById("state-active-job").classList.remove("hidden");
     document.getElementById("view-payment-success").classList.remove("hidden");
     
     // Start live countdown timer
-    startExpiryCountdown(job.paid_at);
+    startExpiryCountdown(job.paid_at || job.final_payment_verified_at);
   }
 }
 
@@ -410,9 +410,9 @@ function setStatusBadgeStyle(el, status) {
     colorClasses = "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20";
   } else if (status === "in_progress") {
     colorClasses = "bg-[#FF5A1F]/15 text-[#FF5A1F] border border-[#FF5A1F]/20";
-  } else if (status === "completed") {
+  } else if (status === "completed" || status === "completed_awaiting_payment" || status === "payment_submitted") {
     colorClasses = "bg-blue-500/15 text-blue-400 border border-blue-500/20";
-  } else if (status === "paid") {
+  } else if (status === "paid" || status === "payment_verified") {
     colorClasses = "bg-green-500/15 text-green-400 border border-green-500/20";
   }
 
