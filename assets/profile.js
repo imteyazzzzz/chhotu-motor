@@ -332,14 +332,17 @@ async function loadOverviewData() {
 // Status Badges mapping helper
 function getStatusPill(status) {
   let badgeColorClass = "bg-[#3A3F49] text-[#B9B6AC]";
-  let label = "Pending";
+  let label = (status || "").replace("_", " ").replace("-", " ").toUpperCase();
 
-  if (status === "pending_verification") {
+  if (status === "pending_verification" || status === "payment_submitted") {
     badgeColorClass = "bg-yellow-500/15 text-yellow-400 border border-yellow-500/25";
     label = "Awaiting Verification";
   } else if (status === "payment_rejected") {
     badgeColorClass = "bg-red-500/15 text-red-500 border border-red-500/25";
     label = "Payment Rejected";
+  } else if (status === "pending") {
+    badgeColorClass = "bg-[#3A3F49] text-[#B9B6AC]";
+    label = "Pending Review";
   } else if (status === "assigned" || status === "confirmed") {
     badgeColorClass = "bg-blue-500/15 text-blue-400";
     label = "Assigned";
@@ -352,6 +355,12 @@ function getStatusPill(status) {
   } else if (status === "completed") {
     badgeColorClass = "bg-green-500/15 text-green-400";
     label = "Completed";
+  } else if (status === "completed_awaiting_payment") {
+    badgeColorClass = "bg-yellow-500/15 text-yellow-400";
+    label = "Awaiting Payment";
+  } else if (status === "payment_verified" || status === "paid") {
+    badgeColorClass = "bg-green-500/15 text-green-400 border border-green-500/25";
+    label = "Payment Verified";
   } else if (status === "cancelled") {
     badgeColorClass = "bg-red-500/15 text-red-400";
     label = "Cancelled";

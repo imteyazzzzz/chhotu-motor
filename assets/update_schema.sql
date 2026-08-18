@@ -294,5 +294,25 @@ ALTER TABLE public.bookings
 ADD CONSTRAINT bookings_user_id_profiles_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE SET NULL;
 
 
+-- Link actor_id in bookings_activity directly to profiles(id)
+ALTER TABLE public.bookings_activity
+DROP CONSTRAINT IF EXISTS bookings_activity_actor_id_fkey,
+DROP CONSTRAINT IF EXISTS bookings_activity_actor_id_profiles_fkey;
+
+ALTER TABLE public.bookings_activity
+ADD CONSTRAINT bookings_activity_actor_id_profiles_fkey FOREIGN KEY (actor_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
+
+
+-- Link select access on invoice_items to access on the parent invoice
+DROP POLICY IF EXISTS "Customers can view own invoice items" ON public.invoice_items;
+CREATE POLICY "Customers can view own invoice items" ON public.invoice_items
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.invoices
+            WHERE invoices.id = invoice_items.invoice_id
+        )
+    );
+
+
 -- 10. Force Supabase PostgREST schema cache to reload
 NOTIFY pgrst, 'reload schema';
