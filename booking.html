@@ -575,11 +575,15 @@
               <span class="material-symbols-outlined text-xl text-text-muted" style="font-variation-settings: 'FILL' 0;">radar</span>
               <h3 class="font-button-text text-sm uppercase">Operational Radius</h3>
             </div>
-            <div class="w-full h-48 bg-surface border border-border-muted mb-4 overflow-hidden relative group">
-              <div class="absolute inset-0 bg-surface/50 z-10 pointer-events-none group-hover:bg-transparent transition-colors"></div>
-              <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_transparent_0%,_#111317_100%)] z-10 pointer-events-none"></div>
-              <!-- Map representation -->
-              <div class="bg-cover bg-center w-full h-full filter grayscale sepia-[.2] hue-rotate-[180deg]" data-alt="A dark stylized digital map of Kathmandu Valley" style="background-image: url('assets/kathmandu_map.jpg')"></div>
+            <div class="w-full h-48 bg-surface border border-border-muted mb-4 overflow-hidden relative">
+              <!-- Interactive Google Map pointing directly to Chotu Motorcycle work shop, Jorpati -->
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d28254.37459699865!2d85.37080941395918!3d27.723558772946262!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb1b61ed8cc6bf%3A0x5e1d3ac1d66346db!2sChotu%20Motorcycle%20work%20shop!5e0!3m2!1sen!2sin!4v1787068709193!5m2!1sen!2sin" 
+                class="w-full h-full border-0 filter invert contrast-[1.1] brightness-[0.85] grayscale-[0.25] opacity-80 hover:opacity-100 transition-opacity duration-300" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="strict-origin-when-cross-origin">
+              </iframe>
             </div>
             <ul class="space-y-3 font-label-mono-sm text-[11px] text-text-muted">
               <li class="flex justify-between border-b border-border-muted pb-1">
