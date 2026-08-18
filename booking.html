@@ -452,6 +452,9 @@
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 
+    window.savedUserAddress = "";
+    window.savedUserCoords = "";
+
     const serviceSelect = document.getElementById("b-service");
     const locationInput = document.getElementById("b-location");
     const locationRequiredMark = document.getElementById("b-location-required");
@@ -480,6 +483,17 @@
       if (locationInput) locationInput.required = locationRequired;
       if (locationRequiredMark) locationRequiredMark.style.display = locationRequired ? "inline" : "none";
       if (locationWrap) locationWrap.style.display = showLocation ? "block" : "none";
+
+      // Auto-fill address for home-visit if not already entered
+      if (val === "home-visit" && locationInput && !locationInput.value && window.savedUserAddress) {
+        locationInput.value = window.savedUserAddress;
+        
+        const coordsInput = document.getElementById("b-coords");
+        if (coordsInput && !coordsInput.value && window.savedUserCoords) {
+          coordsInput.value = window.savedUserCoords;
+        }
+      }
+
       if (!showLocation && locationInput) {
         locationInput.value = "";
       }
@@ -620,24 +634,49 @@
 
             const nameInput = document.getElementById("b-name");
             const phoneInput = document.getElementById("b-phone");
+            const codeEl = document.getElementById("b-phone-code");
 
             if (nameInput && !nameInput.value) {
               nameInput.value = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "";
             }
-            if (phoneInput && !phoneInput.value && session.user.phone) {
-              let phoneVal = session.user.phone;
-              const codeEl = document.getElementById("b-phone-code");
+
+            // 1. Fetch user profile from database to get saved phone number
+            const { data: profile } = await window.supabaseClient
+              .from("profiles")
+              .select("phone")
+              .eq("id", loggedInUserId)
+              .maybeSingle();
+
+            const profilePhone = profile?.phone || session.user.phone || "";
+            if (phoneInput && !phoneInput.value && profilePhone) {
               if (codeEl) {
                 const codes = Array.from(codeEl.options).map(o => o.value);
-                const matchedCode = codes.find(c => phoneVal.startsWith(c));
+                const matchedCode = codes.find(c => profilePhone.startsWith(c));
                 if (matchedCode) {
                   codeEl.value = matchedCode;
-                  phoneInput.value = phoneVal.substring(matchedCode.length);
+                  phoneInput.value = profilePhone.substring(matchedCode.length);
                 } else {
-                  phoneInput.value = phoneVal;
+                  phoneInput.value = profilePhone;
                 }
               } else {
-                phoneInput.value = phoneVal;
+                phoneInput.value = profilePhone;
+              }
+            }
+
+            // 2. Fetch user saved address details from database
+            const { data: addrData } = await window.supabaseClient
+              .from("addresses")
+              .select("street_address, coordinates")
+              .eq("user_id", loggedInUserId)
+              .maybeSingle();
+
+            if (addrData) {
+              window.savedUserAddress = addrData.street_address || "";
+              window.savedUserCoords = addrData.coordinates || "";
+              
+              // If service type was already selected as home-visit (e.g. from query param), trigger syncServiceUI again to populate!
+              if (serviceSelect && serviceSelect.value === "home-visit") {
+                syncServiceUI();
               }
             }
 
