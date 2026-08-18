@@ -280,5 +280,19 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
+-- Ensure all user_ids in bookings exist in profiles, or set them to NULL to avoid constraint validation errors
+UPDATE public.bookings
+SET user_id = NULL
+WHERE user_id NOT IN (SELECT id FROM public.profiles);
+
+-- Link user_id in bookings directly to profiles(id)
+ALTER TABLE public.bookings
+DROP CONSTRAINT IF EXISTS bookings_user_id_fkey,
+DROP CONSTRAINT IF EXISTS bookings_user_id_profiles_fkey;
+
+ALTER TABLE public.bookings
+ADD CONSTRAINT bookings_user_id_profiles_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE SET NULL;
+
+
 -- 10. Force Supabase PostgREST schema cache to reload
 NOTIFY pgrst, 'reload schema';

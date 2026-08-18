@@ -334,7 +334,7 @@
       try {
         const { data, error } = await window.supabaseClient
           .from("bookings")
-          .select("*, profiles!inner(full_name, phone)")
+          .select("*, profiles(full_name, phone)")
           .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -376,12 +376,14 @@
 
         // 4. Search Filter (customer name, phone, reference)
         if (searchVal) {
-          filtered = filtered.filter(b => 
-            b.id.toLowerCase().includes(searchVal) ||
-            b.profiles.full_name.toLowerCase().includes(searchVal) ||
-            b.profiles.phone.includes(searchVal) ||
-            (b.bike_model && b.bike_model.toLowerCase().includes(searchVal))
-          );
+          filtered = filtered.filter(b => {
+            const name = b.profiles?.full_name || b.name || "";
+            const phone = b.profiles?.phone || b.phone || "";
+            return b.id.toLowerCase().includes(searchVal) ||
+              name.toLowerCase().includes(searchVal) ||
+              phone.includes(searchVal) ||
+              (b.bike_model && b.bike_model.toLowerCase().includes(searchVal));
+          });
         }
 
         renderQueueLayouts(filtered);
@@ -412,7 +414,7 @@
         return `
           <tr onclick="openDetailsDrawer('${b.id}')" class="border-b border-[#3A3F49] hover:bg-[#1B1E24]/30 cursor-pointer transition-all">
             <td class="p-4 font-mono text-xs font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</td>
-            <td class="p-4 text-xs font-semibold text-[#F4F1E8]">${b.profiles.full_name}</td>
+            <td class="p-4 text-xs font-semibold text-[#F4F1E8]">${b.profiles?.full_name || b.name}</td>
             <td class="p-4 text-xs text-[#B9B6AC] uppercase">${b.bike_brand || ""} ${b.bike_model}</td>
             <td class="p-4 text-xs text-[#B9B6AC] capitalize">${b.service_type.replace("-", " ")}</td>
             <td class="p-4">${statusPill}</td>
@@ -435,7 +437,7 @@
             <div class="flex justify-between items-start">
               <div>
                 <h4 class="font-mono text-xs font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</h4>
-                <p class="text-xs font-semibold text-[#F4F1E8] mt-0.5">${b.profiles.full_name}</p>
+                <p class="text-xs font-semibold text-[#F4F1E8] mt-0.5">${b.profiles?.full_name || b.name}</p>
               </div>
               ${statusPill}
             </div>
@@ -519,9 +521,9 @@
       document.getElementById("drawer-ref-title").textContent = `#${b.id.substring(0, 12).toUpperCase()}...`;
       document.getElementById("drawer-created-at").textContent = new Date(b.created_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
       
-      document.getElementById("drawer-cust-name").textContent = b.profiles.full_name;
-      document.getElementById("drawer-cust-phone").textContent = b.profiles.phone || "No phone";
-      document.getElementById("drawer-call-link").setAttribute("href", `tel:${b.profiles.phone || ''}`);
+      document.getElementById("drawer-cust-name").textContent = b.profiles?.full_name || b.name || "Customer";
+      document.getElementById("drawer-cust-phone").textContent = b.profiles?.phone || b.phone || "No phone";
+      document.getElementById("drawer-call-link").setAttribute("href", `tel:${b.profiles?.phone || b.phone || ''}`);
       
       document.getElementById("drawer-service-type").textContent = b.service_type.replace("-", " ");
       document.getElementById("drawer-bike-model").textContent = `${b.bike_brand || ""} ${b.bike_model}`;

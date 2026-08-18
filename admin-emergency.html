@@ -92,7 +92,7 @@
         // Query bookings where service_type = 'emergency' and status = 'pending' or 'assigned' or 'dispatched' (but not in_progress/completed/cancelled)
         const { data, error } = await window.supabaseClient
           .from("bookings")
-          .select("*, profiles!inner(full_name, phone)")
+          .select("*, profiles(full_name, phone)")
           .eq("service_type", "emergency")
           .in("status", ["pending", "assigned", "dispatched"])
           .order("created_at", { ascending: true }); // oldest first
@@ -158,10 +158,10 @@
               </div>
 
               <div class="text-xs space-y-1">
-                <p class="font-bold text-[#F4F1E8]">${b.profiles.full_name}</p>
+                <p class="font-bold text-[#F4F1E8]">${b.profiles?.full_name || b.name}</p>
                 <p class="flex items-center gap-2">
-                  <span class="font-mono text-[#B9B6AC]">${b.profiles.phone}</span>
-                  <a href="tel:${b.profiles.phone}" class="px-1.5 py-0.5 bg-[#FFC530] text-[#14161A] font-mono text-[9px] rounded font-bold uppercase"><i class="fa-solid fa-phone"></i> Call</a>
+                  <span class="font-mono text-[#B9B6AC]">${b.profiles?.phone || b.phone}</span>
+                  <a href="tel:${b.profiles?.phone || b.phone}" class="px-1.5 py-0.5 bg-[#FFC530] text-[#14161A] font-mono text-[9px] rounded font-bold uppercase"><i class="fa-solid fa-phone"></i> Call</a>
                 </p>
                 <p class="text-[#B9B6AC] font-semibold">${b.bike_brand || ""} ${b.bike_model}</p>
                 <p class="text-[#B9B6AC]"><i class="fa-solid fa-location-dot text-[9px] text-[#FF5A1F]"></i> Address: ${b.location}</p>
