@@ -231,15 +231,31 @@ function initTabs() {
     });
   });
 
-  // Wire up Mobile Accordion Headers
+  // Wire up Mobile Accordion Headers with toggle open/close behavior
   const accordionHeaders = document.querySelectorAll(".accordion-header");
   accordionHeaders.forEach(header => {
     header.addEventListener("click", (e) => {
       e.preventDefault();
       const targetPanelName = header.getAttribute("data-target");
-      const targetTabBtn = document.getElementById(`tab-${targetPanelName}`);
-      if (targetTabBtn) {
-        targetTabBtn.click();
+      const targetPanel = document.getElementById(`panel-${targetPanelName}`);
+      const accordionItem = header.closest(".accordion-item");
+      const content = accordionItem.querySelector(".accordion-content");
+      
+      const isOpen = accordionItem.classList.contains("open");
+      
+      if (isOpen) {
+        // Toggle to collapsed state
+        accordionItem.classList.remove("open");
+        content.classList.remove("open");
+        if (targetPanel) {
+          targetPanel.classList.add("hidden");
+        }
+      } else {
+        // Trigger tab click to expand it
+        const targetTabBtn = document.getElementById(`tab-${targetPanelName}`);
+        if (targetTabBtn) {
+          targetTabBtn.click();
+        }
       }
     });
   });
