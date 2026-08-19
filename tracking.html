@@ -309,6 +309,9 @@
         </div>
       </div>
 
+      <!-- Dynamic Payment Alert Banner for verification states -->
+      <div id="tracking-payment-alert" class="hidden mb-6 p-4 rounded border font-mono text-xs"></div>
+
       <div class="grid md:grid-cols-3 gap-8" id="tracking-standard-view">
         
         <!-- Timeline Stepper (Left 2 cols) -->
@@ -645,10 +648,37 @@
 
   // Load a single booking's timeline
   function displayBooking(booking) {
-    if (booking.status === "pending_verification" || booking.status === "payment_rejected") {
-      alert("This booking requires payment verification. Redirecting you to your profile page to check status or upload proof.");
-      window.location.href = "profile.html";
-      return;
+    // Populate dynamic verification alerts if pending/rejected
+    const paymentAlert = document.getElementById("tracking-payment-alert");
+    if (paymentAlert) {
+      if (booking.status === "pending_verification") {
+        paymentAlert.className = "mb-6 p-4 rounded border font-mono text-xs bg-[#FF5A1F]/10 border-[#FF5A1F]/30 text-[#FF5A1F]";
+        paymentAlert.innerHTML = `
+          <div class="flex items-start gap-3">
+            <i class="fa-solid fa-clock-rotate-left mt-0.5 text-base"></i>
+            <div>
+              <h5 class="font-bold uppercase mb-1">Payment Verification Pending</h5>
+              <p class="text-[#B9B6AC]">We are currently verifying your upfront deposit screenshot. Once verified by our admin, your booking will be confirmed and assigned to a mechanic. You can keep this page open to track updates live.</p>
+            </div>
+          </div>
+        `;
+        paymentAlert.classList.remove("hidden");
+      } else if (booking.status === "payment_rejected") {
+        paymentAlert.className = "mb-6 p-4 rounded border font-mono text-xs bg-red-500/10 border-red-500/30 text-red-400";
+        paymentAlert.innerHTML = `
+          <div class="flex items-start gap-3">
+            <i class="fa-solid fa-circle-exclamation mt-0.5 text-base"></i>
+            <div>
+              <h5 class="font-bold uppercase mb-1">Deposit Payment Rejected</h5>
+              <p class="text-[#B9B6AC] mb-2">The submitted payment proof was rejected by our admin. Reason: <span class="text-red-400 font-bold">${booking.payment_rejection_reason || "Invalid screenshot."}</span></p>
+              <a href="https://wa.me/9779813691072?text=${encodeURIComponent('Hi Chhotu Motorcycles, my payment screenshot was rejected for Booking ID: ' + booking.id)}" target="_blank" class="btn btn-outline !py-1.5 !px-3 !text-[10px]"><i class="fa-brands fa-whatsapp text-green-400"></i> Contact Support via WhatsApp</a>
+            </div>
+          </div>
+        `;
+        paymentAlert.classList.remove("hidden");
+      } else {
+        paymentAlert.classList.add("hidden");
+      }
     }
 
     // Subscribe to realtime updates
@@ -716,6 +746,9 @@
     
     // Determine active index
     let activeIdx = statuses.indexOf(currentStatus);
+    if (currentStatus === "pending_verification" || currentStatus === "payment_rejected") {
+      activeIdx = 0; // Highlight first step ("Request Received")
+    }
     if (currentStatus === "cancelled") activeIdx = -1; // Don't highlight stepper for cancelled
 
     // Reset styles on all stepper items

@@ -1443,21 +1443,8 @@
         body: JSON.stringify(payload)
       }).catch(e => console.error("Asynchronous webhook failed:", e));
 
-      // D. Redirect to booking-success.html
-      const successUrl = `booking-success.html?` +
-        `id=${encodeURIComponent(supabaseBookingId || '')}` +
-        `&name=${encodeURIComponent(payload.name)}` +
-        `&phone=${encodeURIComponent(payload.phone)}` +
-        `&bike=${encodeURIComponent(payload.bikeModel)}` +
-        `&service=${encodeURIComponent(payload.serviceType)}` +
-        `&location=${encodeURIComponent(payload.location)}` +
-        `&coords=${encodeURIComponent(payload.coordinates)}` +
-        `&date=${encodeURIComponent(payload.preferredDate)}` +
-        `&time=${encodeURIComponent(payload.preferredTime)}` +
-        `&issue=${encodeURIComponent(payload.issueDescription)}` +
-        `&payref=${encodeURIComponent(paymentRef)}`;
-
-      window.location.href = successUrl;
+      // D. Redirect to tracking.html with auto-filled booking ID
+      window.location.href = `tracking.html?id=${encodeURIComponent(supabaseBookingId || '')}`;
     });
   </script>
   <script src="assets/agentation-bundle.js"></script>
