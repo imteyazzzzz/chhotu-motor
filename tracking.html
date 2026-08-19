@@ -960,6 +960,32 @@
         return;
       }
 
+      // Self-healing: if logged in and searching a guest booking, auto-claim/merge it!
+      const user = session.user;
+      const userPhone = user.user_metadata?.phone || user.phone || "";
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
+      
+      let mergeFilter = "";
+      if (isUUID) {
+        mergeFilter = `id.eq.${val}`;
+        if (userPhone) mergeFilter += `,phone.eq.${userPhone}`;
+      } else {
+        const cleaned = val.replace(/[-\s()]/g, "");
+        if (cleaned) mergeFilter = `phone.eq.${cleaned}`;
+      }
+      
+      if (mergeFilter) {
+        try {
+          await window.supabaseClient
+            .from("bookings")
+            .update({ user_id: user.id })
+            .or(mergeFilter)
+            .is("user_id", null);
+        } catch (e) {
+          console.error("Self-healing auto-claim failed:", e);
+        }
+      }
+
       let query = window.supabaseClient.from("bookings").select("*");
       
       // UUID format check (regex)
