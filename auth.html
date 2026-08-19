@@ -341,17 +341,19 @@
       const userPhone = user.user_metadata?.phone || user.phone || "";
       console.log("Merging guest bookings to account:", user.id, "phone:", userPhone);
       
-      let filter = `id.eq.${bookingId}`;
-      if (userPhone) {
-        filter += `,phone.eq.${userPhone}`;
-      }
-      
       try {
-        await window.supabaseClient
+        let updateQuery = window.supabaseClient
           .from("bookings")
           .update({ user_id: user.id })
-          .or(filter)
           .is("user_id", null);
+          
+        if (userPhone) {
+          updateQuery = updateQuery.or(`id.eq.${bookingId},phone.eq.${userPhone}`);
+        } else {
+          updateQuery = updateQuery.eq("id", bookingId);
+        }
+        
+        await updateQuery;
         console.log("Merge completed.");
       } catch (err) {
         console.error("Failed to claim guest bookings:", err);

@@ -965,31 +965,35 @@
       const userPhone = user.user_metadata?.phone || user.phone || "";
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
       
-      let mergeFilter = "";
-      if (isUUID) {
-        mergeFilter = `id.eq.${val}`;
-        if (userPhone) mergeFilter += `,phone.eq.${userPhone}`;
-      } else {
-        const cleaned = val.replace(/[-\s()]/g, "");
-        if (cleaned) mergeFilter = `phone.eq.${cleaned}`;
-      }
-      
-      if (mergeFilter) {
-        try {
-          await window.supabaseClient
-            .from("bookings")
-            .update({ user_id: user.id })
-            .or(mergeFilter)
-            .is("user_id", null);
-        } catch (e) {
-          console.error("Self-healing auto-claim failed:", e);
+      try {
+        let updateQuery = window.supabaseClient
+          .from("bookings")
+          .update({ user_id: user.id })
+          .is("user_id", null);
+          
+        if (isUUID) {
+          if (userPhone) {
+            updateQuery = updateQuery.or(`id.eq.${val},phone.eq.${userPhone}`);
+          } else {
+            updateQuery = updateQuery.eq("id", val);
+          }
+        } else {
+          const cleaned = val.replace(/[-\s()]/g, "");
+          if (cleaned) {
+            updateQuery = updateQuery.eq("phone", cleaned);
+          } else {
+            updateQuery = null;
+          }
         }
+        
+        if (updateQuery) {
+          await updateQuery;
+        }
+      } catch (e) {
+        console.error("Self-healing auto-claim failed:", e);
       }
 
       let query = window.supabaseClient.from("bookings").select("*");
-      
-      // UUID format check (regex)
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
       
       if (isUUID) {
         query = query.eq("id", val);
