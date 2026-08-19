@@ -255,6 +255,27 @@
       <p class="text-[#B9B6AC]" id="tracking-subtitle">Look up details or check repair progress in real-time.</p>
     </div>
 
+    <!-- Dedicated Security Login Notice (Hidden by default) -->
+    <div id="tracking-login-card" class="card p-6 reveal hidden">
+      <div class="text-center py-6 space-y-4">
+        <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-[#FF5A1F]/10 text-[#FF5A1F] mb-2">
+          <i class="fa-solid fa-lock text-2xl"></i>
+        </div>
+        <h2 class="font-display text-base text-[#F4F1E8] uppercase tracking-wider">Security Access Required</h2>
+        <p class="text-xs text-[#B9B6AC] max-w-md mx-auto leading-relaxed font-mono">
+          Please log in to track your booking status. This is for your security to protect your personal booking details.
+        </p>
+        <div class="pt-2 flex flex-col sm:flex-row justify-center gap-3">
+          <a id="tracking-login-btn" href="auth.html" class="btn btn-primary !py-2 !px-5 !text-xs text-center inline-block">
+            <i class="fa-solid fa-right-to-bracket text-[#14161A]"></i> Login to Track Booking
+          </a>
+          <button id="tracking-back-btn" class="btn btn-outline !py-2 !px-5 !text-xs">
+            <i class="fa-solid fa-arrow-left"></i> Back to Search
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Lookup Box (Shown by default/guest) -->
     <div id="lookup-panel" class="card p-6 reveal">
       <h2 class="font-display text-sm mb-4 text-[#FF5A1F]">Search Booking</h2>
@@ -886,23 +907,26 @@
   }
 
   function showTrackingLoginNotice(searchedVal) {
-    if (trackingError) {
-      trackingError.className = "bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-5 text-xs text-[#B9B6AC] mt-4 space-y-3 font-mono";
-      trackingError.innerHTML = `
-        <div class="flex items-start gap-2 text-[#FF5A1F]">
-          <i class="fa-solid fa-lock text-sm mt-0.5"></i>
-          <span class="font-bold uppercase tracking-wider">Security Notice</span>
-        </div>
-        <p class="leading-relaxed">Booking status check karne ke liye please login kar le, yeh aapki security ke liye hai.</p>
-        <div class="pt-2">
-          <a href="auth.html?redirect=tracking.html&id=${encodeURIComponent(searchedVal)}" class="btn btn-primary !py-2 !px-4 !text-xs !min-h-[36px] w-full sm:w-auto text-center inline-block">
-            <i class="fa-solid fa-right-to-bracket text-[#14161A]"></i> Login to Track Booking
-          </a>
-        </div>
-      `;
-      trackingError.classList.remove("hidden");
+    const loginCard = document.getElementById("tracking-login-card");
+    const loginBtn = document.getElementById("tracking-login-btn");
+    const lookupPanel = document.getElementById("lookup-panel");
+    
+    if (loginCard && loginBtn && lookupPanel) {
+      loginBtn.href = `auth.html?redirect=tracking.html&id=${encodeURIComponent(searchedVal)}`;
+      lookupPanel.classList.add("hidden");
+      loginCard.classList.remove("hidden");
     }
   }
+
+  // Back to search button click handler
+  document.getElementById("tracking-back-btn")?.addEventListener("click", () => {
+    const loginCard = document.getElementById("tracking-login-card");
+    const lookupPanel = document.getElementById("lookup-panel");
+    if (loginCard && lookupPanel) {
+      loginCard.classList.add("hidden");
+      lookupPanel.classList.remove("hidden");
+    }
+  });
 
   function clearTrackingError() {
     if (trackingError) {
