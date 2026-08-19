@@ -1323,7 +1323,19 @@
         return;
       }
 
-      let supabaseBookingId = null;
+      // Helper: Generate UUID with secure fallback
+      const generateUUID = () => {
+        if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+          return crypto.randomUUID();
+        }
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+          const r = Math.random() * 16 | 0;
+          const v = c === "x" ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        });
+      };
+
+      let supabaseBookingId = generateUUID();
 
       // Helper: Convert file to Base64
       const fileToBase64 = (file) => {
@@ -1345,6 +1357,7 @@
         // B. Save booking record in 'pending_verification' status
         const regNoVal = document.getElementById("b-reg-no").value.trim();
         const insertData = {
+          id: supabaseBookingId,
           user_id: loggedInUserId,
           name: nameInput.value.trim(),
           phone: combinedPhone,
@@ -1367,15 +1380,11 @@
           source: "booking.html"
         };
 
-        const { data: insertedRows, error: dbErr } = await window.supabaseClient
+        const { error: dbErr } = await window.supabaseClient
           .from("bookings")
-          .insert([insertData])
-          .select();
+          .insert([insertData]);
 
         if (dbErr) throw dbErr;
-        if (insertedRows && insertedRows[0]) {
-          supabaseBookingId = insertedRows[0].id;
-        }
 
         // C. If user is logged in and submitted a NEW motorcycle, save it to public.motorcycles
         const savedBikesSelect = document.getElementById("b-saved-bike");
