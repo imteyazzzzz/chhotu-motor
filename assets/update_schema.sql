@@ -314,5 +314,21 @@ CREATE POLICY "Customers can view own invoice items" ON public.invoice_items
     );
 
 
--- 10. Force Supabase PostgREST schema cache to reload
+-- 10. Row-Level Security (RLS) policies for public.bookings
+ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public insert to bookings" ON public.bookings;
+CREATE POLICY "Allow public insert to bookings" ON public.bookings
+    FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Customers can view their own bookings" ON public.bookings;
+CREATE POLICY "Customers can view their own bookings" ON public.bookings
+    FOR SELECT USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Customers can update their own bookings" ON public.bookings;
+CREATE POLICY "Customers can update their own bookings" ON public.bookings
+    FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+
+
+-- 11. Force Supabase PostgREST schema cache to reload
 NOTIFY pgrst, 'reload schema';

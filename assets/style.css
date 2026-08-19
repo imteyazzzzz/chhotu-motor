@@ -326,8 +326,15 @@ input[type="password"]::placeholder,
 input[type="number"]::placeholder,
 input[type="search"]::placeholder,
 textarea::placeholder {
-  color: var(--off-white-dim) !important;
+  color: #808796 !important;
   opacity: 1 !important;
+}
+select:required:invalid {
+  color: #808796 !important;
+}
+select option {
+  color: var(--off-white) !important;
+  background-color: var(--charcoal-2) !important;
 }
 .field-label{
   font-family: var(--font-mono);
