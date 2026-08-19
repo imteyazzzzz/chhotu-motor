@@ -25,6 +25,7 @@
     "esbuild": "^0.28.2"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.112.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }
