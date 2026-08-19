@@ -321,13 +321,14 @@ DROP POLICY IF EXISTS "Allow public insert to bookings" ON public.bookings;
 CREATE POLICY "Allow public insert to bookings" ON public.bookings
     FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Allow owners to read their own bookings" ON public.bookings;
 DROP POLICY IF EXISTS "Customers can view their own bookings" ON public.bookings;
 CREATE POLICY "Customers can view their own bookings" ON public.bookings
     FOR SELECT USING (user_id = auth.uid());
 
 DROP POLICY IF EXISTS "Customers can update their own bookings" ON public.bookings;
 CREATE POLICY "Customers can update their own bookings" ON public.bookings
-    FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+    FOR UPDATE TO authenticated USING (user_id = auth.uid() OR user_id IS NULL) WITH CHECK (user_id = auth.uid());
 
 
 -- 11. Force Supabase PostgREST schema cache to reload

@@ -122,6 +122,9 @@
 
       <!-- Sign In Form -->
       <form id="auth-signin-form" class="space-y-4" novalidate>
+        <div id="signin-tracking-alert" class="hidden p-4 rounded border font-mono text-xs bg-[#FF5A1F]/10 border-[#FF5A1F]/30 text-[#FF5A1F] leading-relaxed">
+          Aapka booking guest mode me create hua hai. Booking status check karne ke liye please login kar le, ya agar aapka account nahi hai toh Sign Up tab par click karein.
+        </div>
         <div>
           <label class="field-label" for="signin-email">Email Address *</label>
           <input id="signin-email" type="email" class="field-input" placeholder="name@example.com" required>
@@ -191,6 +194,9 @@
 
       <!-- Sign Up Form -->
       <form id="auth-signup-form" class="space-y-4 hidden" novalidate>
+        <div id="signup-tracking-alert" class="hidden p-4 rounded border font-mono text-xs bg-[#FF5A1F]/10 border-[#FF5A1F]/30 text-[#FF5A1F] leading-relaxed">
+          Aap abhi signed up nahi hain. Sign Up karte hi aapke phone number se aapki booking automatically merge ho jayegi, aur aap tracking screen par redirect ho jayenge.
+        </div>
         <div>
           <label class="field-label" for="signup-name">Full Name *</label>
           <input id="signup-name" type="text" class="field-input" placeholder="Full Name" required>
@@ -312,6 +318,41 @@
   const formReset = document.getElementById("auth-reset-form");
   const successEl = document.getElementById("auth-success");
   const errorEl = document.getElementById("auth-error");
+
+  // Onload check for tracking redirect to show alert banners
+  const onloadParams = new URLSearchParams(window.location.search);
+  const redirectVal = onloadParams.get("redirect");
+  const idVal = onloadParams.get("id");
+  if (redirectVal === "tracking.html" && idVal) {
+    const signinAlert = document.getElementById("signin-tracking-alert");
+    const signupAlert = document.getElementById("signup-tracking-alert");
+    if (signinAlert) signinAlert.classList.remove("hidden");
+    if (signupAlert) signupAlert.classList.remove("hidden");
+  }
+
+  // Helper to merge/claim guest bookings for the newly authenticated user
+  async function claimGuestBookings(session) {
+    if (!session || !session.user) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get("id");
+    
+    if (urlParams.get("redirect") === "tracking.html" && bookingId) {
+      const user = session.user;
+      const userPhone = user.user_metadata?.phone || user.phone || "";
+      console.log("Merging guest bookings to account:", user.id, "phone:", userPhone);
+      
+      try {
+        await window.supabaseClient
+          .from("bookings")
+          .update({ user_id: user.id })
+          .or(`id.eq.${bookingId},phone.eq.${userPhone}`)
+          .is("user_id", null);
+        console.log("Merge completed.");
+      } catch (err) {
+        console.error("Failed to claim guest bookings:", err);
+      }
+    }
+  }
 
   function showMessage(type, title, desc) {
     successEl.classList.add("hidden");
@@ -501,6 +542,10 @@
 
       if (error) throw error;
 
+      if (data && data.session) {
+        await claimGuestBookings(data.session);
+      }
+
       formSignin.classList.add("hidden"); // hide the form so the success card takes its place, not sits below it
       
       showMessage("success", "<i class='fa-solid fa-circle-check'></i> SIGN IN SUCCESSFUL", "Welcome back! Redirecting you...");
@@ -509,6 +554,10 @@
       const redirectUrl = urlParams.get("redirect") || "booking.html";
       
       let targetUrl = redirectUrl;
+      const bookingId = urlParams.get("id");
+      if (targetUrl === "tracking.html" && bookingId) {
+        targetUrl = `tracking.html?id=${encodeURIComponent(bookingId)}`;
+      }
       if (targetUrl === "booking.html") {
         try {
           const { data: profile } = await window.supabaseClient
@@ -593,12 +642,20 @@
         } catch (_) {}
       }
 
+      if (session) {
+        await claimGuestBookings(session);
+      }
+
       formSignup.classList.add("hidden");
 
       const urlParams = new URLSearchParams(window.location.search);
       const redirectUrl = urlParams.get("redirect") || "booking.html";
 
       let targetUrl = redirectUrl;
+      const bookingId = urlParams.get("id");
+      if (targetUrl === "tracking.html" && bookingId) {
+        targetUrl = `tracking.html?id=${encodeURIComponent(bookingId)}`;
+      }
 
       if (session) {
         if (targetUrl === "booking.html") {

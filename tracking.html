@@ -878,7 +878,28 @@
 
   function showTrackingError(msg) {
     if (trackingError && trackingErrorText) {
-      trackingErrorText.textContent = msg;
+      trackingError.className = "bg-[#1B1E24] border border-red-500/40 rounded-md p-4 text-xs text-red-400 mt-4";
+      trackingError.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span id="tracking-error-text"></span>`;
+      document.getElementById("tracking-error-text").textContent = msg;
+      trackingError.classList.remove("hidden");
+    }
+  }
+
+  function showTrackingLoginNotice(searchedVal) {
+    if (trackingError) {
+      trackingError.className = "bg-[#1B1E24] border border-[#FF5A1F]/40 rounded-md p-5 text-xs text-[#B9B6AC] mt-4 space-y-3 font-mono";
+      trackingError.innerHTML = `
+        <div class="flex items-start gap-2 text-[#FF5A1F]">
+          <i class="fa-solid fa-lock text-sm mt-0.5"></i>
+          <span class="font-bold uppercase tracking-wider">Security Notice</span>
+        </div>
+        <p class="leading-relaxed">Booking status check karne ke liye please login kar le, yeh aapki security ke liye hai.</p>
+        <div class="pt-2">
+          <a href="auth.html?redirect=tracking.html&id=${encodeURIComponent(searchedVal)}" class="btn btn-primary !py-2 !px-4 !text-xs !min-h-[36px] w-full sm:w-auto text-center inline-block">
+            <i class="fa-solid fa-right-to-bracket text-[#14161A]"></i> Login to Track Booking
+          </a>
+        </div>
+      `;
       trackingError.classList.remove("hidden");
     }
   }
@@ -904,6 +925,16 @@
 
     try {
       if (!window.supabaseClient) throw new Error("Supabase is not configured.");
+
+      // Check if logged in first (security floor)
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (!session) {
+        showTrackingLoginNotice(val);
+        statusPanel.classList.add("hidden");
+        lookupBtn.disabled = false;
+        lookupBtn.innerHTML = originalText;
+        return;
+      }
 
       let query = window.supabaseClient.from("bookings").select("*");
       
