@@ -1415,6 +1415,32 @@
             detailsEl.textContent = `Error Details: ${err.message || err}`;
             detailsEl.classList.remove("hidden");
           }
+          
+          const fallbackBtn = errorEl.querySelector("[data-wa-fallback]");
+          if (fallbackBtn) {
+            const bikeBrand = brandVal === "Other" ? brandOtherVal : brandVal;
+            const serviceType = serviceSelect.value;
+            const locationVal = locationInput.value.trim() || "Workshop (Jorpati, Boudha Rd)";
+            const dateVal = document.getElementById("b-date").value || "";
+            const timeVal = document.getElementById("b-time").value || "";
+            const issueDesc = issueInput.value.trim() || "";
+            const upiRef = document.getElementById("booking-utr").value.trim() || "";
+
+            const text = `Hi Chhotu Motorcycles, my website booking submission failed.\n\n` +
+              `*Booking Details:*\n` +
+              `- Name: ${nameInput.value.trim()}\n` +
+              `- Phone: ${combinedPhone}\n` +
+              `- Bike: ${bikeBrand} ${modelVal}\n` +
+              `- Service: ${serviceType}\n` +
+              `- Location: ${locationVal}\n` +
+              `- Date/Time: ${dateVal} ${timeVal}\n` +
+              `- Issue: ${issueDesc}\n` +
+              `- UPI Ref (UTR): ${upiRef}\n\n` +
+              `Please process my booking manually.`;
+
+            fallbackBtn.href = `https://wa.me/9779813691072?text=${encodeURIComponent(text)}`;
+            fallbackBtn.target = "_blank";
+          }
         }
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalBtnText;
