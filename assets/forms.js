@@ -28,12 +28,8 @@ function cleanPhoneNumber(value, countryCode = "") {
 }
 
 /** Check if the phone number is valid for the selected country code */
-function isValidPhone(value, countryCode = "+977") {
+function isValidPhone(value, countryCode = "+91") {
   const cleaned = cleanPhoneNumber(value, countryCode);
-  if (countryCode === "+977") {
-    // Nepal mobile (10 digits) or landline (7-9 digits)
-    return /^[0-9]{7,10}$/.test(cleaned);
-  }
   if (countryCode === "+91") {
     // India mobile (10 digits)
     return /^[0-9]{10}$/.test(cleaned);

@@ -510,11 +510,11 @@ function setupAccountDetailsController() {
       document.getElementById("e-name").value = profileData.full_name;
       
       const phoneInputVal = profileData.phone || "";
-      let matchedCode = "+977";
+      let matchedCode = "+91";
       let localNum = phoneInputVal;
       
       // Parse phone code
-      ["+977", "+91", "+1"].forEach(code => {
+      ["+91", "+1"].forEach(code => {
         if (phoneInputVal.startsWith(code)) {
           matchedCode = code;
           localNum = phoneInputVal.substring(code.length);

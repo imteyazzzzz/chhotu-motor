@@ -6,7 +6,7 @@
    at the bottom of booking.html / contact.html.
    ========================================================================= */
 
-const WHATSAPP_NUMBER = "9779813691072"; // +977 981 369 1072, no plus/spaces for wa.me
+const WHATSAPP_NUMBER = "919876543210"; // +91 98765 43210, no plus/spaces for wa.me
 
 /**
  * Build a wa.me link with an encoded, context-specific prefilled message.
