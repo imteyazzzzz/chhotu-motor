@@ -347,10 +347,18 @@
           .update({ user_id: user.id })
           .is("user_id", null);
           
-        if (userPhone) {
-          updateQuery = updateQuery.or(`id.eq.${bookingId},phone.eq.${userPhone}`);
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookingId);
+        
+        if (isUUID) {
+          if (userPhone) {
+            updateQuery = updateQuery.or(`id.eq.${bookingId},phone.eq.${userPhone}`);
+          } else {
+            updateQuery = updateQuery.eq("id", bookingId);
+          }
+        } else if (userPhone) {
+          updateQuery = updateQuery.eq("phone", userPhone);
         } else {
-          updateQuery = updateQuery.eq("id", bookingId);
+          updateQuery = null;
         }
         
         await updateQuery;

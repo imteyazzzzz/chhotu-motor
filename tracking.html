@@ -285,7 +285,7 @@
           <i class="fa-solid fa-magnifying-glass text-[#14161A]"></i> Search
         </button>
       </div>
-      <p class="text-xs text-[#B9B6AC] mt-3 font-mono">Tip: Search with your registered phone number (including country code, e.g., +9779813691072) to see all your requests.</p>
+      <p class="text-xs text-[#B9B6AC] mt-3 font-mono">Tip: Search with your registered phone number (including country code, e.g., +97798XXXXXXXX or +9198XXXXXXXX) to see all your requests.</p>
       
       <!-- Inline Error Panel -->
       <div id="tracking-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-4 text-xs text-red-400 mt-4">
@@ -912,7 +912,9 @@
     const lookupPanel = document.getElementById("lookup-panel");
     
     if (loginCard && loginBtn && lookupPanel) {
-      loginBtn.href = `auth.html?redirect=tracking.html&id=${encodeURIComponent(searchedVal)}`;
+      let cleanVal = searchedVal.trim();
+      cleanVal = cleanVal.replace(/^#/, "").replace(/^(bk-?|booking-?)/i, "");
+      loginBtn.href = `auth.html?redirect=tracking.html&id=${encodeURIComponent(cleanVal)}`;
       lookupPanel.classList.add("hidden");
       loginCard.classList.remove("hidden");
     }
@@ -960,10 +962,18 @@
         return;
       }
 
+      // 1. Clean the input value
+      let searchStr = val.trim();
+      searchStr = searchStr.replace(/^#/, "").replace(/^(bk-?|booking-?)/i, "");
+      
+      const isFullUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(searchStr);
+      const isShortUUID = /^[0-9a-f]{8}$/i.test(searchStr);
+      const cleanedPhone = searchStr.replace(/[-\s()]/g, "");
+      const isPhone = /^\+?[0-9]{7,15}$/.test(cleanedPhone);
+
       // Self-healing: if logged in and searching a guest booking, auto-claim/merge it!
       const user = session.user;
       const userPhone = user.user_metadata?.phone || user.phone || "";
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
       
       try {
         let updateQuery = window.supabaseClient
@@ -971,19 +981,16 @@
           .update({ user_id: user.id })
           .is("user_id", null);
           
-        if (isUUID) {
+        if (isFullUUID) {
           if (userPhone) {
-            updateQuery = updateQuery.or(`id.eq.${val},phone.eq.${userPhone}`);
+            updateQuery = updateQuery.or(`id.eq.${searchStr},phone.eq.${userPhone}`);
           } else {
-            updateQuery = updateQuery.eq("id", val);
+            updateQuery = updateQuery.eq("id", searchStr);
           }
+        } else if (userPhone) {
+          updateQuery = updateQuery.eq("phone", userPhone);
         } else {
-          const cleaned = val.replace(/[-\s()]/g, "");
-          if (cleaned) {
-            updateQuery = updateQuery.eq("phone", cleaned);
-          } else {
-            updateQuery = null;
-          }
+          updateQuery = null;
         }
         
         if (updateQuery) {
@@ -993,28 +1000,45 @@
         console.error("Self-healing auto-claim failed:", e);
       }
 
-      let query = window.supabaseClient.from("bookings").select("*");
-      
-      if (isUUID) {
-        query = query.eq("id", val);
-      } else {
-        // Assume phone lookup. Clean it first
-        const cleaned = val.replace(/[-\s()]/g, "");
-        query = query.eq("phone", cleaned).order("created_at", { ascending: false });
-      }
+      // Query all bookings owned by this user
+      const { data, error } = await window.supabaseClient
+        .from("bookings")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      const { data, error } = await query;
       if (error) throw error;
 
-      if (!data || data.length === 0) {
+      // Filter locally in JS to find matching bookings
+      let matchedBookings = [];
+      if (data && data.length > 0) {
+        if (isFullUUID || isShortUUID) {
+          matchedBookings = data.filter(b => b.id.toLowerCase().startsWith(searchStr.toLowerCase()));
+        } else if (isPhone) {
+          matchedBookings = data.filter(b => {
+            const bPhone = (b.phone || "").replace(/[-\s()]/g, "");
+            return bPhone === cleanedPhone;
+          });
+        } else {
+          // General search fallback (fuzzy name/model/ID match like admin)
+          matchedBookings = data.filter(b => {
+            const name = b.name || "";
+            const model = b.bike_model || "";
+            return b.id.toLowerCase().includes(searchStr.toLowerCase()) ||
+              name.toLowerCase().includes(searchStr.toLowerCase()) ||
+              model.toLowerCase().includes(searchStr.toLowerCase());
+          });
+        }
+      }
+
+      if (!matchedBookings || matchedBookings.length === 0) {
         showTrackingError("No bookings found matching your search. Please check the ID or Phone Number.");
         statusPanel.classList.add("hidden");
-      } else if (data.length === 1) {
-        displayBooking(data[0]);
+      } else if (matchedBookings.length === 1) {
+        displayBooking(matchedBookings[0]);
       } else {
         // Multiple bookings for a phone number. Show in history panel
         historyBody.innerHTML = "";
-        data.forEach(booking => {
+        matchedBookings.forEach(booking => {
           const row = document.createElement("tr");
           row.className = "border-b border-[#3A3F49]/40 hover:bg-[#22262E]/20 transition-colors";
           row.innerHTML = `
@@ -1038,7 +1062,7 @@
         historyBody.querySelectorAll(".select-booking-btn").forEach(btn => {
           btn.addEventListener("click", () => {
             const bookingId = btn.getAttribute("data-id");
-            const selected = data.find(b => b.id === bookingId);
+            const selected = matchedBookings.find(b => b.id === bookingId);
             if (selected) displayBooking(selected);
           });
         });
