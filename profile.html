@@ -747,10 +747,16 @@
                           <h5 class="text-sm font-semibold">WhatsApp Alerts</h5>
                           <p class="text-xs text-[#B9B6AC]">Get status updates on booking, dispatched mechanic, and completion.</p>
                         </div>
-                        <label class="switch">
-                          <input type="checkbox" id="pref-booking-whatsapp" role="switch" aria-checked="true" checked>
-                          <span class="slider"></span>
-                        </label>
+                        <div class="gtg-container">
+                          <input type="checkbox" id="pref-booking-whatsapp" class="hidden">
+                          <button type="button" class="gtg" role="switch" aria-checked="true" aria-label="Toggle WhatsApp Alerts">
+                            <span class="gtg-track"></span>
+                            <span class="gtg-goo">
+                              <span class="gtg-knob"></span>
+                              <span class="gtg-tail"></span>
+                            </span>
+                          </button>
+                        </div>
                       </div>
 
                       <div class="flex items-center justify-between">
@@ -758,10 +764,16 @@
                           <h5 class="text-sm font-semibold">SMS Alerts</h5>
                           <p class="text-xs text-[#B9B6AC]">Receive SMS text messages on status progress updates.</p>
                         </div>
-                        <label class="switch">
-                          <input type="checkbox" id="pref-booking-sms" role="switch" aria-checked="false">
-                          <span class="slider"></span>
-                        </label>
+                        <div class="gtg-container">
+                          <input type="checkbox" id="pref-booking-sms" class="hidden">
+                          <button type="button" class="gtg" role="switch" aria-checked="false" aria-label="Toggle SMS Alerts">
+                            <span class="gtg-track"></span>
+                            <span class="gtg-goo">
+                              <span class="gtg-knob"></span>
+                              <span class="gtg-tail"></span>
+                            </span>
+                          </button>
+                        </div>
                       </div>
 
                       <div class="flex items-center justify-between">
@@ -769,10 +781,16 @@
                           <h5 class="text-sm font-semibold">Email Notifications</h5>
                           <p class="text-xs text-[#B9B6AC]">Receive receipts, confirmation summaries, and status logs.</p>
                         </div>
-                        <label class="switch">
-                          <input type="checkbox" id="pref-booking-email" role="switch" aria-checked="true" checked>
-                          <span class="slider"></span>
-                        </label>
+                        <div class="gtg-container">
+                          <input type="checkbox" id="pref-booking-email" class="hidden">
+                          <button type="button" class="gtg" role="switch" aria-checked="true" aria-label="Toggle Email Notifications">
+                            <span class="gtg-track"></span>
+                            <span class="gtg-goo">
+                              <span class="gtg-knob"></span>
+                              <span class="gtg-tail"></span>
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -785,10 +803,16 @@
                           <h5 class="text-sm font-semibold">WhatsApp Promotions</h5>
                           <p class="text-xs text-[#B9B6AC]">Occasional coupon codes, seasonal service checks, and discount reminders.</p>
                         </div>
-                        <label class="switch">
-                          <input type="checkbox" id="pref-promo-whatsapp" role="switch" aria-checked="false">
-                          <span class="slider"></span>
-                        </label>
+                        <div class="gtg-container">
+                          <input type="checkbox" id="pref-promo-whatsapp" class="hidden">
+                          <button type="button" class="gtg" role="switch" aria-checked="false" aria-label="Toggle WhatsApp Promotions">
+                            <span class="gtg-track"></span>
+                            <span class="gtg-goo">
+                              <span class="gtg-knob"></span>
+                              <span class="gtg-tail"></span>
+                            </span>
+                          </button>
+                        </div>
                       </div>
 
                       <div class="flex items-center justify-between">
@@ -796,10 +820,16 @@
                           <h5 class="text-sm font-semibold">Email Promotions</h5>
                           <p class="text-xs text-[#B9B6AC]">Service reminders, monthly discount updates, and bike tips.</p>
                         </div>
-                        <label class="switch">
-                          <input type="checkbox" id="pref-promo-email" role="switch" aria-checked="false">
-                          <span class="slider"></span>
-                        </label>
+                        <div class="gtg-container">
+                          <input type="checkbox" id="pref-promo-email" class="hidden">
+                          <button type="button" class="gtg" role="switch" aria-checked="false" aria-label="Toggle Email Promotions">
+                            <span class="gtg-track"></span>
+                            <span class="gtg-goo">
+                              <span class="gtg-knob"></span>
+                              <span class="gtg-tail"></span>
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -947,6 +977,7 @@
 
   <script src="assets/main.js"></script>
   <script src="assets/forms.js"></script>
+  <script src="assets/gtg-toggle.js"></script>
   <script src="assets/profile.js?v=1.0.4"></script>
   <script src="assets/agentation-bundle.js"></script>
 </body>

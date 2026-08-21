@@ -552,3 +552,75 @@ img.lazy-ph{
 .open .chevron {
   transform: rotate(180deg);
 }
+
+/* ---- Goo Drag Toggle Component ---- */
+.gtg-container {
+  position: relative;
+  display: inline-block;
+  width: 104px;
+  height: 52px;
+}
+.gtg-filter {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.gtg {
+  position: relative;
+  width: 104px;
+  height: 52px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: grab;
+  outline: none;
+  touch-action: none;
+}
+.gtg:active {
+  cursor: grabbing;
+}
+.gtg:focus-visible .gtg-track {
+  box-shadow: 0 0 0 3px rgba(74, 157, 253, 0.4);
+}
+.gtg-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: rgba(226, 236, 248, 0.1);
+  border: 1px solid rgba(226, 236, 248, 0.12);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.gtg--on .gtg-track {
+  background: rgba(74, 157, 253, 0.32);
+  border-color: rgba(74, 157, 253, 0.5);
+}
+.gtg-goo {
+  position: absolute;
+  inset: 0;
+  filter: url(#gtgGoo);
+  pointer-events: none;
+}
+.gtg-knob, .gtg-tail {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  border-radius: 50%;
+  background: #eef3fa;
+  will-change: transform;
+}
+.gtg-knob {
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+}
+.gtg-tail {
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  opacity: 0.9;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gtg-track {
+    transition: none;
+  }
+}
