@@ -338,8 +338,48 @@
     
     if (urlParams.get("redirect") === "tracking.html" && bookingId) {
       const user = session.user;
-      const userPhone = user.user_metadata?.phone || user.phone || "";
+      
+      // 1. Get user phone from metadata or public.profiles
+      let userPhone = user.user_metadata?.phone || user.phone || "";
+      if (!userPhone) {
+        try {
+          const { data: profile } = await window.supabaseClient
+            .from("profiles")
+            .select("phone")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (profile && profile.phone) {
+            userPhone = profile.phone;
+          }
+        } catch (e) {
+          console.warn("Could not load user phone from profiles table:", e);
+        }
+      }
+
       console.log("Merging guest bookings to account:", user.id, "phone:", userPhone);
+      
+      // 2. Build variations of the user's phone number to match different formats in database
+      const getPhoneVariations = (phone) => {
+        if (!phone) return [];
+        const cleaned = phone.replace(/[-\s()]/g, "");
+        const variations = [cleaned];
+        if (cleaned.startsWith("+977")) {
+          variations.push(cleaned.slice(1)); // 97798...
+          variations.push(cleaned.slice(4)); // 98...
+        } else if (cleaned.startsWith("977") && cleaned.length > 10) {
+          variations.push("+" + cleaned); // +97798...
+          variations.push(cleaned.slice(3)); // 98...
+        } else if (cleaned.length === 10) {
+          variations.push("+977" + cleaned);
+          variations.push("977" + cleaned);
+          variations.push("+91" + cleaned);
+          variations.push("91" + cleaned);
+        }
+        return [...new Set(variations)];
+      };
+
+      const phoneList = getPhoneVariations(userPhone);
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookingId);
       
       try {
         let updateQuery = window.supabaseClient
@@ -347,22 +387,25 @@
           .update({ user_id: user.id })
           .is("user_id", null);
           
-        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookingId);
-        
         if (isUUID) {
-          if (userPhone) {
-            updateQuery = updateQuery.or(`id.eq.${bookingId},phone.eq.${userPhone}`);
+          if (phoneList.length > 0) {
+            const orFilters = [`id.eq.${bookingId}`, ...phoneList.map(p => `phone.eq.${p}`)].join(",");
+            updateQuery = updateQuery.or(orFilters);
           } else {
             updateQuery = updateQuery.eq("id", bookingId);
           }
-        } else if (userPhone) {
-          updateQuery = updateQuery.eq("phone", userPhone);
+        } else if (phoneList.length > 0) {
+          const orFilters = phoneList.map(p => `phone.eq.${p}`).join(",");
+          updateQuery = updateQuery.or(orFilters);
         } else {
           updateQuery = null;
         }
         
-        await updateQuery;
-        console.log("Merge completed.");
+        if (updateQuery) {
+          const { error } = await updateQuery;
+          if (error) throw error;
+          console.log("Merge completed successfully.");
+        }
       } catch (err) {
         console.error("Failed to claim guest bookings:", err);
       }

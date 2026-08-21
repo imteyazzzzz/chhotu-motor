@@ -973,8 +973,44 @@
 
       // Self-healing: if logged in and searching a guest booking, auto-claim/merge it!
       const user = session.user;
-      const userPhone = user.user_metadata?.phone || user.phone || "";
-      
+      let userPhone = user.user_metadata?.phone || user.phone || "";
+      if (!userPhone) {
+        try {
+          const { data: profile } = await window.supabaseClient
+            .from("profiles")
+            .select("phone")
+            .eq("id", user.id)
+            .maybeSingle();
+          if (profile && profile.phone) {
+            userPhone = profile.phone;
+          }
+        } catch (e) {
+          console.warn("Could not load user phone from profiles table:", e);
+        }
+      }
+
+      // Build phone variations
+      const getPhoneVariations = (phone) => {
+        if (!phone) return [];
+        const cleaned = phone.replace(/[-\s()]/g, "");
+        const variations = [cleaned];
+        if (cleaned.startsWith("+977")) {
+          variations.push(cleaned.slice(1));
+          variations.push(cleaned.slice(4));
+        } else if (cleaned.startsWith("977") && cleaned.length > 10) {
+          variations.push("+" + cleaned);
+          variations.push(cleaned.slice(3));
+        } else if (cleaned.length === 10) {
+          variations.push("+977" + cleaned);
+          variations.push("977" + cleaned);
+          variations.push("+91" + cleaned);
+          variations.push("91" + cleaned);
+        }
+        return [...new Set(variations)];
+      };
+
+      const phoneList = getPhoneVariations(userPhone);
+
       try {
         let updateQuery = window.supabaseClient
           .from("bookings")
@@ -982,13 +1018,15 @@
           .is("user_id", null);
           
         if (isFullUUID) {
-          if (userPhone) {
-            updateQuery = updateQuery.or(`id.eq.${searchStr},phone.eq.${userPhone}`);
+          if (phoneList.length > 0) {
+            const orFilters = [`id.eq.${searchStr}`, ...phoneList.map(p => `phone.eq.${p}`)].join(",");
+            updateQuery = updateQuery.or(orFilters);
           } else {
             updateQuery = updateQuery.eq("id", searchStr);
           }
-        } else if (userPhone) {
-          updateQuery = updateQuery.eq("phone", userPhone);
+        } else if (phoneList.length > 0) {
+          const orFilters = phoneList.map(p => `phone.eq.${p}`).join(",");
+          updateQuery = updateQuery.or(orFilters);
         } else {
           updateQuery = null;
         }
