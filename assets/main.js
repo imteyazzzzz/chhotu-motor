@@ -376,3 +376,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initEmergencyWhatsApp();
   updateNavigationAuth();
 });
+
+// Dynamic Morph Buttons Loader
+(function() {
+  const script = document.createElement("script");
+  script.src = "assets/morph-buttons.js";
+  document.head.appendChild(script);
+})();
