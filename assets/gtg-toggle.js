@@ -158,15 +158,6 @@ function initGooDragToggles() {
     } else {
       apply();
       requestAnimationFrame(frame);
-      
-      // Flipping behavior on slow beat (until user interacts)
-      setInterval(() => {
-        if (userActive && (Date.now() - lastTouch) > 7000) {
-          userActive = false;
-        }
-        if (userActive) return;
-        setOn(!on, false); // Auto flip without saving to db
-      }, 2800);
     }
   });
 }
