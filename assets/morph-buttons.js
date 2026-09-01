@@ -39,13 +39,30 @@ function initMorphButtons() {
     // Create inline wrapper
     const wrap = document.createElement("span");
     wrap.className = "bsm-wrap-inline";
-    if (btn.classList.contains("w-full")) {
-      wrap.classList.add("w-full");
-    }
 
     const cell = document.createElement("span");
     cell.className = "bsm-cell";
-    if (btn.classList.contains("w-full")) {
+
+    // Transfer layout, flex, grid, margin, width, order classes to wrap and cell
+    const layoutClassPatterns = [
+      /^flex-/, /^sm:flex-/, /^md:flex-/, /^lg:flex-/,
+      /^w-/, /^sm:w-/, /^md:w-/, /^lg:w-/,
+      /^min-w-/, /^max-w-/,
+      /^order-/, /^sm:order-/, /^md:order-/, /^lg:order-/,
+      /^grow/, /^shrink/, /^self-/,
+      /^(m|mx|my|mt|mb|ml|mr)-/,
+      /^col-span-/, /^row-span-/
+    ];
+
+    btn.classList.forEach(cls => {
+      if (layoutClassPatterns.some(p => p.test(cls))) {
+        wrap.classList.add(cls);
+        cell.classList.add(cls);
+      }
+    });
+
+    if (btn.classList.contains("flex-1") || btn.classList.contains("w-full")) {
+      wrap.classList.add("w-full");
       cell.classList.add("w-full");
     }
 

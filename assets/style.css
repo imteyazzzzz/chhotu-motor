@@ -637,9 +637,15 @@ img.lazy-ph{
   display: inline-flex;
   vertical-align: middle;
   box-sizing: border-box;
+  max-width: 100%;
 }
 
 .bsm-wrap-inline.w-full {
+  width: 100%;
+}
+
+.bsm-wrap-inline.flex-1 {
+  flex: 1 1 0%;
   width: 100%;
 }
 
@@ -656,6 +662,8 @@ img.lazy-ph{
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 .bsm-cell.w-full {
@@ -665,9 +673,9 @@ img.lazy-ph{
 /* Aura glow */
 .bsm-aura {
   position: absolute;
-  inset: -15px;
+  inset: -8px;
   z-index: 0;
-  border-radius: 20px;
+  border-radius: calc(var(--bsm-radius) + 8px);
   background: radial-gradient(56% 56% at 50% 50%, rgba(var(--bsm-acc), 0.12), rgba(var(--bsm-acc), 0) 72%);
   filter: blur(8px);
   opacity: 0.4;
@@ -683,8 +691,8 @@ img.lazy-ph{
   z-index: 2;
   width: 100%;
   min-height: 48px;
-  height: 52px;
-  padding: 0 28px;
+  height: auto;
+  padding: 0.75rem 1.5rem;
   border-radius: var(--bsm-radius);
   border: 1px solid rgba(var(--bsm-fg), 0.14) !important;
   background: linear-gradient(180deg, rgba(var(--bsm-fg), 0.085), rgba(var(--bsm-fg), 0.025)) !important;
@@ -693,6 +701,9 @@ img.lazy-ph{
   overflow: hidden;
   isolation: isolate;
   -webkit-tap-highlight-color: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-shadow:
     inset 0 1px 0 rgba(var(--bsm-fg), 0.12),
     inset 0 -2px 4px rgba(0,0,0,0.22),
@@ -706,42 +717,42 @@ img.lazy-ph{
 
 /* Primary adaptation */
 .bsm-btn.btn-primary {
-  background: linear-gradient(180deg, rgba(255, 90, 31, 0.18), rgba(255, 90, 31, 0.06)) !important;
-  border-color: rgba(255, 90, 31, 0.35) !important;
+  background: linear-gradient(180deg, rgba(255, 90, 31, 0.22), rgba(255, 90, 31, 0.08)) !important;
+  border-color: rgba(255, 90, 31, 0.45) !important;
   color: #ff6b37 !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 90, 31, 0.25),
+    inset 0 1px 0 rgba(255, 90, 31, 0.3),
     inset 0 -2px 4px rgba(0,0,0,0.3),
     0 12px 28px -16px rgba(255, 90, 31, 0.4),
     0 2px 4px rgba(0,0,0,0.3) !important;
 }
 .bsm-btn.btn-primary:hover {
-  border-color: rgba(255, 90, 31, 0.6) !important;
+  border-color: rgba(255, 90, 31, 0.75) !important;
 }
 
 /* Call adaptation */
 .bsm-btn.btn-call {
-  background: linear-gradient(180deg, rgba(255, 197, 48, 0.18), rgba(255, 197, 48, 0.06)) !important;
-  border-color: rgba(255, 197, 48, 0.35) !important;
+  background: linear-gradient(180deg, rgba(255, 197, 48, 0.22), rgba(255, 197, 48, 0.08)) !important;
+  border-color: rgba(255, 197, 48, 0.45) !important;
   color: #ffd257 !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 197, 48, 0.25),
+    inset 0 1px 0 rgba(255, 197, 48, 0.3),
     inset 0 -2px 4px rgba(0,0,0,0.3),
     0 12px 28px -16px rgba(255, 197, 48, 0.4),
     0 2px 4px rgba(0,0,0,0.3) !important;
 }
 .bsm-btn.btn-call:hover {
-  border-color: rgba(255, 197, 48, 0.6) !important;
+  border-color: rgba(255, 197, 48, 0.75) !important;
 }
 
 /* Outline adaptation */
 .bsm-btn.btn-outline {
   background: transparent !important;
-  border: 1.5px solid rgba(var(--bsm-fg), 0.2) !important;
+  border: 1.5px solid rgba(var(--bsm-fg), 0.25) !important;
   color: rgb(var(--bsm-fg)) !important;
 }
 .bsm-btn.btn-outline:hover {
-  border-color: rgba(255, 90, 31, 0.6) !important;
+  border-color: rgba(255, 90, 31, 0.7) !important;
   color: #ff6b37 !important;
 }
 
@@ -793,19 +804,23 @@ img.lazy-ph{
   animation: bsm-sheen 4.6s var(--bsm-ease) infinite;
 }
 
-/* Content stack */
+/* Content stack - in-flow grid so button calculates exact width & height */
 .bsm-stack {
-  position: absolute;
-  inset: 0;
+  position: relative;
   z-index: 1;
   display: grid;
+  width: 100%;
+  height: 100%;
 }
 .bsm-face {
   grid-area: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  text-align: center;
   transition:
     opacity .34s var(--bsm-ease),
     transform .48s var(--bsm-spring),
@@ -816,11 +831,15 @@ img.lazy-ph{
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-size: 14px;
+  font-size: 0.95rem;
   font-weight: 600;
-  line-height: 1;
-  color: rgba(var(--bsm-fg), 0.95);
+  line-height: 1.2;
+  color: inherit;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 /* Loading spinner */
