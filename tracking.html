@@ -256,21 +256,21 @@
     </div>
 
     <!-- Dedicated Security Login Notice (Hidden by default) -->
-    <div id="tracking-login-card" class="card p-6 reveal hidden">
+    <div id="tracking-login-card" class="card p-6 md:p-8 reveal hidden border border-[#FF5A1F]/30 bg-[#1B1E24]/95 shadow-2xl">
       <div class="text-center py-6 space-y-4">
-        <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-[#FF5A1F]/10 text-[#FF5A1F] mb-2">
-          <i class="fa-solid fa-lock text-2xl"></i>
+        <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-[#FF5A1F]/15 border border-[#FF5A1F]/30 text-[#FF5A1F] mb-1 shadow-inner shadow-[#FF5A1F]/20">
+          <i class="fa-solid fa-shield-halved text-2xl"></i>
         </div>
-        <h2 class="font-display text-base text-[#F4F1E8] uppercase tracking-wider">Security Access Required</h2>
-        <p class="text-xs text-[#B9B6AC] max-w-md mx-auto leading-relaxed font-mono">
-          Please log in to track your booking status. This is for your security to protect your personal booking details.
+        <h2 class="font-display text-lg md:text-xl text-[#F4F1E8] uppercase tracking-wider font-bold">Authentication Required</h2>
+        <p class="text-xs text-[#B9B6AC] max-w-lg mx-auto leading-relaxed font-body">
+          To protect your personal information and view live mechanic dispatch status, please sign in with your registered account.
         </p>
-        <div class="pt-2 flex flex-col sm:flex-row justify-center gap-3">
-          <a id="tracking-login-btn" href="auth.html" class="btn btn-primary !py-2 !px-5 !text-xs text-center inline-block">
-            <i class="fa-solid fa-right-to-bracket text-[#14161A]"></i> Login to Track Booking
+        <div class="pt-3 flex flex-col sm:flex-row justify-center items-center gap-3">
+          <a id="tracking-login-btn" href="auth.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#FF5A1F] hover:bg-[#ff7139] text-[#14161A] font-bold font-display uppercase tracking-wider text-xs px-6 py-3 rounded shadow-lg shadow-[#FF5A1F]/25 hover:shadow-[#FF5A1F]/40 transition-all duration-200 active:translate-y-0.5">
+            <i class="fa-solid fa-right-to-bracket text-[#14161A]"></i> Sign In to View Booking
           </a>
-          <button id="tracking-back-btn" class="btn btn-outline !py-2 !px-5 !text-xs">
-            <i class="fa-solid fa-arrow-left"></i> Back to Search
+          <button id="tracking-back-btn" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#14161A] hover:bg-[#22262E] text-[#F4F1E8] hover:text-[#FF5A1F] border border-[#3A3F49] hover:border-[#FF5A1F]/40 font-display uppercase tracking-wider text-xs px-5 py-3 rounded transition-all duration-200">
+            <i class="fa-solid fa-arrow-left"></i> Search Another Booking
           </button>
         </div>
       </div>

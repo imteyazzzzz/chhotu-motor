@@ -122,8 +122,12 @@
 
       <!-- Sign In Form -->
       <form id="auth-signin-form" class="space-y-4" novalidate>
-        <div id="signin-tracking-alert" class="hidden p-4 rounded border font-mono text-xs bg-[#FF5A1F]/10 border-[#FF5A1F]/30 text-[#FF5A1F] leading-relaxed">
-          Your booking was created in guest mode. Please log in to check your booking status. If you don't have an account, please switch to the Sign Up tab.
+        <div id="signin-tracking-alert" class="hidden p-4 rounded-md border text-xs bg-[#FF5A1F]/10 border-[#FF5A1F]/30 text-[#F4F1E8] leading-relaxed flex items-start gap-3 font-body">
+          <i class="fa-solid fa-shield-halved text-[#FF5A1F] text-base mt-0.5 shrink-0"></i>
+          <div>
+            <span class="font-bold text-[#FF5A1F] uppercase tracking-wider block mb-0.5 font-display text-[11px]">Booking Access Verification</span>
+            <p class="text-[#B9B6AC]">Please sign in to securely view and manage your repair tracking details. If you do not have an account yet, switch to the <strong>Sign Up</strong> tab to register.</p>
+          </div>
         </div>
         <div>
           <label class="field-label" for="signin-email">Email Address *</label>
@@ -194,8 +198,12 @@
 
       <!-- Sign Up Form -->
       <form id="auth-signup-form" class="space-y-4 hidden" novalidate>
-        <div id="signup-tracking-alert" class="hidden p-4 rounded border font-mono text-xs bg-[#FF5A1F]/10 border-[#FF5A1F]/30 text-[#FF5A1F] leading-relaxed">
-          You do not have an account yet. Once you sign up, your booking will be automatically linked to your phone number, and you will be redirected to the tracking page.
+        <div id="signup-tracking-alert" class="hidden p-4 rounded-md border text-xs bg-[#FF5A1F]/10 border-[#FF5A1F]/30 text-[#F4F1E8] leading-relaxed flex items-start gap-3 font-body">
+          <i class="fa-solid fa-user-plus text-[#FF5A1F] text-base mt-0.5 shrink-0"></i>
+          <div>
+            <span class="font-bold text-[#FF5A1F] uppercase tracking-wider block mb-0.5 font-display text-[11px]">Link &amp; Track Your Repair</span>
+            <p class="text-[#B9B6AC]">Create an account using your booking phone number. Your active repair requests will be automatically linked and redirected to live tracking.</p>
+          </div>
         </div>
         <div>
           <label class="field-label" for="signup-name">Full Name *</label>
