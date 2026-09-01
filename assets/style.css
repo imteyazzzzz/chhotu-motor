@@ -346,14 +346,43 @@ select option {
   margin-bottom: 0.4rem;
 }
 .field-error{
-  color: var(--orange);
-  font-size: 0.8rem;
+  color: #f87171 !important; /* Bright accessible alert red */
+  font-size: 0.78rem;
   margin-top: 0.35rem;
   display: none;
   font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
-.field-error.show{ display: block; }
-.field-input.invalid{ border-color: var(--orange); }
+.field-error.show{
+  display: flex !important;
+  align-items: center;
+  gap: 0.35rem;
+  animation: field-error-pop 0.25s ease-out;
+}
+@keyframes field-error-pop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.field-input.invalid,
+textarea.field-input.invalid,
+select.field-input.invalid,
+.invalid {
+  border-color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.04) !important;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.4), 0 0 14px rgba(239, 68, 68, 0.15) !important;
+}
+.field-input.shake,
+textarea.field-input.shake,
+select.field-input.shake,
+.invalid.shake {
+  animation: field-shake 0.4s ease-in-out;
+}
+@keyframes field-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
 
 /* ---- Skeleton / lazy image placeholder ---- */
 img.lazy-ph{

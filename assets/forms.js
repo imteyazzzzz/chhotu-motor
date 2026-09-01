@@ -42,17 +42,28 @@ function isValidPhone(value, countryCode = "+977") {
 }
 
 function showFieldError(inputEl, errorEl, message) {
-  inputEl.classList.add("invalid");
+  if (inputEl) {
+    inputEl.classList.add("invalid");
+    inputEl.setAttribute("aria-invalid", "true");
+  }
   if (errorEl) {
-    errorEl.textContent = message;
+    if (message) {
+      errorEl.textContent = message;
+    } else if (!errorEl.textContent.trim()) {
+      errorEl.textContent = "This field is required.";
+    }
     errorEl.classList.add("show");
+    errorEl.classList.remove("hidden");
   }
 }
 
 function clearFieldError(inputEl, errorEl) {
-  inputEl.classList.remove("invalid");
+  if (inputEl) {
+    inputEl.classList.remove("invalid");
+    inputEl.classList.remove("shake");
+    inputEl.removeAttribute("aria-invalid");
+  }
   if (errorEl) {
-    errorEl.textContent = "";
     errorEl.classList.remove("show");
   }
 }
@@ -64,19 +75,55 @@ function clearFieldError(inputEl, errorEl) {
  */
 function validateForm(rules) {
   let valid = true;
+  let firstInvalidEl = null;
+
   rules.forEach(({ input, error, required, validator, message }) => {
-    const val = input.value.trim();
+    if (!input) return;
+    const val = (input.value !== undefined ? String(input.value) : "").trim();
     let ok = true;
-    if (required && !val) ok = false;
-    if (ok && validator && val && !validator(val)) ok = false;
+
+    if (required && !val) {
+      ok = false;
+      message = message || "This field is required.";
+    } else if (ok && validator && val && !validator(val)) {
+      ok = false;
+      message = message || "Please enter a valid value.";
+    }
 
     if (!ok) {
       showFieldError(input, error, message);
       valid = false;
+      if (!firstInvalidEl) {
+        firstInvalidEl = input;
+      }
     } else {
       clearFieldError(input, error);
     }
   });
+
+  if (firstInvalidEl) {
+    // Shake effect to draw eye directly to the missing field
+    firstInvalidEl.classList.remove("shake");
+    void firstInvalidEl.offsetWidth; // Trigger reflow
+    firstInvalidEl.classList.add("shake");
+
+    // Scroll smoothly so the missing field is centered on screen
+    const headerOffset = 110;
+    const elementPosition = firstInvalidEl.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+    window.scrollTo({
+      top: Math.max(0, offsetPosition),
+      behavior: "smooth"
+    });
+
+    setTimeout(() => {
+      try {
+        firstInvalidEl.focus();
+      } catch (_) {}
+    }, 250);
+  }
+
   return valid;
 }
 

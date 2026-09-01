@@ -579,8 +579,8 @@
     const passwordInput = document.getElementById("signin-password");
 
     const rules = [
-      { input: emailInput, error: document.getElementById("signin-email-error"), required: true },
-      { input: passwordInput, error: document.getElementById("signin-password-error"), required: true }
+      { input: emailInput, error: document.getElementById("signin-email-error"), required: true, message: "Please enter your email address." },
+      { input: passwordInput, error: document.getElementById("signin-password-error"), required: true, message: "Please enter your password." }
     ];
 
     if (!validateForm(rules)) return;
@@ -651,10 +651,10 @@
     const passwordInput = document.getElementById("signup-password");
 
     const rules = [
-      { input: nameInput, error: document.getElementById("signup-name-error"), required: true },
-      { input: emailInput, error: document.getElementById("signup-email-error"), required: true },
-      { input: phoneInput, error: document.getElementById("signup-phone-error"), required: true, validator: (val) => isValidPhone(val, codeSelect.value) },
-      { input: passwordInput, error: document.getElementById("signup-password-error"), required: true }
+      { input: nameInput, error: document.getElementById("signup-name-error"), required: true, message: "Please enter your full name." },
+      { input: emailInput, error: document.getElementById("signup-email-error"), required: true, message: "Please enter your email address." },
+      { input: phoneInput, error: document.getElementById("signup-phone-error"), required: true, validator: (val) => isValidPhone(val, codeSelect.value), message: "Please enter a valid phone number." },
+      { input: passwordInput, error: document.getElementById("signup-password-error"), required: true, message: "Please enter a password." }
     ];
 
     if (!validateForm(rules)) return;

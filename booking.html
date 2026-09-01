@@ -1254,32 +1254,64 @@
       }, 50); // Small delay to let browser finish layout heights update
     }
 
+    // Live validation feedback on input/change/blur
+    const nameInput = document.getElementById("b-name");
+    const phoneInput = document.getElementById("b-phone");
+    const brandSelectEl = document.getElementById("b-brand");
+    const brandOtherInputEl = document.getElementById("b-brand-other");
+    const bikeInput = document.getElementById("b-bike");
+    const issueInput = document.getElementById("b-issue");
+
+    const liveFieldRules = [
+      { input: nameInput, error: document.getElementById("b-name-error"), required: true, message: "Please enter your full name." },
+      { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value), message: "Please enter a valid phone number." },
+      { input: serviceSelect, error: document.getElementById("b-service-error"), required: true, message: "Please select a service type." },
+      { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true, message: "Please select your bike brand." },
+      { input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: () => brandSelectEl.value === "Other", message: "Please specify your bike brand." },
+      { input: bikeInput, error: document.getElementById("b-bike-error"), required: true, message: "Please enter your bike model." },
+      { input: locationInput, error: document.getElementById("b-location-error"), required: () => locationInput.required, message: "Location address is required for this service." },
+      { input: document.getElementById("b-date"), error: document.getElementById("b-date-error"), required: () => serviceSelect.value === "home-visit" || serviceSelect.value === "workshop", message: "Preferred date is required for this service." },
+      { input: document.getElementById("b-time"), error: document.getElementById("b-time-error"), required: () => serviceSelect.value === "home-visit" || serviceSelect.value === "workshop", message: "Preferred time is required for this service." },
+      { input: issueInput, error: document.getElementById("b-issue-error"), required: true, message: "Please describe what is wrong with your bike." }
+    ];
+
+    liveFieldRules.forEach(item => {
+      if (!item.input) return;
+      const handler = () => {
+        if (item.input.classList.contains("invalid")) {
+          const val = item.input.value.trim();
+          const isReq = typeof item.required === "function" ? item.required() : item.required;
+          let ok = true;
+          if (isReq && !val) ok = false;
+          if (ok && item.validator && val && !item.validator(val)) ok = false;
+          if (ok) {
+            clearFieldError(item.input, item.error);
+          }
+        }
+      };
+      item.input.addEventListener("input", handler);
+      item.input.addEventListener("change", handler);
+      item.input.addEventListener("blur", handler);
+    });
+
     // 2. Step Navigation Trigger
     continueBtn.addEventListener("click", () => {
-      const nameInput = document.getElementById("b-name");
-      const phoneInput = document.getElementById("b-phone");
-      const brandSelectEl = document.getElementById("b-brand");
-      const brandOtherInputEl = document.getElementById("b-brand-other");
-      const bikeInput = document.getElementById("b-bike");
-      const issueInput = document.getElementById("b-issue");
-
       const rules = [
-        { input: nameInput, error: document.getElementById("b-name-error"), required: true },
-        { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value) },
-        { input: serviceSelect, error: document.getElementById("b-service-error"), required: true },
-        { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true },
-        { input: bikeInput, error: document.getElementById("b-bike-error"), required: true },
-        { input: issueInput, error: document.getElementById("b-issue-error"), required: true }
+        { input: nameInput, error: document.getElementById("b-name-error"), required: true, message: "Please enter your full name." },
+        { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value), message: "Please enter a valid phone number." },
+        { input: serviceSelect, error: document.getElementById("b-service-error"), required: true, message: "Please select a service type." },
+        { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true, message: "Please select your bike brand." },
+        { input: bikeInput, error: document.getElementById("b-bike-error"), required: true, message: "Please enter your bike model." }
       ];
 
       if (brandSelectEl.value === "Other") {
-        rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true });
+        rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true, message: "Please specify your bike brand." });
       } else {
         clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
       }
 
       if (locationInput.required) {
-        rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true });
+        rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true, message: "Location address is required for this service." });
       } else {
         clearFieldError(locationInput, document.getElementById("b-location-error"));
       }
@@ -1290,12 +1322,14 @@
       const timeInput = document.getElementById("b-time");
 
       if (isDateTimeRequired) {
-        rules.push({ input: dateInput, error: document.getElementById("b-date-error"), required: true });
-        rules.push({ input: timeInput, error: document.getElementById("b-time-error"), required: true });
+        rules.push({ input: dateInput, error: document.getElementById("b-date-error"), required: true, message: "Preferred date is required for this service." });
+        rules.push({ input: timeInput, error: document.getElementById("b-time-error"), required: true, message: "Preferred time is required for this service." });
       } else {
         clearFieldError(dateInput, document.getElementById("b-date-error"));
         clearFieldError(timeInput, document.getElementById("b-time-error"));
       }
+
+      rules.push({ input: issueInput, error: document.getElementById("b-issue-error"), required: true, message: "Please describe what is wrong with your bike." });
 
       if (!validateForm(rules)) return;
 

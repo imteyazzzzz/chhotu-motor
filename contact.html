@@ -336,12 +336,12 @@
     const messageInput = document.getElementById("c-message");
 
     const rules = [
-      { input: nameInput, error: document.getElementById("c-name-error"), required: true },
-      { input: phoneInput, error: document.getElementById("c-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("c-phone-code").value) },
-      { input: messageInput, error: document.getElementById("c-message-error"), required: true },
+      { input: nameInput, error: document.getElementById("c-name-error"), required: true, message: "Please enter your name." },
+      { input: phoneInput, error: document.getElementById("c-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("c-phone-code").value), message: "Please enter a valid phone number." },
+      { input: messageInput, error: document.getElementById("c-message-error"), required: true, message: "Please enter your message." },
     ];
     if (emailInput.value.trim()) {
-      rules.push({ input: emailInput, error: document.getElementById("c-email-error"), required: false, validator: isValidEmail });
+      rules.push({ input: emailInput, error: document.getElementById("c-email-error"), required: false, validator: isValidEmail, message: "Please enter a valid email address." });
     } else {
       clearFieldError(emailInput, document.getElementById("c-email-error"));
     }
