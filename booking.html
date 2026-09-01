@@ -236,14 +236,24 @@
           <!-- Progress Indicator -->
           <div class="flex flex-col gap-2 w-full mb-8">
             <div class="flex items-center w-full">
+              <!-- Step 1: Details -->
               <div class="flex flex-col items-center relative">
                 <div id="step-1-indicator" class="w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10">01</div>
                 <span id="step-1-label" class="text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap">Details</span>
               </div>
-              <div id="step-divider" class="flex-1 h-px bg-border-muted mx-3 transition-colors duration-300"></div>
+              <div id="step-divider-1" class="flex-1 h-px bg-border-muted mx-3 transition-colors duration-300"></div>
+              
+              <!-- Step 2: Payment -->
               <div class="flex flex-col items-center relative">
                 <div id="step-2-indicator" class="w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10">02</div>
-                <span id="step-2-label" class="text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap">Deposit</span>
+                <span id="step-2-label" class="text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap">Payment</span>
+              </div>
+              <div id="step-divider-2" class="flex-1 h-px bg-border-muted mx-3 transition-colors duration-300"></div>
+
+              <!-- Step 3: Booked -->
+              <div class="flex flex-col items-center relative">
+                <div id="step-3-indicator" class="w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10">03</div>
+                <span id="step-3-label" class="text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap">Booked</span>
               </div>
             </div>
             <!-- Sub-step progress indicators for Step 2 -->
@@ -523,21 +533,104 @@
 
             </div>
 
-            <!-- Success state -->
-            <div id="b-success" class="hidden success-screen">
-              <div class="hazard-stripe hazard-stripe--thin"></div>
-              <div class="success-confetti">
-                <span></span><span></span><span></span><span></span>
-                <span></span><span></span><span></span><span></span><span></span>
+            <!-- STEP 3: Booked / Success State -->
+            <div id="b-success" class="hidden space-y-6">
+              <!-- Top Banner with Confetti & Checkmark -->
+              <div class="text-center bg-[#14161A]/90 border border-green-500/30 rounded-lg p-6 md:p-8 space-y-3 relative overflow-hidden">
+                <div class="w-14 h-14 rounded-full bg-green-500/10 border border-green-500/30 text-green-400 flex items-center justify-center text-2xl mx-auto mb-2 shadow-[0_0_25px_rgba(74,222,128,0.25)]">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h3 class="font-display text-2xl md:text-3xl font-bold uppercase text-[#F4F1E8] tracking-tight">Booking Initiated!</h3>
+                <p class="text-xs md:text-sm text-[#B9B6AC] max-w-lg mx-auto leading-relaxed">
+                  We've received your repair request and upfront deposit. Our dispatcher is reviewing your details and will confirm your service shortly.
+                </p>
+                <div class="inline-flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 rounded font-mono text-[11px] text-yellow-400 mt-2">
+                  <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+                  <span>STATUS: PENDING DISPATCHER VERIFICATION</span>
+                </div>
               </div>
-              <div class="success-check"><i class="fa-solid fa-check"></i></div>
-              <h3>You're Booked!</h3>
-              <p>We've got your details — a dispatcher will confirm by phone or WhatsApp shortly.</p>
-              <div class="flex flex-wrap justify-center gap-3 mt-4">
-                <a href="#" id="b-success-wa" class="btn btn-outline w-full sm:w-auto"><i class="fa-brands fa-whatsapp"></i> Confirm via WhatsApp</a>
-                <a href="tracking.html" id="b-track-link" class="btn btn-primary w-full sm:w-auto">
-                  <i class="fa-solid fa-location-arrow"></i> Track Booking
+
+              <!-- Booking Reference & Quick Copy Bar -->
+              <div class="flex flex-col sm:flex-row items-center justify-between bg-[#14161A] border border-[#3A3F49] rounded-md p-4 gap-3 font-mono text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="text-[#B9B6AC] uppercase">Booking ID:</span>
+                  <span class="text-[#FF5A1F] font-bold text-sm tracking-wider" id="s-booking-id">#BK-XXXX</span>
+                </div>
+                <button type="button" id="btn-copy-booking-id" class="btn btn-outline !py-1.5 !px-3 !text-[11px]">
+                  <i class="fa-regular fa-copy"></i> <span id="copy-text">Copy Booking ID</span>
+                </button>
+              </div>
+
+              <!-- Full Details Breakdown (Matching Tracking Page) -->
+              <div class="bg-[#14161A] border border-[#3A3F49] rounded-md p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-[#3A3F49]/60 pb-3">
+                  <h4 class="font-display text-xs text-[#FF5A1F] uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list"></i> Booking Specifications
+                  </h4>
+                  <span class="text-[10px] font-mono text-[#B9B6AC]" id="s-booking-time">--</span>
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4 font-mono text-xs">
+                  <div class="bg-[#1A1D24]/60 p-3 rounded border border-[#3A3F49]/40 space-y-1">
+                    <span class="text-[#B9B6AC] text-[10px] uppercase block">Customer Details</span>
+                    <span class="text-[#F4F1E8] font-bold block" id="s-customer-name">--</span>
+                    <span class="text-[#B9B6AC] text-[11px] block" id="s-customer-phone">--</span>
+                  </div>
+
+                  <div class="bg-[#1A1D24]/60 p-3 rounded border border-[#3A3F49]/40 space-y-1">
+                    <span class="text-[#B9B6AC] text-[10px] uppercase block">Motorcycle</span>
+                    <span class="text-[#F4F1E8] font-bold block" id="s-bike-model">--</span>
+                    <span class="text-[#B9B6AC] text-[11px] block" id="s-reg-no">--</span>
+                  </div>
+
+                  <div class="bg-[#1A1D24]/60 p-3 rounded border border-[#3A3F49]/40 space-y-1">
+                    <span class="text-[#B9B6AC] text-[10px] uppercase block">Service Type</span>
+                    <span class="text-[#FF5A1F] font-bold uppercase block" id="s-service-type">--</span>
+                  </div>
+
+                  <div class="bg-[#1A1D24]/60 p-3 rounded border border-[#3A3F49]/40 space-y-1">
+                    <span class="text-[#B9B6AC] text-[10px] uppercase block">Schedule / Slot</span>
+                    <span class="text-[#F4F1E8] font-bold block" id="s-schedule-slot">--</span>
+                  </div>
+
+                  <div class="sm:col-span-2 bg-[#1A1D24]/60 p-3 rounded border border-[#3A3F49]/40 space-y-1">
+                    <span class="text-[#B9B6AC] text-[10px] uppercase block">Service Location</span>
+                    <span class="text-[#F4F1E8] block" id="s-location">--</span>
+                    <div id="s-map-link-wrap" class="mt-1"></div>
+                  </div>
+
+                  <div class="sm:col-span-2 bg-[#1A1D24]/60 p-3 rounded border border-[#3A3F49]/40 space-y-1">
+                    <span class="text-[#B9B6AC] text-[10px] uppercase block">Issue / Symptoms</span>
+                    <span class="text-[#F4F1E8] block leading-relaxed" id="s-issue-desc">--</span>
+                  </div>
+
+                  <div class="sm:col-span-2 bg-[#1A1D24]/60 p-3 rounded border border-[#3A3F49]/40 space-y-1">
+                    <span class="text-[#B9B6AC] text-[10px] uppercase block">Payment / Deposit Summary</span>
+                    <div class="flex justify-between items-center text-xs text-[#F4F1E8] pt-1">
+                      <span>Upfront Paid (Deposit Rs. 200 + Fee Rs. 49):</span>
+                      <span class="text-[#FF5A1F] font-bold">Rs. 249</span>
+                    </div>
+                    <div class="flex justify-between items-center text-[11px] text-[#B9B6AC] pt-0.5">
+                      <span>UPI Reference / UTR:</span>
+                      <span class="font-mono text-[#F4F1E8]" id="s-utr-display">Attached Screenshot</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action CTAs (Track Live Status, WhatsApp Confirm, Book Another) -->
+              <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <a href="#" id="s-btn-track" class="btn btn-primary flex-1 text-center">
+                  <i class="fa-solid fa-location-arrow"></i> Track Live Status
                 </a>
+                <a href="#" id="s-btn-wa" target="_blank" class="btn btn-outline flex-1 text-center">
+                  <i class="fa-brands fa-whatsapp"></i> Confirm on WhatsApp
+                </a>
+              </div>
+              <div class="text-center pt-2">
+                <button type="button" id="s-btn-new-booking" class="text-xs text-[#B9B6AC] hover:text-[#FF5A1F] transition-colors underline font-mono">
+                  <i class="fa-solid fa-rotate-left"></i> Book Another Service
+                </button>
               </div>
             </div>
 
@@ -1206,18 +1299,67 @@
 
       if (!validateForm(rules)) return;
 
+      // Helper function to update 3-step timeline indicators
+      function updateStepTimeline(activeStep) {
+        const step1Ind = document.getElementById("step-1-indicator");
+        const step1Lbl = document.getElementById("step-1-label");
+        const div1 = document.getElementById("step-divider-1");
+        const step2Ind = document.getElementById("step-2-indicator");
+        const step2Lbl = document.getElementById("step-2-label");
+        const div2 = document.getElementById("step-divider-2");
+        const step3Ind = document.getElementById("step-3-indicator");
+        const step3Lbl = document.getElementById("step-3-label");
+        const substepProg = document.getElementById("substep-progress");
+
+        const activeClasses = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
+        const inactiveClasses = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
+        const activeLabelClasses = "text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap";
+        const inactiveLabelClasses = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
+
+        if (activeStep === 1) {
+          if (step1Ind) step1Ind.className = activeClasses;
+          if (step1Lbl) step1Lbl.className = activeLabelClasses;
+          if (div1) div1.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
+          if (step2Ind) step2Ind.className = inactiveClasses;
+          if (step2Lbl) step2Lbl.className = inactiveLabelClasses;
+          if (div2) div2.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
+          if (step3Ind) step3Ind.className = inactiveClasses;
+          if (step3Lbl) step3Lbl.className = inactiveLabelClasses;
+          if (substepProg) {
+            substepProg.classList.add("hidden");
+            substepProg.classList.remove("flex");
+          }
+        } else if (activeStep === 2) {
+          if (step1Ind) step1Ind.className = activeClasses;
+          if (step1Lbl) step1Lbl.className = activeLabelClasses;
+          if (div1) div1.className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
+          if (step2Ind) step2Ind.className = activeClasses;
+          if (step2Lbl) step2Lbl.className = activeLabelClasses;
+          if (div2) div2.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
+          if (step3Ind) step3Ind.className = inactiveClasses;
+          if (step3Lbl) step3Lbl.className = inactiveLabelClasses;
+        } else if (activeStep === 3) {
+          if (step1Ind) step1Ind.className = activeClasses;
+          if (step1Lbl) step1Lbl.className = activeLabelClasses;
+          if (div1) div1.className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
+          if (step2Ind) step2Ind.className = activeClasses;
+          if (step2Lbl) step2Lbl.className = activeLabelClasses;
+          if (div2) div2.className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
+          if (step3Ind) step3Ind.className = activeClasses;
+          if (step3Lbl) step3Lbl.className = activeLabelClasses;
+          if (substepProg) {
+            substepProg.classList.add("hidden");
+            substepProg.classList.remove("flex");
+          }
+        }
+      }
+
       // Enter payment step
       fieldsStep.classList.add("hidden");
       paymentStep.classList.remove("hidden");
       showSubstep("2a");
       scrollToFormTop();
-
-      // Update indicators
-      document.getElementById("step-1-indicator").className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
-      document.getElementById("step-1-label").className = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
-      document.getElementById("step-divider").className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
-      document.getElementById("step-2-indicator").className = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
-      document.getElementById("step-2-label").className = "text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap";
+      updateStepTimeline(2);
 
       // Generate random transaction reference
       if (!paymentRef) {
@@ -1241,12 +1383,24 @@
         substepProgress.classList.remove("flex");
       }
 
-      // Revert indicators
-      document.getElementById("step-1-indicator").className = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
-      document.getElementById("step-1-label").className = "text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap";
-      document.getElementById("step-divider").className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
-      document.getElementById("step-2-indicator").className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
-      document.getElementById("step-2-label").className = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
+      // Revert indicators to Step 1
+      const step1Ind = document.getElementById("step-1-indicator");
+      const step1Lbl = document.getElementById("step-1-label");
+      const div1 = document.getElementById("step-divider-1");
+      const step2Ind = document.getElementById("step-2-indicator");
+      const step2Lbl = document.getElementById("step-2-label");
+      const div2 = document.getElementById("step-divider-2");
+      const step3Ind = document.getElementById("step-3-indicator");
+      const step3Lbl = document.getElementById("step-3-label");
+
+      if (step1Ind) step1Ind.className = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
+      if (step1Lbl) step1Lbl.className = "text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap";
+      if (div1) div1.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
+      if (step2Ind) step2Ind.className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
+      if (step2Lbl) step2Lbl.className = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
+      if (div2) div2.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
+      if (step3Ind) step3Ind.className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
+      if (step3Lbl) step3Lbl.className = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
     });
 
     // Sub-step transition handlers
@@ -1480,8 +1634,136 @@
         body: JSON.stringify(payload)
       }).catch(e => console.error("Asynchronous webhook failed:", e));
 
-      // D. Redirect to tracking.html with auto-filled booking ID
-      window.location.href = `tracking.html?id=${encodeURIComponent(supabaseBookingId || '')}`;
+      // D. Populate Step 3 "Booked" Screen Details
+      const shortId = (supabaseBookingId || "").slice(0, 8).toUpperCase();
+      const sBookingIdEl = document.getElementById("s-booking-id");
+      if (sBookingIdEl) sBookingIdEl.textContent = `#BK-${shortId}`;
+
+      const sBookingTimeEl = document.getElementById("s-booking-time");
+      if (sBookingTimeEl) sBookingTimeEl.textContent = `${submissionDate} • ${submissionTime}`;
+
+      const sCustNameEl = document.getElementById("s-customer-name");
+      if (sCustNameEl) sCustNameEl.textContent = nameInput.value.trim();
+
+      const sCustPhoneEl = document.getElementById("s-customer-phone");
+      if (sCustPhoneEl) sCustPhoneEl.textContent = combinedPhone;
+
+      const sBikeModelEl = document.getElementById("s-bike-model");
+      if (sBikeModelEl) sBikeModelEl.textContent = combinedBikeModel;
+
+      const sRegNoEl = document.getElementById("s-reg-no");
+      if (sRegNoEl) {
+        const regVal = document.getElementById("b-reg-no").value.trim();
+        sRegNoEl.textContent = regVal ? `Plate: ${regVal}` : "No Plate Provided";
+      }
+
+      const sServiceTypeEl = document.getElementById("s-service-type");
+      if (sServiceTypeEl) {
+        const svc = serviceSelect.value;
+        let svcLabel = svc;
+        if (svc === "emergency") svcLabel = "Emergency Breakdown / Roadside";
+        else if (svc === "home-visit") svcLabel = "Doorstep Home Visit Service";
+        else if (svc === "workshop") svcLabel = "Workshop Comprehensive Service";
+        sServiceTypeEl.textContent = svcLabel;
+      }
+
+      const sScheduleSlotEl = document.getElementById("s-schedule-slot");
+      if (sScheduleSlotEl) {
+        if (serviceSelect.value === "emergency") {
+          sScheduleSlotEl.textContent = "⚡ Immediate Roadside Dispatch";
+        } else {
+          const dVal = document.getElementById("b-date").value || "Pending";
+          const tVal = document.getElementById("b-time").value || "";
+          sScheduleSlotEl.textContent = `${dVal} ${tVal}`.trim();
+        }
+      }
+
+      const sLocationEl = document.getElementById("s-location");
+      if (sLocationEl) {
+        sLocationEl.textContent = locationInput.value.trim() || "Workshop (Jorpati, Boudha Rd)";
+      }
+
+      const sMapWrap = document.getElementById("s-map-link-wrap");
+      if (sMapWrap) {
+        if (googleMapsLink) {
+          sMapWrap.innerHTML = `<a href="${googleMapsLink}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-[#FF5A1F] hover:underline font-mono"><i class="fa-solid fa-location-dot"></i> View on Google Maps</a>`;
+        } else {
+          sMapWrap.innerHTML = "";
+        }
+      }
+
+      const sIssueEl = document.getElementById("s-issue-desc");
+      if (sIssueEl) {
+        sIssueEl.textContent = issueInput.value.trim() || "Standard service request.";
+      }
+
+      const sUtrEl = document.getElementById("s-utr-display");
+      if (sUtrEl) {
+        const utrVal = document.getElementById("booking-utr").value.trim();
+        sUtrEl.textContent = utrVal ? `UTR: ${utrVal}` : "Verified via Uploaded Screenshot";
+      }
+
+      // Configure Live Tracking Button
+      const sBtnTrack = document.getElementById("s-btn-track");
+      if (sBtnTrack) {
+        sBtnTrack.href = `tracking.html?id=${encodeURIComponent(supabaseBookingId || '')}`;
+      }
+
+      // Configure WhatsApp Confirmation Button
+      const sBtnWa = document.getElementById("s-btn-wa");
+      if (sBtnWa) {
+        const text = `Hi Chhotu Motorcycles, I just created a new repair booking on your website!\n\n` +
+          `*Booking ID:* #BK-${shortId}\n` +
+          `*Customer:* ${nameInput.value.trim()} (${combinedPhone})\n` +
+          `*Bike:* ${combinedBikeModel}\n` +
+          `*Service:* ${serviceSelect.value}\n` +
+          `*Location:* ${locationInput.value.trim() || 'Workshop'}\n` +
+          `*Upfront Paid:* Rs. 249\n\n` +
+          `Please verify my payment and confirm my booking.`;
+        sBtnWa.href = `https://wa.me/9779813691072?text=${encodeURIComponent(text)}`;
+      }
+
+      // 1-Click Copy Booking ID Handler
+      const copyBtn = document.getElementById("btn-copy-booking-id");
+      if (copyBtn) {
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(supabaseBookingId);
+          const copyText = document.getElementById("copy-text");
+          if (copyText) {
+            copyText.textContent = "Copied!";
+            setTimeout(() => { copyText.textContent = "Copy Booking ID"; }, 2000);
+          }
+        };
+      }
+
+      // Book Another Service Handler
+      const newBookingBtn = document.getElementById("s-btn-new-booking");
+      if (newBookingBtn) {
+        newBookingBtn.onclick = () => {
+          form.reset();
+          selectedFile = null;
+          paymentRef = "";
+          if (dropzonePreview) dropzonePreview.classList.add("hidden");
+          if (dropzonePrompt) dropzonePrompt.classList.remove("hidden");
+          syncSubmitBtn();
+          successEl.classList.add("hidden");
+          fieldsStep.classList.remove("hidden");
+          updateStepTimeline(1);
+          scrollToFormTop();
+        };
+      }
+
+      // Switch to Step 3: Booked
+      paymentStep.classList.add("hidden");
+      fieldsStep.classList.add("hidden");
+      if (errorEl) errorEl.classList.add("hidden");
+      successEl.classList.remove("hidden");
+      updateStepTimeline(3);
+      scrollToFormTop();
+
+      if (typeof initMorphButtons === "function") {
+        initMorphButtons();
+      }
     });
   </script>
   <script src="assets/agentation-bundle.js"></script>
