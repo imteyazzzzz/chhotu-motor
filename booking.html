@@ -303,8 +303,7 @@
                 <label class="field-label" for="b-service">Service Type *</label>
                 <div class="relative">
                   <select id="b-service" name="serviceType" class="field-input appearance-none" required>
-                    <option value="">Select a service</option>
-                    <option value="emergency">Emergency Repair / Roadside Assistance</option>
+                    <option value="emergency" selected>Emergency Repair / Roadside Assistance</option>
                     <option value="home-visit">Scheduled Home / Office Visit</option>
                     <option value="workshop">Workshop Visit / Appointment</option>
                   </select>
@@ -377,7 +376,7 @@
                   placeholder="e.g. NP 97 PA 1234">
               </div>
 
-              <!-- Location / Address -->
+              <!-- Location / Address (Visible for Emergency & Home Visit; Hidden for Workshop Visit) -->
               <div id="b-location-wrap">
                 <label class="field-label" for="b-location">Location / Address <span
                     id="b-location-required">*</span></label>
@@ -393,8 +392,18 @@
                 <p class="field-error" id="b-location-error">Location is required for this service.</p>
               </div>
 
+              <!-- Workshop Notice (Only shown when Workshop Visit is selected) -->
+              <div id="b-workshop-notice" class="hidden p-4 rounded border border-[#FF5A1F]/30 bg-[#FF5A1F]/10 text-xs text-[#F4F1E8] font-mono flex items-start gap-3">
+                <i class="fa-solid fa-location-dot text-[#FF5A1F] mt-0.5 text-base shrink-0"></i>
+                <div>
+                  <span class="font-bold text-[#FF5A1F] uppercase tracking-wider block mb-0.5">Workshop Service Point</span>
+                  <p class="text-[#F4F1E8]">Jorpati, Boudha Rd, Kathmandu 44600 (Opposite Stupa Hospital)</p>
+                  <p class="text-[11px] text-[#B9B6AC] mt-1">Please bring your bike to our workshop at your selected preferred date and time slot below.</p>
+                </div>
+              </div>
+
               <!-- Preferred Date & Time (Hidden by default; only shown for Home Visit & Workshop) -->
-              <div class="hidden sm:grid-cols-2 gap-5" id="b-datetime-wrap" style="display: none;">
+              <div class="hidden grid grid-cols-1 sm:grid-cols-2 gap-5" id="b-datetime-wrap">
                 <div>
                   <label class="field-label" for="b-date">Preferred Date *</label>
                   <input id="b-date" name="preferredDate" type="date" class="field-input">
@@ -786,25 +795,46 @@
     const issueWrap = document.getElementById("b-issue-wrap");
     const issueRequiredMark = document.getElementById("b-issue-required");
 
-    // ---- Prefill service type from ?service= query param (see services.html links) ----
+    // ---- Prefill service type from ?service= query param (default: emergency) ----
     const params = new URLSearchParams(window.location.search);
     const serviceParam = (params.get("service") || "").toLowerCase().trim();
     if (serviceParam) {
       if (serviceParam.includes("emergency") || serviceParam.includes("roadside") || serviceParam.includes("breakdown")) {
         serviceSelect.value = "emergency";
-      } else if (serviceParam.includes("home") || serviceParam.includes("visit") || serviceParam.includes("doorstep")) {
+      } else if (serviceParam.includes("home") || serviceParam.includes("visit") || serviceParam.includes("doorstep") || serviceParam.includes("schedule")) {
         serviceSelect.value = "home-visit";
       } else if (serviceParam.includes("workshop") || serviceParam.includes("garage") || serviceParam.includes("appointment")) {
         serviceSelect.value = "workshop";
+      } else {
+        serviceSelect.value = "emergency";
       }
+    } else {
+      serviceSelect.value = "emergency";
     }
 
     // ---- Toggle "location required" + date/time relevance based on service type ----
     function syncServiceUI() {
       if (!serviceSelect) return;
       const val = serviceSelect.value;
+      const workshopNotice = document.getElementById("b-workshop-notice");
+
+      // Synchronize URL query parameter with current selection without reloading
+      try {
+        if (window.history && window.history.replaceState) {
+          const currentUrl = new URL(window.location.href);
+          if (currentUrl.searchParams.get("service") !== val) {
+            currentUrl.searchParams.set("service", val);
+            window.history.replaceState(null, "", currentUrl.toString());
+          }
+        }
+      } catch (e) {
+        console.warn("Could not sync URL state:", e);
+      }
 
       // 1. Location visibility and required status
+      // - Emergency: Location is SHOWN & REQUIRED
+      // - Home Visit: Location is SHOWN & REQUIRED
+      // - Workshop Visit: Location is HIDDEN (Customer visits workshop)
       const locationRequired = val === "emergency" || val === "home-visit";
       const showLocation = val === "emergency" || val === "home-visit";
 
@@ -822,6 +852,15 @@
         }
       }
 
+      // Workshop Info Notice
+      if (workshopNotice) {
+        if (val === "workshop") {
+          workshopNotice.classList.remove("hidden");
+        } else {
+          workshopNotice.classList.add("hidden");
+        }
+      }
+
       // Auto-fill address for home-visit if not already entered
       if (val === "home-visit" && locationInput && !locationInput.value && window.savedUserAddress) {
         locationInput.value = window.savedUserAddress;
@@ -832,8 +871,14 @@
         }
       }
 
-      // 2. Date and Time visibility - Only for Home Visit & Workshop
+      // 2. Date and Time visibility - ONLY for Home Visit & Workshop Visit (Hidden for Emergency)
       const showDateTime = val === "home-visit" || val === "workshop";
+      const dateEl = document.getElementById("b-date");
+      const timeEl = document.getElementById("b-time");
+
+      if (dateEl) dateEl.required = showDateTime;
+      if (timeEl) timeEl.required = showDateTime;
+
       if (dateTimeWrap) {
         if (showDateTime) {
           dateTimeWrap.classList.remove("hidden");
@@ -841,8 +886,6 @@
         } else {
           dateTimeWrap.classList.add("hidden");
           dateTimeWrap.style.display = "none";
-          const dateEl = document.getElementById("b-date");
-          const timeEl = document.getElementById("b-time");
           if (dateEl) dateEl.value = "";
           if (timeEl) timeEl.value = "";
           clearFieldError(dateEl, document.getElementById("b-date-error"));
@@ -865,6 +908,10 @@
     const detectBtn = document.getElementById("b-detect-location");
 
     async function performAutoLocation(isManual) {
+      if (serviceSelect && serviceSelect.value === "workshop" && !isManual) {
+        return; // Don't auto-detect location when workshop visit is active
+      }
+
       if (!navigator.geolocation) {
         if (isManual) alert("Geolocation is not supported by your browser.");
         return;
@@ -1286,7 +1333,7 @@
       { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true, message: "Please select your bike brand." },
       { input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: () => brandSelectEl.value === "Other", message: "Please specify your bike brand." },
       { input: bikeInput, error: document.getElementById("b-bike-error"), required: true, message: "Please enter your bike model." },
-      { input: locationInput, error: document.getElementById("b-location-error"), required: () => locationInput.required, message: "Location address is required for this service." },
+      { input: locationInput, error: document.getElementById("b-location-error"), required: () => serviceSelect.value === "emergency" || serviceSelect.value === "home-visit", message: "Location address is required for this service." },
       { input: document.getElementById("b-date"), error: document.getElementById("b-date-error"), required: () => serviceSelect.value === "home-visit" || serviceSelect.value === "workshop", message: "Preferred date is required for this service." },
       { input: document.getElementById("b-time"), error: document.getElementById("b-time-error"), required: () => serviceSelect.value === "home-visit" || serviceSelect.value === "workshop", message: "Preferred time is required for this service." },
       { input: issueInput, error: document.getElementById("b-issue-error"), required: true, message: "Please describe what is wrong with your bike." }
@@ -1313,30 +1360,36 @@
 
     // 2. Step Navigation Trigger
     continueBtn.addEventListener("click", () => {
+      const isSavedBike = savedBikesSelect && savedBikesSelect.value && savedBikesSelect.value !== "new";
+
       const rules = [
         { input: nameInput, error: document.getElementById("b-name-error"), required: true, message: "Please enter your full name." },
         { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value), message: "Please enter a valid phone number." },
-        { input: serviceSelect, error: document.getElementById("b-service-error"), required: true, message: "Please select a service type." },
-        { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true, message: "Please select your bike brand." },
-        { input: bikeInput, error: document.getElementById("b-bike-error"), required: true, message: "Please enter your bike model." }
+        { input: serviceSelect, error: document.getElementById("b-service-error"), required: true, message: "Please select a service type." }
       ];
 
-      if (brandSelectEl.value === "Other") {
-        rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true, message: "Please specify your bike brand." });
-      } else {
-        clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
+      if (!isSavedBike) {
+        rules.push({ input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true, message: "Please select your bike brand." });
+        rules.push({ input: bikeInput, error: document.getElementById("b-bike-error"), required: true, message: "Please enter your bike model." });
+
+        if (brandSelectEl.value === "Other") {
+          rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true, message: "Please specify your bike brand." });
+        } else {
+          clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
+        }
       }
 
-      if (locationInput.required) {
+      const val = serviceSelect.value;
+      const isLocationRequired = val === "emergency" || val === "home-visit";
+      const isDateTimeRequired = val === "home-visit" || val === "workshop";
+      const dateInput = document.getElementById("b-date");
+      const timeInput = document.getElementById("b-time");
+
+      if (isLocationRequired) {
         rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true, message: "Location address is required for this service." });
       } else {
         clearFieldError(locationInput, document.getElementById("b-location-error"));
       }
-
-      const val = serviceSelect.value;
-      const isDateTimeRequired = val === "home-visit" || val === "workshop";
-      const dateInput = document.getElementById("b-date");
-      const timeInput = document.getElementById("b-time");
 
       if (isDateTimeRequired) {
         rules.push({ input: dateInput, error: document.getElementById("b-date-error"), required: true, message: "Preferred date is required for this service." });
@@ -1563,6 +1616,17 @@
 
         // B. Save booking record in 'pending_verification' status
         const regNoVal = document.getElementById("b-reg-no").value.trim();
+        const selectedSvc = serviceSelect.value;
+        const finalLocation = selectedSvc === "workshop"
+          ? "Workshop (Jorpati, Boudha Rd, Kathmandu)"
+          : (locationInput.value.trim() || null);
+        const finalPreferredDate = selectedSvc === "emergency"
+          ? null
+          : (document.getElementById("b-date").value || null);
+        const finalPreferredTime = selectedSvc === "emergency"
+          ? null
+          : (document.getElementById("b-time").value || null);
+
         const insertData = {
           id: supabaseBookingId,
           user_id: loggedInUserId,
@@ -1571,12 +1635,12 @@
           bike_brand: brandVal === "Other" ? brandOtherVal : brandVal,
           bike_model: modelVal,
           registration_no: regNoVal || null,
-          service_type: serviceSelect.value,
-          location: locationInput.value.trim() || null,
-          coordinates: coordsVal || null,
-          google_maps_link: googleMapsLink || null,
-          preferred_date: document.getElementById("b-date").value || null,
-          preferred_time: document.getElementById("b-time").value || null,
+          service_type: selectedSvc,
+          location: finalLocation,
+          coordinates: selectedSvc === "workshop" ? null : (coordsVal || null),
+          google_maps_link: selectedSvc === "workshop" ? null : (googleMapsLink || null),
+          preferred_date: finalPreferredDate,
+          preferred_time: finalPreferredTime,
           issue_description: issueInput.value.trim() || null,
           status: "pending_verification",
           payment_status: "submitted",
@@ -1627,7 +1691,7 @@
           if (fallbackBtn) {
             const bikeBrand = brandVal === "Other" ? brandOtherVal : brandVal;
             const serviceType = serviceSelect.value;
-            const locationVal = locationInput.value.trim() || "Workshop (Jorpati, Boudha Rd)";
+            const locationVal = serviceType === "workshop" ? "Workshop (Jorpati, Boudha Rd, Kathmandu)" : (locationInput.value.trim() || "Workshop (Jorpati, Boudha Rd)");
             const dateVal = document.getElementById("b-date").value || "";
             const timeVal = document.getElementById("b-time").value || "";
             const issueDesc = issueInput.value.trim() || "";
@@ -1662,13 +1726,13 @@
         phone: combinedPhone,
         bikeModel: combinedBikeModel,
         serviceType: serviceSelect.value,
-        location: locationInput.value.trim(),
-        coordinates: coordsVal,
-        googleMapsLink: googleMapsLink,
+        location: serviceSelect.value === "workshop" ? "Workshop (Jorpati, Boudha Rd, Kathmandu)" : locationInput.value.trim(),
+        coordinates: serviceSelect.value === "workshop" ? null : coordsVal,
+        googleMapsLink: serviceSelect.value === "workshop" ? null : googleMapsLink,
         submissionDate: submissionDate,
         submissionTime: submissionTime,
-        preferredDate: document.getElementById("b-date").value,
-        preferredTime: document.getElementById("b-time").value,
+        preferredDate: serviceSelect.value === "emergency" ? "" : document.getElementById("b-date").value,
+        preferredTime: serviceSelect.value === "emergency" ? "" : document.getElementById("b-time").value,
         issueDescription: issueInput.value.trim(),
         booking_charge: 249,
         payment_ref: paymentRef,
@@ -1731,12 +1795,14 @@
 
       const sLocationEl = document.getElementById("s-location");
       if (sLocationEl) {
-        sLocationEl.textContent = locationInput.value.trim() || "Workshop (Jorpati, Boudha Rd)";
+        sLocationEl.textContent = serviceSelect.value === "workshop"
+          ? "Workshop (Jorpati, Boudha Rd, Kathmandu)"
+          : (locationInput.value.trim() || "Workshop (Jorpati, Boudha Rd)");
       }
 
       const sMapWrap = document.getElementById("s-map-link-wrap");
       if (sMapWrap) {
-        if (googleMapsLink) {
+        if (serviceSelect.value !== "workshop" && googleMapsLink) {
           sMapWrap.innerHTML = `<a href="${googleMapsLink}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-[#FF5A1F] hover:underline font-mono"><i class="fa-solid fa-location-dot"></i> View on Google Maps</a>`;
         } else {
           sMapWrap.innerHTML = "";
