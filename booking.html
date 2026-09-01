@@ -393,8 +393,8 @@
                 <p class="field-error" id="b-location-error">Location is required for this service.</p>
               </div>
 
-              <!-- Preferred Date & Time -->
-              <div class="grid sm:grid-cols-2 gap-5" id="b-datetime-wrap">
+              <!-- Preferred Date & Time (Hidden by default; only shown for Home Visit & Workshop) -->
+              <div class="hidden sm:grid-cols-2 gap-5" id="b-datetime-wrap" style="display: none;">
                 <div>
                   <label class="field-label" for="b-date">Preferred Date *</label>
                   <input id="b-date" name="preferredDate" type="date" class="field-input">
@@ -788,9 +788,15 @@
 
     // ---- Prefill service type from ?service= query param (see services.html links) ----
     const params = new URLSearchParams(window.location.search);
-    const serviceParam = params.get("service");
-    if (serviceParam && ["emergency", "home-visit", "workshop"].includes(serviceParam)) {
-      serviceSelect.value = serviceParam;
+    const serviceParam = (params.get("service") || "").toLowerCase().trim();
+    if (serviceParam) {
+      if (serviceParam.includes("emergency") || serviceParam.includes("roadside") || serviceParam.includes("breakdown")) {
+        serviceSelect.value = "emergency";
+      } else if (serviceParam.includes("home") || serviceParam.includes("visit") || serviceParam.includes("doorstep")) {
+        serviceSelect.value = "home-visit";
+      } else if (serviceParam.includes("workshop") || serviceParam.includes("garage") || serviceParam.includes("appointment")) {
+        serviceSelect.value = "workshop";
+      }
     }
 
     // ---- Toggle "location required" + date/time relevance based on service type ----
@@ -804,7 +810,17 @@
 
       if (locationInput) locationInput.required = locationRequired;
       if (locationRequiredMark) locationRequiredMark.style.display = locationRequired ? "inline" : "none";
-      if (locationWrap) locationWrap.style.display = showLocation ? "block" : "none";
+      if (locationWrap) {
+        if (showLocation) {
+          locationWrap.classList.remove("hidden");
+          locationWrap.style.display = "block";
+        } else {
+          locationWrap.classList.add("hidden");
+          locationWrap.style.display = "none";
+          if (locationInput) locationInput.value = "";
+          clearFieldError(locationInput, document.getElementById("b-location-error"));
+        }
+      }
 
       // Auto-fill address for home-visit if not already entered
       if (val === "home-visit" && locationInput && !locationInput.value && window.savedUserAddress) {
@@ -816,30 +832,31 @@
         }
       }
 
-      if (!showLocation && locationInput) {
-        locationInput.value = "";
-      }
-
-      // 2. Date and Time visibility
+      // 2. Date and Time visibility - Only for Home Visit & Workshop
       const showDateTime = val === "home-visit" || val === "workshop";
-      if (dateTimeWrap) dateTimeWrap.style.display = showDateTime ? "grid" : "none";
-      if (!showDateTime) {
-        const dateEl = document.getElementById("b-date");
-        const timeEl = document.getElementById("b-time");
-        if (dateEl) dateEl.value = "";
-        if (timeEl) timeEl.value = "";
+      if (dateTimeWrap) {
+        if (showDateTime) {
+          dateTimeWrap.classList.remove("hidden");
+          dateTimeWrap.style.display = "grid";
+        } else {
+          dateTimeWrap.classList.add("hidden");
+          dateTimeWrap.style.display = "none";
+          const dateEl = document.getElementById("b-date");
+          const timeEl = document.getElementById("b-time");
+          if (dateEl) dateEl.value = "";
+          if (timeEl) timeEl.value = "";
+          clearFieldError(dateEl, document.getElementById("b-date-error"));
+          clearFieldError(timeEl, document.getElementById("b-time-error"));
+        }
       }
 
       // 3. Issue visibility and required status
       const issueRequired = val !== "";
-      const showIssue = val !== "";
+      const showIssue = true; // Always show issue description
 
       if (issueInput) issueInput.required = issueRequired;
       if (issueRequiredMark) issueRequiredMark.style.display = issueRequired ? "inline" : "none";
       if (issueWrap) issueWrap.style.display = showIssue ? "block" : "none";
-      if (!showIssue && issueInput) {
-        issueInput.value = "";
-      }
     }
     serviceSelect.addEventListener("change", syncServiceUI);
     syncServiceUI();
