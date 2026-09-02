@@ -247,51 +247,90 @@ WHERE id IN (
     SELECT id FROM duplicates WHERE rn > 1
 );
 
--- Add unique constraint on phone column of profiles table
-ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_phone_unique;
-ALTER TABLE public.profiles ADD CONSTRAINT profiles_phone_unique UNIQUE (phone);
-
--- 9. Update handle_new_user trigger function to use NULL instead of empty string for phone
+-- 9. Update handle_new_user trigger function
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
+DECLARE
+    v_phone TEXT;
+    v_name TEXT;
 BEGIN
-    INSERT INTO public.profiles (id, full_name, phone, avatar_url, role)
-    VALUES (
-        new.id,
-        COALESCE(new.raw_user_meta_data->>'full_name', 'Customer'),
-        NULLIF(new.raw_user_meta_data->>'phone', ''),
-        COALESCE(new.raw_user_meta_data->>'avatar_url', ''),
-        'customer'
-    )
-    ON CONFLICT (id) DO UPDATE SET
-        full_name = EXCLUDED.full_name,
-        phone = COALESCE(NULLIF(EXCLUDED.phone, ''), public.profiles.phone);
+    v_phone := NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'phone', '')), '');
+    v_name := COALESCE(NULLIF(TRIM(NEW.raw_user_meta_data->>'full_name'), ''), 'Customer');
 
-    INSERT INTO public.addresses (user_id)
-    VALUES (new.id)
-    ON CONFLICT (user_id) DO NOTHING;
+    -- 1. Insert or update profile first
+    BEGIN
+        INSERT INTO public.profiles (id, full_name, phone, role)
+        VALUES (
+            NEW.id,
+            v_name,
+            v_phone,
+            'customer'
+        )
+        ON CONFLICT (id) DO UPDATE SET
+            full_name = EXCLUDED.full_name,
+            phone = COALESCE(EXCLUDED.phone, public.profiles.phone),
+            updated_at = NOW();
+    EXCEPTION WHEN OTHERS THEN
+        RAISE WARNING 'Profile creation warning: %', SQLERRM;
+    END;
 
-    INSERT INTO public.notification_preferences (user_id)
-    VALUES (new.id)
-    ON CONFLICT (user_id) DO NOTHING;
+    -- 2. Initialize default address
+    BEGIN
+        INSERT INTO public.addresses (user_id)
+        VALUES (NEW.id)
+        ON CONFLICT (user_id) DO NOTHING;
+    EXCEPTION WHEN OTHERS THEN
+        NULL;
+    END;
+
+    -- 3. Initialize notification preferences
+    BEGIN
+        INSERT INTO public.notification_preferences (user_id)
+        VALUES (NEW.id)
+        ON CONFLICT (user_id) DO NOTHING;
+    EXCEPTION WHEN OTHERS THEN
+        NULL;
+    END;
+
+    -- 4. Automatically claim guest bookings matching this user phone
+    IF v_phone IS NOT NULL AND v_phone <> '' THEN
+        BEGIN
+            UPDATE public.bookings
+            SET user_id = NEW.id
+            WHERE user_id IS NULL 
+              AND (
+                  phone = v_phone 
+                  OR REPLACE(REPLACE(phone, ' ', ''), '-', '') = REPLACE(REPLACE(v_phone, ' ', ''), '-', '')
+                  OR phone = RIGHT(v_phone, 10)
+              );
+        EXCEPTION WHEN OTHERS THEN
+            RAISE WARNING 'Guest booking claim warning: %', SQLERRM;
+        END;
+    END IF;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created_profile ON auth.users;
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created_profile
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Ensure all user_ids in bookings exist in profiles, or set them to NULL to avoid constraint validation errors
 UPDATE public.bookings
 SET user_id = NULL
-WHERE user_id NOT IN (SELECT id FROM public.profiles);
+WHERE user_id NOT IN (SELECT id FROM auth.users);
 
--- Link user_id in bookings directly to profiles(id)
+-- Link user_id in bookings directly to auth.users(id)
 ALTER TABLE public.bookings
 DROP CONSTRAINT IF EXISTS bookings_user_id_fkey,
 DROP CONSTRAINT IF EXISTS bookings_user_id_profiles_fkey;
 
 ALTER TABLE public.bookings
-ADD CONSTRAINT bookings_user_id_profiles_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE SET NULL;
+ADD CONSTRAINT bookings_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE SET NULL;
 
 
 -- Link actor_id in bookings_activity directly to profiles(id)
