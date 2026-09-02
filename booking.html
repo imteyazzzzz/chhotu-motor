@@ -1075,8 +1075,38 @@
             }
             const { data: bikes, error: bikesError } = await window.supabaseClient.from("motorcycles").select("*").eq("user_id", loggedInUserId).order("created_at", { ascending: false });
             if (!bikesError && bikes && bikes.length > 0) {
+              const KNOWN_BRANDS = ["Bajaj", "Honda", "Yamaha", "Hero", "TVS", "Royal Enfield", "Suzuki", "KTM"];
+              
+              const parsedBikes = bikes.map(b => {
+                let brand = b.brand || "";
+                let model = b.model || "";
+                const regNo = b.registration_no || b.registration_number || "";
+
+                if (!brand && model) {
+                  for (const kb of KNOWN_BRANDS) {
+                    if (model.toLowerCase().startsWith(kb.toLowerCase() + " ")) {
+                      brand = kb;
+                      model = model.slice(kb.length).trim();
+                      break;
+                    }
+                  }
+                }
+
+                const displayName = (brand ? `${brand} ${model}` : (model || "Motorcycle")).trim();
+                const displayPlate = regNo ? `(${regNo})` : `(No plate)`;
+                const optionLabel = `${displayName} ${displayPlate}`;
+
+                return {
+                  id: b.id,
+                  brand: brand || "Other",
+                  model: model,
+                  regNo: regNo,
+                  label: optionLabel
+                };
+              });
+
               savedBikesSelect.innerHTML = `<option value="">-- Choose from your bikes --</option>` +
-                bikes.map(b => `<option value="${b.id}" data-brand="${b.brand || ''}" data-model="${b.model || ''}" data-reg="${b.registration_number || ''}">${b.brand} ${b.model} (${b.registration_number || 'No plate'})</option>`).join("") +
+                parsedBikes.map(b => `<option value="${b.id}" data-brand="${b.brand}" data-model="${b.model}" data-reg="${b.regNo}">${b.label}</option>`).join("") +
                 `<option value="new">+ Add New Motorcycle</option>`;
               savedBikesWrap.classList.remove("hidden");
               newBikeFields.classList.add("hidden");
@@ -1095,10 +1125,10 @@
                 } else {
                   newBikeFields.classList.add("hidden");
                   const selectedOption = savedBikesSelect.options[savedBikesSelect.selectedIndex];
-                  brandSelectEl.value = selectedOption.getAttribute("data-brand");
-                  bikeInput.value = selectedOption.getAttribute("data-model");
-                  document.getElementById("b-reg-no").value = selectedOption.getAttribute("data-reg");
-                  if (brandSelectEl.value && !["Bajaj", "Honda", "Yamaha", "Hero", "TVS", "Royal Enfield", "Suzuki", "KTM"].includes(brandSelectEl.value)) {
+                  brandSelectEl.value = selectedOption.getAttribute("data-brand") || "";
+                  bikeInput.value = selectedOption.getAttribute("data-model") || "";
+                  document.getElementById("b-reg-no").value = selectedOption.getAttribute("data-reg") || "";
+                  if (brandSelectEl.value && !KNOWN_BRANDS.includes(brandSelectEl.value)) {
                     brandOtherInputEl.value = brandSelectEl.value; brandSelectEl.value = "Other";
                   }
                   brandSelectEl.required = false; bikeInput.required = false; syncBrandUI();
