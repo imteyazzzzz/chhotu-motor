@@ -781,10 +781,7 @@
   <!-- =====================================================================
      SHARED FOOTER END
      ===================================================================== -->
-
-  <button id="back-to-top" class="back-to-top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
-
-  <script src="assets/main.js"></script>
+<script src="assets/main.js"></script>
   <script src="assets/forms.js"></script>
   <script src="assets/auth-header.js"></script>
   <script>
@@ -793,413 +790,7 @@
     window.savedUserAddress = "";
     window.savedUserCoords = "";
 
-    const serviceSelect = document.getElementById("b-service");
-    const locationInput = document.getElementById("b-location");
-    const locationRequiredMark = document.getElementById("b-location-required");
-    const locationWrap = document.getElementById("b-location-wrap");
-    const dateTimeWrap = document.getElementById("b-datetime-wrap");
-    const issueInput = document.getElementById("b-issue");
-    const issueWrap = document.getElementById("b-issue-wrap");
-    const issueRequiredMark = document.getElementById("b-issue-required");
-
-    // ---- Prefill service type from ?service= query param (default: emergency) ----
-    const params = new URLSearchParams(window.location.search);
-    const serviceParam = (params.get("service") || "").toLowerCase().trim();
-    if (serviceParam) {
-      if (serviceParam.includes("emergency") || serviceParam.includes("roadside") || serviceParam.includes("breakdown")) {
-        serviceSelect.value = "emergency";
-      } else if (serviceParam.includes("home") || serviceParam.includes("visit") || serviceParam.includes("doorstep") || serviceParam.includes("schedule")) {
-        serviceSelect.value = "home-visit";
-      } else if (serviceParam.includes("workshop") || serviceParam.includes("garage") || serviceParam.includes("appointment")) {
-        serviceSelect.value = "workshop";
-      } else {
-        serviceSelect.value = "emergency";
-      }
-    } else {
-      serviceSelect.value = "emergency";
-    }
-
-    function updateTimeSlots(serviceVal) {
-      const timeEl = document.getElementById("b-time");
-      if (!timeEl) return;
-      const currentVal = timeEl.value;
-
-      const workshopSlots = [
-        { value: "09:00 AM - 11:00 AM", label: "09:00 AM - 11:00 AM" },
-        { value: "12:00 PM - 02:00 PM", label: "12:00 PM - 02:00 PM" },
-        { value: "02:00 PM - 04:00 PM", label: "02:00 PM - 04:00 PM" },
-        { value: "04:00 PM - 06:00 PM", label: "04:00 PM - 06:00 PM" }
-      ];
-
-      const homeSlots = [
-        { value: "08:00 AM - 10:00 AM", label: "08:00 AM - 10:00 AM" },
-        { value: "10:00 AM - 12:00 PM", label: "10:00 AM - 12:00 PM" },
-        { value: "05:00 PM - 07:00 PM", label: "05:00 PM - 07:00 PM" },
-        { value: "07:00 PM - 09:00 PM", label: "07:00 PM - 09:00 PM" }
-      ];
-
-      const slots = serviceVal === "workshop" ? workshopSlots : (serviceVal === "home-visit" ? homeSlots : []);
-
-      timeEl.innerHTML = `<option value="">Select Time Slot</option>` +
-        slots.map(s => `<option value="${s.value}">${s.label}</option>`).join("");
-
-      if (slots.some(s => s.value === currentVal)) {
-        timeEl.value = currentVal;
-      }
-    }
-
-    // ---- Toggle "location required" + date/time relevance based on service type ----
-    function syncServiceUI() {
-      if (!serviceSelect) return;
-      const val = serviceSelect.value;
-      const workshopNotice = document.getElementById("b-workshop-notice");
-
-      // Synchronize URL query parameter with current selection without reloading
-      try {
-        if (window.history && window.history.replaceState) {
-          const currentUrl = new URL(window.location.href);
-          if (currentUrl.searchParams.get("service") !== val) {
-            currentUrl.searchParams.set("service", val);
-            window.history.replaceState(null, "", currentUrl.toString());
-          }
-        }
-      } catch (e) {
-        console.warn("Could not sync URL state:", e);
-      }
-
-      // 1. Location visibility and required status
-      // - Emergency: Location is SHOWN & REQUIRED
-      // - Home Visit: Location is SHOWN & REQUIRED
-      // - Workshop Visit: Location is HIDDEN (Customer visits workshop)
-      const locationRequired = val === "emergency" || val === "home-visit";
-      const showLocation = val === "emergency" || val === "home-visit";
-
-      if (locationInput) locationInput.required = locationRequired;
-      if (locationRequiredMark) locationRequiredMark.style.display = locationRequired ? "inline" : "none";
-      if (locationWrap) {
-        if (showLocation) {
-          locationWrap.classList.remove("hidden");
-          locationWrap.style.display = "block";
-        } else {
-          locationWrap.classList.add("hidden");
-          locationWrap.style.display = "none";
-          if (locationInput) locationInput.value = "";
-          clearFieldError(locationInput, document.getElementById("b-location-error"));
-        }
-      }
-
-      // Workshop Info Notice
-      if (workshopNotice) {
-        if (val === "workshop") {
-          workshopNotice.classList.remove("hidden");
-        } else {
-          workshopNotice.classList.add("hidden");
-        }
-      }
-
-      // Auto-fill address for home-visit if not already entered
-      if (val === "home-visit" && locationInput && !locationInput.value && window.savedUserAddress) {
-        locationInput.value = window.savedUserAddress;
-        
-        const coordsInput = document.getElementById("b-coords");
-        if (coordsInput && !coordsInput.value && window.savedUserCoords) {
-          coordsInput.value = window.savedUserCoords;
-        }
-      }
-
-      // 2. Date and Time visibility - ONLY for Home Visit & Workshop Visit (Hidden for Emergency)
-      const showDateTime = val === "home-visit" || val === "workshop";
-      const dateEl = document.getElementById("b-date");
-      const timeEl = document.getElementById("b-time");
-
-      if (dateEl) {
-        dateEl.required = showDateTime;
-        try {
-          dateEl.min = new Date().toISOString().split("T")[0];
-        } catch (_) {}
-      }
-      if (timeEl) timeEl.required = showDateTime;
-
-      if (dateTimeWrap) {
-        if (showDateTime) {
-          dateTimeWrap.classList.remove("hidden");
-          dateTimeWrap.style.display = "grid";
-          updateTimeSlots(val);
-        } else {
-          dateTimeWrap.classList.add("hidden");
-          dateTimeWrap.style.display = "none";
-          if (dateEl) dateEl.value = "";
-          if (timeEl) timeEl.value = "";
-          clearFieldError(dateEl, document.getElementById("b-date-error"));
-          clearFieldError(timeEl, document.getElementById("b-time-error"));
-        }
-      }
-
-      // 3. Issue visibility and required status
-      const issueRequired = val !== "";
-      const showIssue = true; // Always show issue description
-
-      if (issueInput) issueInput.required = issueRequired;
-      if (issueRequiredMark) issueRequiredMark.style.display = issueRequired ? "inline" : "none";
-      if (issueWrap) issueWrap.style.display = showIssue ? "block" : "none";
-
-      if (typeof syncContinueBtnState === "function") {
-        syncContinueBtnState();
-      }
-    }
-    serviceSelect.addEventListener("change", syncServiceUI);
-    syncServiceUI();
-
-    // ---- Auto-detect location feature ----
-    const detectBtn = document.getElementById("b-detect-location");
-
-    async function performAutoLocation(isManual) {
-      if (serviceSelect && serviceSelect.value === "workshop" && !isManual) {
-        return; // Don't auto-detect location when workshop visit is active
-      }
-
-      if (!navigator.geolocation) {
-        if (isManual) alert("Geolocation is not supported by your browser.");
-        return;
-      }
-
-      let originalText = "";
-      if (detectBtn) {
-        originalText = detectBtn.innerHTML;
-        detectBtn.disabled = true;
-        detectBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-[#FF5A1F]"></i><span class="hidden sm:inline text-xs">Detecting...</span>`;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          document.getElementById("b-coords").value = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
-          locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-
-          try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
-              headers: { "Accept-Language": "en" }
-            });
-            if (response.ok) {
-              const data = await response.json();
-              if (data && data.display_name) {
-                locationInput.value = data.display_name;
-              }
-            }
-          } catch (err) {
-            console.error("Reverse geocoding failed, using raw coordinates.", err);
-          } finally {
-            if (detectBtn) {
-              detectBtn.disabled = false;
-              detectBtn.innerHTML = originalText;
-            }
-            if (typeof clearFieldError === "function") {
-              clearFieldError(locationInput, document.getElementById("b-location-error"));
-            }
-            if (typeof syncContinueBtnState === "function") {
-              syncContinueBtnState();
-            }
-          }
-        },
-        (error) => {
-          console.warn("Geolocation failed or declined:", error);
-          if (isManual) {
-            let errMsg = "Unable to retrieve location.";
-            if (error.code === error.PERMISSION_DENIED) {
-              errMsg = "Location permission denied by user.";
-            }
-            alert(errMsg);
-          }
-          if (detectBtn) {
-            detectBtn.disabled = false;
-            detectBtn.innerHTML = originalText;
-          }
-        },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
-      );
-    }
-
-    if (detectBtn) {
-      detectBtn.addEventListener("click", () => performAutoLocation(true));
-    }
-
-    // Automatically trigger auto-detect on page load
-    window.addEventListener("DOMContentLoaded", () => {
-      setTimeout(() => {
-        performAutoLocation(false);
-      }, 600);
-    });
-
-    // Clear coordinates if user types manually in the location field
-    locationInput.addEventListener("input", () => {
-      document.getElementById("b-coords").value = "";
-    });
-    // ---- Brand select toggle logic ----
-    const brandSelect = document.getElementById("b-brand");
-    const brandOtherWrap = document.getElementById("b-brand-other-wrap");
-    const brandOtherInput = document.getElementById("b-brand-other");
-    function syncBrandUI() {
-      const isOther = brandSelect.value === "Other";
-      if (isOther) {
-        brandOtherWrap.classList.remove("hidden");
-        brandOtherInput.required = true;
-      } else {
-        brandOtherWrap.classList.add("hidden");
-        brandOtherInput.required = false;
-        brandOtherInput.value = "";
-        if (typeof clearFieldError === "function") {
-          clearFieldError(brandOtherInput, document.getElementById("b-brand-other-error"));
-        }
-      }
-      if (typeof syncContinueBtnState === "function") {
-        syncContinueBtnState();
-      }
-    }
-
-    brandSelect.addEventListener("change", syncBrandUI);
-    syncBrandUI();
-
-    // ---- Check Supabase Auth Session and Prefill ----
-    let loggedInUserId = null;
-    async function checkUserSession() {
-      if (window.supabaseClient) {
-        try {
-          const { data: { session }, error } = await window.supabaseClient.auth.getSession();
-          if (error) throw error;
-
-          if (session && session.user) {
-            loggedInUserId = session.user.id;
-
-            const nameInput = document.getElementById("b-name");
-            const phoneInput = document.getElementById("b-phone");
-            const codeEl = document.getElementById("b-phone-code");
-
-            if (nameInput && !nameInput.value) {
-              nameInput.value = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "";
-            }
-
-            // 1. Fetch user profile from database to get saved phone number
-            const { data: profile } = await window.supabaseClient
-              .from("profiles")
-              .select("phone")
-              .eq("id", loggedInUserId)
-              .maybeSingle();
-
-            const profilePhone = profile?.phone || session.user.phone || "";
-            if (phoneInput && !phoneInput.value && profilePhone) {
-              if (codeEl) {
-                const codes = Array.from(codeEl.options).map(o => o.value);
-                const matchedCode = codes.find(c => profilePhone.startsWith(c));
-                if (matchedCode) {
-                  codeEl.value = matchedCode;
-                  phoneInput.value = profilePhone.substring(matchedCode.length);
-                } else {
-                  phoneInput.value = profilePhone;
-                }
-              } else {
-                phoneInput.value = profilePhone;
-              }
-            }
-
-            // 2. Fetch user saved address details from database
-            const { data: addrData } = await window.supabaseClient
-              .from("addresses")
-              .select("street_address, coordinates")
-              .eq("user_id", loggedInUserId)
-              .maybeSingle();
-
-            if (addrData) {
-              window.savedUserAddress = addrData.street_address || "";
-              window.savedUserCoords = addrData.coordinates || "";
-              
-              // If service type was already selected as home-visit (e.g. from query param), trigger syncServiceUI again to populate!
-              if (serviceSelect && serviceSelect.value === "home-visit") {
-                syncServiceUI();
-              }
-            }
-
-            // Fetch user's saved motorcycles
-            const { data: savedBikes, error: bikesErr } = await window.supabaseClient
-              .from("motorcycles")
-              .select("*")
-              .eq("user_id", loggedInUserId);
-
-            if (!bikesErr && savedBikes && savedBikes.length > 0) {
-              const savedBikesWrap = document.getElementById("b-saved-bikes-wrap");
-              const savedBikesSelect = document.getElementById("b-saved-bike");
-              const newBikeFields = document.getElementById("b-new-bike-fields");
-
-              // Populate select list options
-              savedBikesSelect.innerHTML = `<option value="">-- Select Saved Motorcycle --</option>` +
-                savedBikes.map(bike => {
-                  const parts = (bike.model || "").trim().split(" ");
-                  const inferredBrand = parts[0] || "";
-                  const inferredModel = parts.slice(1).join(" ") || "";
-                  return `<option value="${bike.id}" data-brand="${inferredBrand}" data-model="${inferredModel}" data-reg="${bike.registration_no || ''}">${bike.model} ${bike.registration_no ? '(' + bike.registration_no + ')' : ''}</option>`;
-                }).join("") +
-                `<option value="new">+ Add New Motorcycle</option>`;
-
-              savedBikesWrap.classList.remove("hidden");
-              newBikeFields.classList.add("hidden"); // hide manual inputs by default
-
-              // Make manual inputs not required by default (we will populate them from selection)
-              document.getElementById("b-brand").required = false;
-              document.getElementById("b-bike").required = false;
-
-              savedBikesSelect.addEventListener("change", (e) => {
-                const val = e.target.value;
-                if (val === "new") {
-                  newBikeFields.classList.remove("hidden");
-                  document.getElementById("b-brand").value = "";
-                  document.getElementById("b-bike").value = "";
-                  document.getElementById("b-reg-no").value = "";
-                  document.getElementById("b-brand").required = true;
-                  document.getElementById("b-bike").required = true;
-                  syncBrandUI();
-                } else if (val === "") {
-                  newBikeFields.classList.add("hidden");
-                  document.getElementById("b-brand").value = "";
-                  document.getElementById("b-bike").value = "";
-                  document.getElementById("b-reg-no").value = "";
-                  document.getElementById("b-brand").required = false;
-                  document.getElementById("b-bike").required = false;
-                  syncBrandUI();
-                } else {
-                  // A saved bike is selected
-                  newBikeFields.classList.add("hidden");
-                  const selectedOption = savedBikesSelect.options[savedBikesSelect.selectedIndex];
-                  const brand = selectedOption.getAttribute("data-brand");
-                  const model = selectedOption.getAttribute("data-model");
-                  const reg = selectedOption.getAttribute("data-reg");
-
-                  // Auto-fill hidden brand/model/reg so form validates successfully
-                  document.getElementById("b-brand").value = brand;
-                  document.getElementById("b-bike").value = model;
-                  document.getElementById("b-reg-no").value = reg;
-                  
-                  // Ensure brand other is synced if selected brand is "Other"
-                  if (brand !== "Bajaj" && brand !== "Honda" && brand !== "Yamaha" && brand !== "Hero" && brand !== "TVS" && brand !== "Royal Enfield" && brand !== "Suzuki" && brand !== "KTM") {
-                    document.getElementById("b-brand").value = "Other";
-                    document.getElementById("b-brand-other").value = brand;
-                  } else {
-                    document.getElementById("b-brand-other").value = "";
-                  }
-                  
-                  document.getElementById("b-brand").required = false;
-                  document.getElementById("b-bike").required = false;
-                  syncBrandUI();
-                }
-              });
-            }
-          }
-        } catch (err) {
-          console.error("Error retrieving auth session:", err);
-        }
-      }
-    }
-    checkUserSession();
-
-    // ---- Form validation + step transitions + upload submission ----
+    // ---- DOM Elements (Declared upfront to prevent TDZ ReferenceErrors) ----
     const form = document.getElementById("booking-form");
     const continueBtn = document.getElementById("b-continue-payment");
     const backBtn = document.getElementById("b-btn-back-fields");
@@ -1209,7 +800,28 @@
 
     const fieldsStep = document.getElementById("booking-fields-step");
     const paymentStep = document.getElementById("booking-payment-step");
-    
+
+    const nameInput = document.getElementById("b-name");
+    const phoneInput = document.getElementById("b-phone");
+    const phoneCodeEl = document.getElementById("b-phone-code");
+    const serviceSelect = document.getElementById("b-service");
+    const savedBikesWrap = document.getElementById("b-saved-bikes-wrap");
+    const savedBikesSelect = document.getElementById("b-saved-bike");
+    const newBikeFields = document.getElementById("b-new-bike-fields");
+    const brandSelectEl = document.getElementById("b-brand");
+    const brandOtherWrap = document.getElementById("b-brand-other-wrap");
+    const brandOtherInputEl = document.getElementById("b-brand-other");
+    const bikeInput = document.getElementById("b-bike");
+    const locationInput = document.getElementById("b-location");
+    const locationRequiredMark = document.getElementById("b-location-required");
+    const locationWrap = document.getElementById("b-location-wrap");
+    const dateTimeWrap = document.getElementById("b-datetime-wrap");
+    const dateInput = document.getElementById("b-date");
+    const timeInput = document.getElementById("b-time");
+    const issueInput = document.getElementById("b-issue");
+    const issueWrap = document.getElementById("b-issue-wrap");
+    const issueRequiredMark = document.getElementById("b-issue-required");
+
     const screenshotInput = document.getElementById("booking-screenshot");
     const dropzone = document.getElementById("booking-screenshot-dropzone");
     const dropzonePrompt = document.getElementById("dropzone-prompt");
@@ -1223,165 +835,11 @@
     let selectedFile = null;
     let paymentRef = "";
 
-    // 1. Dropzone Drag & Drop / Selection Events
-    dropzone.addEventListener("click", () => screenshotInput.click());
-    
-    screenshotInput.addEventListener("change", (e) => {
-      if (e.target.files && e.target.files[0]) {
-        handleFileSelect(e.target.files[0]);
-      }
-    });
-
-    // Drag-over hover styling
-    dropzone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropzone.classList.add("border-[#FF5A1F]");
-    });
-
-    dropzone.addEventListener("dragleave", () => {
-      dropzone.classList.remove("border-[#FF5A1F]");
-    });
-
-    dropzone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropzone.classList.remove("border-[#FF5A1F]");
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        handleFileSelect(e.dataTransfer.files[0]);
-      }
-    });
-
-    function syncSubmitBtn() {
-      const submitBtn = document.getElementById("b-submit");
-      if (submitBtn) {
-        submitBtn.disabled = !selectedFile;
-      }
-    }
-
-    function showSubstep(stepName) {
-      const step2a = document.getElementById("booking-payment-2a");
-      const step2b = document.getElementById("booking-payment-2b");
-      const step2c = document.getElementById("booking-payment-2c");
-      
-      const substepProgress = document.getElementById("substep-progress");
-      const dotA = document.getElementById("substep-dot-a");
-      const lineAB = document.getElementById("substep-line-ab");
-      const dotB = document.getElementById("substep-dot-b");
-      const lineBC = document.getElementById("substep-line-bc");
-      const dotC = document.getElementById("substep-dot-c");
-      const label = document.getElementById("substep-label");
-
-      // Hide all sub-steps
-      if (step2a) step2a.classList.add("hidden");
-      if (step2b) step2b.classList.add("hidden");
-      if (step2c) step2c.classList.add("hidden");
-
-      if (substepProgress) {
-        substepProgress.classList.remove("hidden");
-        substepProgress.classList.add("flex");
-      }
-
-      if (stepName === "2a") {
-        if (step2a) step2a.classList.remove("hidden");
-        if (dotA) dotA.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
-        if (lineAB) lineAB.className = "w-8 h-px bg-border-muted transition-colors";
-        if (dotB) dotB.className = "w-2 h-2 rounded-full bg-border-muted transition-colors";
-        if (lineBC) lineBC.className = "w-8 h-px bg-border-muted transition-colors";
-        if (dotC) dotC.className = "w-2 h-2 rounded-full bg-border-muted transition-colors";
-        if (label) label.textContent = "Summary";
-      } else if (stepName === "2b") {
-        if (step2b) step2b.classList.remove("hidden");
-        if (dotA) dotA.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
-        if (lineAB) lineAB.className = "w-8 h-px bg-primary-container transition-colors";
-        if (dotB) dotB.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
-        if (lineBC) lineBC.className = "w-8 h-px bg-border-muted transition-colors";
-        if (dotC) dotC.className = "w-2 h-2 rounded-full bg-border-muted transition-colors";
-        if (label) label.textContent = "Payment";
-      } else if (stepName === "2c") {
-        if (step2c) step2c.classList.remove("hidden");
-        if (dotA) dotA.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
-        if (lineAB) lineAB.className = "w-8 h-px bg-primary-container transition-colors";
-        if (dotB) dotB.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
-        if (lineBC) lineBC.className = "w-8 h-px bg-primary-container transition-colors";
-        if (dotC) dotC.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
-        if (label) label.textContent = "Upload Proof";
-      }
-    }
-
-    function handleFileSelect(file) {
-      screenshotError.classList.add("hidden");
-
-      // Validations: size cap (5MB) & type
-      if (!file.type.match("image/jpeg") && !file.type.match("image/png") && !file.type.match("image/jpg")) {
-        alert("Please select a valid image file (PNG or JPEG).");
-        return;
-      }
-
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Screenshot exceeds 5MB size limit. Please compress and try again.");
-        return;
-      }
-
-      selectedFile = file;
-
-      // Show thumbnail preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        previewThumb.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-
-      previewFilename.textContent = file.name;
-      previewFilesize.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
-
-      dropzonePrompt.classList.add("hidden");
-      dropzonePreview.classList.remove("hidden");
-      
-      syncSubmitBtn();
-    }
-
-    removeScreenshotBtn.addEventListener("click", (e) => {
-      e.stopPropagation(); // prevent triggering file picker click
-      resetScreenshotInput();
-    });
-
-    function resetScreenshotInput() {
-      selectedFile = null;
-      screenshotInput.value = "";
-      dropzonePrompt.classList.remove("hidden");
-      dropzonePreview.classList.add("hidden");
-      
-      syncSubmitBtn();
-    }
-
-    // Helper function to scroll to the top of the form container smoothly on transitions
-    function scrollToFormTop() {
-      setTimeout(() => {
-        const formElement = document.getElementById("booking-form");
-        if (formElement) {
-          const headerOffset = 90; // Offset for the fixed/sticky top navigation bar
-          const elementPosition = formElement.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-          
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth"
-          });
-        }
-      }, 50); // Small delay to let browser finish layout heights update
-    }
-
-    // Live validation feedback on input/change/blur
-    const nameInput = document.getElementById("b-name");
-    const phoneInput = document.getElementById("b-phone");
-    const brandSelectEl = document.getElementById("b-brand");
-    const brandOtherInputEl = document.getElementById("b-brand-other");
-    const bikeInput = document.getElementById("b-bike");
-
     function getStep1Rules() {
       const isSavedBike = savedBikesSelect && savedBikesSelect.value && savedBikesSelect.value !== "new";
       const rules = [
         { input: nameInput, error: document.getElementById("b-name-error"), required: true, message: "Please enter your full name." },
-        { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value), message: "Please enter a valid phone number." },
+        { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, phoneCodeEl ? phoneCodeEl.value : "+977"), message: "Please enter a valid phone number." },
         { input: serviceSelect, error: document.getElementById("b-service-error"), required: true, message: "Please select a service type." }
       ];
 
@@ -1389,16 +847,14 @@
         rules.push({ input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true, message: "Please select your bike brand." });
         rules.push({ input: bikeInput, error: document.getElementById("b-bike-error"), required: true, message: "Please enter your bike model." });
 
-        if (brandSelectEl.value === "Other") {
+        if (brandSelectEl && brandSelectEl.value === "Other") {
           rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true, message: "Please specify your bike brand." });
         }
       }
 
-      const val = serviceSelect.value;
+      const val = serviceSelect ? serviceSelect.value : "emergency";
       const isLocationRequired = val === "emergency" || val === "home-visit";
       const isDateTimeRequired = val === "home-visit" || val === "workshop";
-      const dateInput = document.getElementById("b-date");
-      const timeInput = document.getElementById("b-time");
 
       if (isLocationRequired) {
         rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true, message: "Location address is required for this service." });
@@ -1424,146 +880,308 @@
       }
     }
 
-    const allStep1Inputs = [
-      nameInput,
-      phoneInput,
-      document.getElementById("b-phone-code"),
-      serviceSelect,
-      brandSelectEl,
-      brandOtherInputEl,
-      bikeInput,
-      locationInput,
-      document.getElementById("b-date"),
-      document.getElementById("b-time"),
-      issueInput
-    ];
+    function updateTimeSlots(serviceVal) {
+      if (!timeInput) return;
+      const currentVal = timeInput.value;
 
+      const workshopSlots = [
+        { value: "09:00 AM - 11:00 AM", label: "09:00 AM - 11:00 AM" },
+        { value: "12:00 PM - 02:00 PM", label: "12:00 PM - 02:00 PM" },
+        { value: "02:00 PM - 04:00 PM", label: "02:00 PM - 04:00 PM" },
+        { value: "04:00 PM - 06:00 PM", label: "04:00 PM - 06:00 PM" }
+      ];
+
+      const homeSlots = [
+        { value: "08:00 AM - 10:00 AM", label: "08:00 AM - 10:00 AM" },
+        { value: "10:00 AM - 12:00 PM", label: "10:00 AM - 12:00 PM" },
+        { value: "05:00 PM - 07:00 PM", label: "05:00 PM - 07:00 PM" },
+        { value: "07:00 PM - 09:00 PM", label: "07:00 PM - 09:00 PM" }
+      ];
+
+      const slots = serviceVal === "workshop" ? workshopSlots : (serviceVal === "home-visit" ? homeSlots : []);
+
+      timeInput.innerHTML = `<option value="">Select Time Slot</option>` +
+        slots.map(s => `<option value="${s.value}">${s.label}</option>`).join("");
+
+      if (slots.some(s => s.value === currentVal)) {
+        timeInput.value = currentVal;
+      }
+    }
+
+    // ---- Toggle "location required" + date/time relevance based on service type ----
+    function syncServiceUI() {
+      if (!serviceSelect) return;
+      const val = serviceSelect.value;
+      const workshopNotice = document.getElementById("b-workshop-notice");
+
+      try {
+        if (window.history && window.history.replaceState) {
+          const currentUrl = new URL(window.location.href);
+          if (currentUrl.searchParams.get("service") !== val) {
+            currentUrl.searchParams.set("service", val);
+            window.history.replaceState(null, "", currentUrl.toString());
+          }
+        }
+      } catch (e) {
+        console.warn("Could not sync URL state:", e);
+      }
+
+      const locationRequired = val === "emergency" || val === "home-visit";
+      const showLocation = val === "emergency" || val === "home-visit";
+
+      if (locationInput) locationInput.required = locationRequired;
+      if (locationRequiredMark) locationRequiredMark.style.display = locationRequired ? "inline" : "none";
+      if (locationWrap) {
+        if (showLocation) {
+          locationWrap.classList.remove("hidden");
+          locationWrap.style.display = "block";
+        } else {
+          locationWrap.classList.add("hidden");
+          locationWrap.style.display = "none";
+          if (locationInput) locationInput.value = "";
+          clearFieldError(locationInput, document.getElementById("b-location-error"));
+        }
+      }
+
+      if (workshopNotice) {
+        workshopNotice.classList.toggle("hidden", val !== "workshop");
+      }
+
+      if (val === "home-visit" && locationInput && !locationInput.value && window.savedUserAddress) {
+        locationInput.value = window.savedUserAddress;
+        const coordsInput = document.getElementById("b-coords");
+        if (coordsInput && !coordsInput.value && window.savedUserCoords) {
+          coordsInput.value = window.savedUserCoords;
+        }
+      }
+
+      const showDateTime = val === "home-visit" || val === "workshop";
+      if (dateInput) {
+        dateInput.required = showDateTime;
+        try { dateInput.min = new Date().toISOString().split("T")[0]; } catch (_) {}
+      }
+      if (timeInput) timeInput.required = showDateTime;
+
+      if (dateTimeWrap) {
+        if (showDateTime) {
+          dateTimeWrap.classList.remove("hidden");
+          dateTimeWrap.style.display = "grid";
+          updateTimeSlots(val);
+        } else {
+          dateTimeWrap.classList.add("hidden");
+          dateTimeWrap.style.display = "none";
+          if (dateInput) dateInput.value = "";
+          if (timeInput) timeInput.value = "";
+          clearFieldError(dateInput, document.getElementById("b-date-error"));
+          clearFieldError(timeInput, document.getElementById("b-time-error"));
+        }
+      }
+
+      if (issueInput) issueInput.required = val !== "";
+      if (issueRequiredMark) issueRequiredMark.style.display = (val !== "") ? "inline" : "none";
+      if (issueWrap) issueWrap.style.display = "block";
+
+      syncContinueBtnState();
+    }
+    serviceSelect.addEventListener("change", syncServiceUI);
+
+    // ---- Auto-detect location feature ----
+    const detectBtn = document.getElementById("b-detect-location");
+
+    async function performAutoLocation(isManual) {
+      if (serviceSelect && serviceSelect.value === "workshop" && !isManual) return;
+      if (!navigator.geolocation) {
+        if (isManual) alert("Geolocation is not supported by your browser.");
+        return;
+      }
+
+      let originalText = "";
+      if (detectBtn) {
+        originalText = detectBtn.innerHTML;
+        detectBtn.disabled = true;
+        detectBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-[#FF5A1F]"></i><span class="hidden sm:inline text-xs">Detecting...</span>`;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          document.getElementById("b-coords").value = `${latitude.toFixed(6)},${longitude.toFixed(6)}`;
+          locationInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, { headers: { "Accept-Language": "en" } });
+            if (response.ok) {
+              const data = await response.json();
+              if (data && data.display_name) locationInput.value = data.display_name;
+            }
+          } catch (err) { console.error("Reverse geocoding failed", err); } finally {
+            if (detectBtn) { detectBtn.disabled = false; detectBtn.innerHTML = originalText; }
+            if (typeof clearFieldError === "function") clearFieldError(locationInput, document.getElementById("b-location-error"));
+            syncContinueBtnState();
+          }
+        },
+        (error) => {
+          console.warn("Geolocation failed:", error);
+          if (isManual) alert("Unable to retrieve location.");
+          if (detectBtn) { detectBtn.disabled = false; detectBtn.innerHTML = originalText; }
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+      );
+    }
+
+    if (detectBtn) detectBtn.addEventListener("click", () => performAutoLocation(true));
+    window.addEventListener("DOMContentLoaded", () => setTimeout(() => performAutoLocation(false), 600));
+
+    locationInput.addEventListener("input", () => {
+      document.getElementById("b-coords").value = "";
+    });
+
+    function syncBrandUI() {
+      const isOther = brandSelectEl.value === "Other";
+      if (isOther) {
+        brandOtherWrap.classList.remove("hidden");
+        brandOtherInputEl.required = true;
+      } else {
+        brandOtherWrap.classList.add("hidden");
+        brandOtherInputEl.required = false;
+        brandOtherInputEl.value = "";
+        clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
+      }
+      syncContinueBtnState();
+    }
+    brandSelectEl.addEventListener("change", syncBrandUI);
+
+    const params = new URLSearchParams(window.location.search);
+    const serviceParam = (params.get("service") || "").toLowerCase().trim();
+    if (serviceParam) {
+      if (serviceParam.includes("emergency") || serviceParam.includes("roadside") || serviceParam.includes("breakdown")) serviceSelect.value = "emergency";
+      else if (serviceParam.includes("home") || serviceParam.includes("visit") || serviceParam.includes("doorstep")) serviceSelect.value = "home-visit";
+      else if (serviceParam.includes("workshop") || serviceParam.includes("garage")) serviceSelect.value = "workshop";
+      else serviceSelect.value = "emergency";
+    } else serviceSelect.value = "emergency";
+
+    syncServiceUI();
+    syncBrandUI();
+
+    let loggedInUserId = null;
+    async function checkUserSession() {
+      if (window.supabaseClient) {
+        try {
+          const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+          if (error) throw error;
+          if (session && session.user) {
+            loggedInUserId = session.user.id;
+            if (nameInput && !nameInput.value) nameInput.value = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "";
+            const { data: profile } = await window.supabaseClient.from("profiles").select("phone").eq("id", loggedInUserId).maybeSingle();
+            const profilePhone = profile?.phone || session.user.phone || "";
+            if (phoneInput && !phoneInput.value && profilePhone) {
+              if (phoneCodeEl) {
+                const codes = Array.from(phoneCodeEl.options).map(o => o.value);
+                const matchedCode = codes.find(c => profilePhone.startsWith(c));
+                if (matchedCode) { phoneCodeEl.value = matchedCode; phoneInput.value = profilePhone.substring(matchedCode.length); } else phoneInput.value = profilePhone;
+              } else phoneInput.value = profilePhone;
+            }
+            const { data: bikes, error: bikesError } = await window.supabaseClient.from("motorcycles").select("*").eq("user_id", loggedInUserId).order("created_at", { ascending: false });
+            if (!bikesError && bikes && bikes.length > 0) {
+              savedBikesSelect.innerHTML = `<option value="">-- Choose from your bikes --</option>` +
+                bikes.map(b => `<option value="${b.id}" data-brand="${b.brand || ''}" data-model="${b.model || ''}" data-reg="${b.registration_number || ''}">${b.brand} ${b.model} (${b.registration_number || 'No plate'})</option>`).join("") +
+                `<option value="new">+ Add New Motorcycle</option>`;
+              savedBikesWrap.classList.remove("hidden");
+              newBikeFields.classList.add("hidden");
+              brandSelectEl.required = false;
+              bikeInput.required = false;
+              savedBikesSelect.addEventListener("change", (e) => {
+                const val = e.target.value;
+                if (val === "new") {
+                  newBikeFields.classList.remove("hidden");
+                  brandSelectEl.value = ""; bikeInput.value = ""; document.getElementById("b-reg-no").value = "";
+                  brandSelectEl.required = true; bikeInput.required = true; syncBrandUI();
+                } else if (val === "") {
+                  newBikeFields.classList.add("hidden");
+                  brandSelectEl.value = ""; bikeInput.value = ""; document.getElementById("b-reg-no").value = "";
+                  brandSelectEl.required = false; bikeInput.required = false; syncBrandUI();
+                } else {
+                  newBikeFields.classList.add("hidden");
+                  const selectedOption = savedBikesSelect.options[savedBikesSelect.selectedIndex];
+                  brandSelectEl.value = selectedOption.getAttribute("data-brand");
+                  bikeInput.value = selectedOption.getAttribute("data-model");
+                  document.getElementById("b-reg-no").value = selectedOption.getAttribute("data-reg");
+                  if (brandSelectEl.value && !["Bajaj", "Honda", "Yamaha", "Hero", "TVS", "Royal Enfield", "Suzuki", "KTM"].includes(brandSelectEl.value)) {
+                    brandOtherInputEl.value = brandSelectEl.value; brandSelectEl.value = "Other";
+                  }
+                  brandSelectEl.required = false; bikeInput.required = false; syncBrandUI();
+                }
+              });
+            }
+          }
+        } catch (err) { console.error("Error retrieving auth session:", err); }
+      }
+    }
+    checkUserSession();
+
+    dropzone.addEventListener("click", () => screenshotInput.click());
+    screenshotInput.addEventListener("change", (e) => { if (e.target.files && e.target.files[0]) handleFileSelect(e.target.files[0]); });
+    function handleFileSelect(file) {
+      screenshotError.classList.add("hidden");
+      if (!file.type.match("image/jpeg") && !file.type.match("image/png") && !file.type.match("image/jpg")) { alert("Please select a valid image file."); return; }
+      if (file.size > 5 * 1024 * 1024) { alert("File too large."); return; }
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => { previewThumb.src = e.target.result; };
+      reader.readAsDataURL(file);
+      previewFilename.textContent = file.name;
+      previewFilesize.textContent = (file.size / (1024 * 1024)).toFixed(2) + " MB";
+      dropzonePrompt.classList.add("hidden");
+      dropzonePreview.classList.remove("hidden");
+      syncSubmitBtn();
+    }
+    removeScreenshotBtn.addEventListener("click", (e) => { e.stopPropagation(); resetScreenshotInput(); });
+    function resetScreenshotInput() {
+      selectedFile = null; screenshotInput.value = ""; dropzonePrompt.classList.remove("hidden");
+      dropzonePreview.classList.add("hidden"); syncSubmitBtn();
+    }
+    function syncSubmitBtn() { if (submitBtn) submitBtn.disabled = !selectedFile; }
+
+    function scrollToFormTop() {
+      setTimeout(() => {
+        const formElement = document.getElementById("booking-form");
+        if (formElement) window.scrollTo({ top: formElement.getBoundingClientRect().top + window.pageYOffset - 90, behavior: "smooth" });
+      }, 50);
+    }
+
+    const allStep1Inputs = [nameInput, phoneInput, phoneCodeEl, serviceSelect, brandSelectEl, brandOtherInputEl, bikeInput, locationInput, dateInput, timeInput, issueInput];
     allStep1Inputs.forEach(inputEl => {
       if (!inputEl) return;
-      const handler = () => {
+      inputEl.addEventListener("input", () => {
         const rules = getStep1Rules();
         const rule = rules.find(r => r.input === inputEl);
         if (rule && inputEl.classList.contains("invalid")) {
           const val = (inputEl.value !== undefined ? String(inputEl.value) : "").trim();
-          const isReq = typeof rule.required === "function" ? rule.required() : rule.required;
           let ok = true;
-          if (isReq && !val) ok = false;
+          if (rule.required && !val) ok = false;
           if (ok && rule.validator && val && !rule.validator(val)) ok = false;
-          if (ok) {
-            clearFieldError(inputEl, rule.error);
-          }
+          if (ok) clearFieldError(inputEl, rule.error);
         }
         syncContinueBtnState();
-      };
-      inputEl.addEventListener("input", handler);
-      inputEl.addEventListener("change", handler);
-      inputEl.addEventListener("blur", handler);
+      });
     });
 
-    // Initial check on load
-    syncContinueBtnState();
-
-    // 2. Step Navigation Trigger
     continueBtn.addEventListener("click", () => {
-      const isSavedBike = savedBikesSelect && savedBikesSelect.value && savedBikesSelect.value !== "new";
       const rules = getStep1Rules();
-
-      // Clear inactive conditional errors
-      if (!isSavedBike && brandSelectEl.value !== "Other") {
-        clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
-      }
-      const val = serviceSelect.value;
-      if (val === "workshop") {
-        clearFieldError(locationInput, document.getElementById("b-location-error"));
-      }
-      if (val === "emergency") {
-        clearFieldError(document.getElementById("b-date"), document.getElementById("b-date-error"));
-        clearFieldError(document.getElementById("b-time"), document.getElementById("b-time-error"));
-      }
-
       if (!validateForm(rules)) {
-        continueBtn.classList.remove("shake");
-        void continueBtn.offsetWidth;
         continueBtn.classList.add("shake");
-        syncContinueBtnState();
+        setTimeout(() => continueBtn.classList.remove("shake"), 500);
         return;
       }
-
-      // Helper function to update 3-step timeline indicators
-      function updateStepTimeline(activeStep) {
-        const step1Ind = document.getElementById("step-1-indicator");
-        const step1Lbl = document.getElementById("step-1-label");
-        const div1 = document.getElementById("step-divider-1");
-        const step2Ind = document.getElementById("step-2-indicator");
-        const step2Lbl = document.getElementById("step-2-label");
-        const div2 = document.getElementById("step-divider-2");
-        const step3Ind = document.getElementById("step-3-indicator");
-        const step3Lbl = document.getElementById("step-3-label");
-        const substepProg = document.getElementById("substep-progress");
-
-        const activeClasses = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
-        const inactiveClasses = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
-        const activeLabelClasses = "text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap";
-        const inactiveLabelClasses = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
-
-        if (activeStep === 1) {
-          if (step1Ind) step1Ind.className = activeClasses;
-          if (step1Lbl) step1Lbl.className = activeLabelClasses;
-          if (div1) div1.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
-          if (step2Ind) step2Ind.className = inactiveClasses;
-          if (step2Lbl) step2Lbl.className = inactiveLabelClasses;
-          if (div2) div2.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
-          if (step3Ind) step3Ind.className = inactiveClasses;
-          if (step3Lbl) step3Lbl.className = inactiveLabelClasses;
-          if (substepProg) {
-            substepProg.classList.add("hidden");
-            substepProg.classList.remove("flex");
-          }
-        } else if (activeStep === 2) {
-          if (step1Ind) step1Ind.className = activeClasses;
-          if (step1Lbl) step1Lbl.className = activeLabelClasses;
-          if (div1) div1.className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
-          if (step2Ind) step2Ind.className = activeClasses;
-          if (step2Lbl) step2Lbl.className = activeLabelClasses;
-          if (div2) div2.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
-          if (step3Ind) step3Ind.className = inactiveClasses;
-          if (step3Lbl) step3Lbl.className = inactiveLabelClasses;
-        } else if (activeStep === 3) {
-          if (step1Ind) step1Ind.className = activeClasses;
-          if (step1Lbl) step1Lbl.className = activeLabelClasses;
-          if (div1) div1.className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
-          if (step2Ind) step2Ind.className = activeClasses;
-          if (step2Lbl) step2Lbl.className = activeLabelClasses;
-          if (div2) div2.className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
-          if (step3Ind) step3Ind.className = activeClasses;
-          if (step3Lbl) step3Lbl.className = activeLabelClasses;
-          if (substepProg) {
-            substepProg.classList.add("hidden");
-            substepProg.classList.remove("flex");
-          }
-        }
-      }
-
-      // Enter payment step
-      fieldsStep.classList.add("hidden");
-      paymentStep.classList.remove("hidden");
-      showSubstep("2a");
+      fieldsStep.classList.add("hidden"); paymentStep.classList.remove("hidden");
       scrollToFormTop();
-      updateStepTimeline(2);
-
-      // Generate random transaction reference
-      if (!paymentRef) {
-        paymentRef = "DEP-" + Math.floor(100000 + Math.random() * 900000);
-      }
-
-      // Populate dynamic UPI QR code pointing to imteez@slc
+      if (!paymentRef) paymentRef = "DEP-" + Math.floor(100000 + Math.random() * 900000);
       const upiUri = `upi://pay?pa=imteez@slc&pn=Chhotu%20Motorcycle%20Workshop&am=249&tn=${paymentRef}`;
       const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
-      document.getElementById("booking-upi-qr").src = qrApiUrl;
+      const upiImg = document.getElementById("booking-upi-qr");
+      if (upiImg) upiImg.src = qrApiUrl;
     });
 
     backBtn.addEventListener("click", () => {
-      paymentStep.classList.add("hidden");
       fieldsStep.classList.remove("hidden");
       scrollToFormTop();
       
