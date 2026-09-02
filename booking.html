@@ -406,13 +406,20 @@
               <div class="hidden grid grid-cols-1 sm:grid-cols-2 gap-5" id="b-datetime-wrap">
                 <div>
                   <label class="field-label" for="b-date">Preferred Date *</label>
-                  <input id="b-date" name="preferredDate" type="date" class="field-input">
+                  <input id="b-date" name="preferredDate" type="date" class="field-input cursor-pointer">
                   <p class="field-error" id="b-date-error">Preferred date is required for this service.</p>
                 </div>
                 <div>
-                  <label class="field-label" for="b-time">Preferred Time *</label>
-                  <input id="b-time" name="preferredTime" type="time" class="field-input">
-                  <p class="field-error" id="b-time-error">Preferred time is required for this service.</p>
+                  <label class="field-label" for="b-time">Preferred Time Slot *</label>
+                  <div class="relative">
+                    <select id="b-time" name="preferredTime" class="field-input appearance-none cursor-pointer pr-10" required>
+                      <option value="">Select Time Slot</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#F4F1E8]">
+                      <i class="fa-solid fa-clock text-xs text-[#F4F1E8]"></i>
+                    </div>
+                  </div>
+                  <p class="field-error" id="b-time-error">Preferred time slot is required for this service.</p>
                 </div>
               </div>
 
@@ -812,6 +819,35 @@
       serviceSelect.value = "emergency";
     }
 
+    function updateTimeSlots(serviceVal) {
+      const timeEl = document.getElementById("b-time");
+      if (!timeEl) return;
+      const currentVal = timeEl.value;
+
+      const workshopSlots = [
+        { value: "09:00 AM - 11:00 AM", label: "09:00 AM - 11:00 AM" },
+        { value: "12:00 PM - 02:00 PM", label: "12:00 PM - 02:00 PM" },
+        { value: "02:00 PM - 04:00 PM", label: "02:00 PM - 04:00 PM" },
+        { value: "04:00 PM - 06:00 PM", label: "04:00 PM - 06:00 PM" }
+      ];
+
+      const homeSlots = [
+        { value: "08:00 AM - 10:00 AM", label: "08:00 AM - 10:00 AM" },
+        { value: "10:00 AM - 12:00 PM", label: "10:00 AM - 12:00 PM" },
+        { value: "05:00 PM - 07:00 PM", label: "05:00 PM - 07:00 PM" },
+        { value: "07:00 PM - 09:00 PM", label: "07:00 PM - 09:00 PM" }
+      ];
+
+      const slots = serviceVal === "workshop" ? workshopSlots : (serviceVal === "home-visit" ? homeSlots : []);
+
+      timeEl.innerHTML = `<option value="">Select Time Slot</option>` +
+        slots.map(s => `<option value="${s.value}">${s.label}</option>`).join("");
+
+      if (slots.some(s => s.value === currentVal)) {
+        timeEl.value = currentVal;
+      }
+    }
+
     // ---- Toggle "location required" + date/time relevance based on service type ----
     function syncServiceUI() {
       if (!serviceSelect) return;
@@ -876,13 +912,19 @@
       const dateEl = document.getElementById("b-date");
       const timeEl = document.getElementById("b-time");
 
-      if (dateEl) dateEl.required = showDateTime;
+      if (dateEl) {
+        dateEl.required = showDateTime;
+        try {
+          dateEl.min = new Date().toISOString().split("T")[0];
+        } catch (_) {}
+      }
       if (timeEl) timeEl.required = showDateTime;
 
       if (dateTimeWrap) {
         if (showDateTime) {
           dateTimeWrap.classList.remove("hidden");
           dateTimeWrap.style.display = "grid";
+          updateTimeSlots(val);
         } else {
           dateTimeWrap.classList.add("hidden");
           dateTimeWrap.style.display = "none";

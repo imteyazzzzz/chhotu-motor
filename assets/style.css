@@ -351,6 +351,17 @@ select option {
   color: var(--off-white) !important;
   background-color: var(--charcoal-2) !important;
 }
+
+/* Calendar picker indicator icon styling (white) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.85;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 .field-label{
   font-family: var(--font-mono);
   font-size: 0.72rem;
