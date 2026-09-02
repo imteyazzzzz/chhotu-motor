@@ -1141,6 +1141,100 @@
     }
     function syncSubmitBtn() { if (submitBtn) submitBtn.disabled = !selectedFile; }
 
+    function updateStepTimeline(activeStep) {
+      const step1Ind = document.getElementById("step-1-indicator");
+      const step1Lbl = document.getElementById("step-1-label");
+      const div1 = document.getElementById("step-divider-1");
+      const step2Ind = document.getElementById("step-2-indicator");
+      const step2Lbl = document.getElementById("step-2-label");
+      const div2 = document.getElementById("step-divider-2");
+      const step3Ind = document.getElementById("step-3-indicator");
+      const step3Lbl = document.getElementById("step-3-label");
+
+      const activeClasses = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
+      const inactiveClasses = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
+      const activeLabelClasses = "text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap";
+      const inactiveLabelClasses = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
+
+      if (activeStep === 1) {
+        if (step1Ind) step1Ind.className = activeClasses;
+        if (step1Lbl) step1Lbl.className = activeLabelClasses;
+        if (div1) div1.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
+        if (step2Ind) step2Ind.className = inactiveClasses;
+        if (step2Lbl) step2Lbl.className = inactiveLabelClasses;
+        if (div2) div2.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
+        if (step3Ind) step3Ind.className = inactiveClasses;
+        if (step3Lbl) step3Lbl.className = inactiveLabelClasses;
+      } else if (activeStep === 2) {
+        if (step1Ind) step1Ind.className = activeClasses;
+        if (step1Lbl) step1Lbl.className = activeLabelClasses;
+        if (div1) div1.className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
+        if (step2Ind) step2Ind.className = activeClasses;
+        if (step2Lbl) step2Lbl.className = activeLabelClasses;
+        if (div2) div2.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
+        if (step3Ind) step3Ind.className = inactiveClasses;
+        if (step3Lbl) step3Lbl.className = inactiveLabelClasses;
+      } else if (activeStep === 3) {
+        if (step1Ind) step1Ind.className = activeClasses;
+        if (step1Lbl) step1Lbl.className = activeLabelClasses;
+        if (div1) div1.className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
+        if (step2Ind) step2Ind.className = activeClasses;
+        if (step2Lbl) step2Lbl.className = activeLabelClasses;
+        if (div2) div2.className = "flex-1 h-px bg-primary-container mx-3 transition-colors duration-300";
+        if (step3Ind) step3Ind.className = activeClasses;
+        if (step3Lbl) step3Lbl.className = activeLabelClasses;
+      }
+    }
+
+    function showSubstep(stepName) {
+      const step2a = document.getElementById("booking-payment-2a");
+      const step2b = document.getElementById("booking-payment-2b");
+      const step2c = document.getElementById("booking-payment-2c");
+
+      const substepProgress = document.getElementById("substep-progress");
+      const dotA = document.getElementById("substep-dot-a");
+      const lineAB = document.getElementById("substep-line-ab");
+      const dotB = document.getElementById("substep-dot-b");
+      const lineBC = document.getElementById("substep-line-bc");
+      const dotC = document.getElementById("substep-dot-c");
+      const label = document.getElementById("substep-label");
+
+      if (step2a) step2a.classList.add("hidden");
+      if (step2b) step2b.classList.add("hidden");
+      if (step2c) step2c.classList.add("hidden");
+
+      if (substepProgress) {
+        substepProgress.classList.remove("hidden");
+        substepProgress.classList.add("flex");
+      }
+
+      if (stepName === "2a") {
+        if (step2a) step2a.classList.remove("hidden");
+        if (dotA) dotA.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineAB) lineAB.className = "w-8 h-px bg-border-muted transition-colors";
+        if (dotB) dotB.className = "w-2 h-2 rounded-full bg-border-muted transition-colors";
+        if (lineBC) lineBC.className = "w-8 h-px bg-border-muted transition-colors";
+        if (dotC) dotC.className = "w-2 h-2 rounded-full bg-border-muted transition-colors";
+        if (label) label.textContent = "Summary";
+      } else if (stepName === "2b") {
+        if (step2b) step2b.classList.remove("hidden");
+        if (dotA) dotA.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineAB) lineAB.className = "w-8 h-px bg-primary-container transition-colors";
+        if (dotB) dotB.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineBC) lineBC.className = "w-8 h-px bg-border-muted transition-colors";
+        if (dotC) dotC.className = "w-2 h-2 rounded-full bg-border-muted transition-colors";
+        if (label) label.textContent = "Payment";
+      } else if (stepName === "2c") {
+        if (step2c) step2c.classList.remove("hidden");
+        if (dotA) dotA.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineAB) lineAB.className = "w-8 h-px bg-primary-container transition-colors";
+        if (dotB) dotB.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (lineBC) lineBC.className = "w-8 h-px bg-primary-container transition-colors";
+        if (dotC) dotC.className = "w-2 h-2 rounded-full bg-primary-container transition-colors";
+        if (label) label.textContent = "Upload Proof";
+      }
+    }
+
     function scrollToFormTop() {
       setTimeout(() => {
         const formElement = document.getElementById("booking-form");
@@ -1172,8 +1266,12 @@
         setTimeout(() => continueBtn.classList.remove("shake"), 500);
         return;
       }
-      fieldsStep.classList.add("hidden"); paymentStep.classList.remove("hidden");
+      fieldsStep.classList.add("hidden");
+      paymentStep.classList.remove("hidden");
+      showSubstep("2a");
+      updateStepTimeline(2);
       scrollToFormTop();
+
       if (!paymentRef) paymentRef = "DEP-" + Math.floor(100000 + Math.random() * 900000);
       const upiUri = `upi://pay?pa=imteez@slc&pn=Chhotu%20Motorcycle%20Workshop&am=249&tn=${paymentRef}`;
       const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
@@ -1182,7 +1280,9 @@
     });
 
     backBtn.addEventListener("click", () => {
+      paymentStep.classList.add("hidden");
       fieldsStep.classList.remove("hidden");
+      updateStepTimeline(1);
       scrollToFormTop();
       
       const substepProgress = document.getElementById("substep-progress");
@@ -1190,25 +1290,6 @@
         substepProgress.classList.add("hidden");
         substepProgress.classList.remove("flex");
       }
-
-      // Revert indicators to Step 1
-      const step1Ind = document.getElementById("step-1-indicator");
-      const step1Lbl = document.getElementById("step-1-label");
-      const div1 = document.getElementById("step-divider-1");
-      const step2Ind = document.getElementById("step-2-indicator");
-      const step2Lbl = document.getElementById("step-2-label");
-      const div2 = document.getElementById("step-divider-2");
-      const step3Ind = document.getElementById("step-3-indicator");
-      const step3Lbl = document.getElementById("step-3-label");
-
-      if (step1Ind) step1Ind.className = "w-8 h-8 flex items-center justify-center bg-primary-container text-surface-container-lowest border border-primary-container font-mono text-xs font-bold z-10";
-      if (step1Lbl) step1Lbl.className = "text-[10px] font-mono text-[#FF5A1F] mt-1.5 uppercase tracking-wider absolute translate-y-8 font-bold whitespace-nowrap";
-      if (div1) div1.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
-      if (step2Ind) step2Ind.className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
-      if (step2Lbl) step2Lbl.className = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
-      if (div2) div2.className = "flex-1 h-px bg-border-muted mx-3 transition-colors duration-300";
-      if (step3Ind) step3Ind.className = "w-8 h-8 flex items-center justify-center bg-surface-elevated text-text-muted border border-border-muted font-mono text-xs z-10";
-      if (step3Lbl) step3Lbl.className = "text-[10px] font-mono text-text-muted mt-1.5 uppercase tracking-wider absolute translate-y-8 whitespace-nowrap";
     });
 
     // Sub-step transition handlers
