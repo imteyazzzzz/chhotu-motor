@@ -323,33 +323,80 @@
   const successEl = document.getElementById("c-success");
   const errorEl = document.getElementById("c-error");
 
+  const nameInput = document.getElementById("c-name");
+  const phoneInput = document.getElementById("c-phone");
+  const phoneCodeEl = document.getElementById("c-phone-code");
+  const emailInput = document.getElementById("c-email");
+  const messageInput = document.getElementById("c-message");
+
   function isValidEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const nameInput = document.getElementById("c-name");
-    const phoneInput = document.getElementById("c-phone");
-    const emailInput = document.getElementById("c-email");
-    const messageInput = document.getElementById("c-message");
-
+  function getContactRules() {
     const rules = [
       { input: nameInput, error: document.getElementById("c-name-error"), required: true, message: "Please enter your name." },
-      { input: phoneInput, error: document.getElementById("c-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("c-phone-code").value), message: "Please enter a valid phone number." },
+      { input: phoneInput, error: document.getElementById("c-phone-error"), required: true, validator: (val) => isValidPhone(val, phoneCodeEl.value), message: "Please enter a valid phone number." },
       { input: messageInput, error: document.getElementById("c-message-error"), required: true, message: "Please enter your message." },
     ];
     if (emailInput.value.trim()) {
       rules.push({ input: emailInput, error: document.getElementById("c-email-error"), required: false, validator: isValidEmail, message: "Please enter a valid email address." });
+    }
+    return rules;
+  }
+
+  function syncContactBtnState() {
+    if (!submitBtn) return;
+    const rules = getContactRules();
+    const valid = isFormValid(rules);
+    if (valid) {
+      submitBtn.classList.remove("btn-dimmed");
     } else {
+      submitBtn.classList.add("btn-dimmed");
+    }
+  }
+
+  [nameInput, phoneInput, phoneCodeEl, emailInput, messageInput].forEach(el => {
+    if (!el) return;
+    const handler = () => {
+      const rules = getContactRules();
+      const rule = rules.find(r => r.input === el);
+      if (rule && el.classList.contains("invalid")) {
+        const val = (el.value !== undefined ? String(el.value) : "").trim();
+        const isReq = typeof rule.required === "function" ? rule.required() : rule.required;
+        let ok = true;
+        if (isReq && !val) ok = false;
+        if (ok && rule.validator && val && !rule.validator(val)) ok = false;
+        if (ok) {
+          clearFieldError(el, rule.error);
+        }
+      }
+      syncContactBtnState();
+    };
+    el.addEventListener("input", handler);
+    el.addEventListener("change", handler);
+    el.addEventListener("blur", handler);
+  });
+
+  syncContactBtnState();
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const rules = getContactRules();
+    if (!emailInput.value.trim()) {
       clearFieldError(emailInput, document.getElementById("c-email-error"));
     }
 
-    if (!validateForm(rules)) return;
+    if (!validateForm(rules)) {
+      submitBtn.classList.remove("shake");
+      void submitBtn.offsetWidth;
+      submitBtn.classList.add("shake");
+      syncContactBtnState();
+      return;
+    }
 
     // Clean and combine phone number
-    const phoneCodeEl = document.getElementById("c-phone-code");
     const cleanedLocalPhone = cleanPhoneNumber(phoneInput.value, phoneCodeEl.value);
     const combinedPhone = `${phoneCodeEl.value}${cleanedLocalPhone}`;
 

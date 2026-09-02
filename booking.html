@@ -900,6 +900,10 @@
       if (issueInput) issueInput.required = issueRequired;
       if (issueRequiredMark) issueRequiredMark.style.display = issueRequired ? "inline" : "none";
       if (issueWrap) issueWrap.style.display = showIssue ? "block" : "none";
+
+      if (typeof syncContinueBtnState === "function") {
+        syncContinueBtnState();
+      }
     }
     serviceSelect.addEventListener("change", syncServiceUI);
     syncServiceUI();
@@ -949,6 +953,9 @@
             }
             if (typeof clearFieldError === "function") {
               clearFieldError(locationInput, document.getElementById("b-location-error"));
+            }
+            if (typeof syncContinueBtnState === "function") {
+              syncContinueBtnState();
             }
           }
         },
@@ -1001,6 +1008,9 @@
         if (typeof clearFieldError === "function") {
           clearFieldError(brandOtherInput, document.getElementById("b-brand-other-error"));
         }
+      }
+      if (typeof syncContinueBtnState === "function") {
+        syncContinueBtnState();
       }
     }
 
@@ -1325,42 +1335,8 @@
     const brandOtherInputEl = document.getElementById("b-brand-other");
     const bikeInput = document.getElementById("b-bike");
 
-    const liveFieldRules = [
-      { input: nameInput, error: document.getElementById("b-name-error"), required: true, message: "Please enter your full name." },
-      { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value), message: "Please enter a valid phone number." },
-      { input: serviceSelect, error: document.getElementById("b-service-error"), required: true, message: "Please select a service type." },
-      { input: brandSelectEl, error: document.getElementById("b-brand-error"), required: true, message: "Please select your bike brand." },
-      { input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: () => brandSelectEl.value === "Other", message: "Please specify your bike brand." },
-      { input: bikeInput, error: document.getElementById("b-bike-error"), required: true, message: "Please enter your bike model." },
-      { input: locationInput, error: document.getElementById("b-location-error"), required: () => serviceSelect.value === "emergency" || serviceSelect.value === "home-visit", message: "Location address is required for this service." },
-      { input: document.getElementById("b-date"), error: document.getElementById("b-date-error"), required: () => serviceSelect.value === "home-visit" || serviceSelect.value === "workshop", message: "Preferred date is required for this service." },
-      { input: document.getElementById("b-time"), error: document.getElementById("b-time-error"), required: () => serviceSelect.value === "home-visit" || serviceSelect.value === "workshop", message: "Preferred time is required for this service." },
-      { input: issueInput, error: document.getElementById("b-issue-error"), required: true, message: "Please describe what is wrong with your bike." }
-    ];
-
-    liveFieldRules.forEach(item => {
-      if (!item.input) return;
-      const handler = () => {
-        if (item.input.classList.contains("invalid")) {
-          const val = item.input.value.trim();
-          const isReq = typeof item.required === "function" ? item.required() : item.required;
-          let ok = true;
-          if (isReq && !val) ok = false;
-          if (ok && item.validator && val && !item.validator(val)) ok = false;
-          if (ok) {
-            clearFieldError(item.input, item.error);
-          }
-        }
-      };
-      item.input.addEventListener("input", handler);
-      item.input.addEventListener("change", handler);
-      item.input.addEventListener("blur", handler);
-    });
-
-    // 2. Step Navigation Trigger
-    continueBtn.addEventListener("click", () => {
+    function getStep1Rules() {
       const isSavedBike = savedBikesSelect && savedBikesSelect.value && savedBikesSelect.value !== "new";
-
       const rules = [
         { input: nameInput, error: document.getElementById("b-name-error"), required: true, message: "Please enter your full name." },
         { input: phoneInput, error: document.getElementById("b-phone-error"), required: true, validator: (val) => isValidPhone(val, document.getElementById("b-phone-code").value), message: "Please enter a valid phone number." },
@@ -1373,8 +1349,6 @@
 
         if (brandSelectEl.value === "Other") {
           rules.push({ input: brandOtherInputEl, error: document.getElementById("b-brand-other-error"), required: true, message: "Please specify your bike brand." });
-        } else {
-          clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
         }
       }
 
@@ -1386,21 +1360,92 @@
 
       if (isLocationRequired) {
         rules.push({ input: locationInput, error: document.getElementById("b-location-error"), required: true, message: "Location address is required for this service." });
-      } else {
-        clearFieldError(locationInput, document.getElementById("b-location-error"));
       }
 
       if (isDateTimeRequired) {
         rules.push({ input: dateInput, error: document.getElementById("b-date-error"), required: true, message: "Preferred date is required for this service." });
         rules.push({ input: timeInput, error: document.getElementById("b-time-error"), required: true, message: "Preferred time is required for this service." });
-      } else {
-        clearFieldError(dateInput, document.getElementById("b-date-error"));
-        clearFieldError(timeInput, document.getElementById("b-time-error"));
       }
 
       rules.push({ input: issueInput, error: document.getElementById("b-issue-error"), required: true, message: "Please describe what is wrong with your bike." });
+      return rules;
+    }
 
-      if (!validateForm(rules)) return;
+    function syncContinueBtnState() {
+      if (!continueBtn) return;
+      const rules = getStep1Rules();
+      const valid = isFormValid(rules);
+      if (valid) {
+        continueBtn.classList.remove("btn-dimmed");
+      } else {
+        continueBtn.classList.add("btn-dimmed");
+      }
+    }
+
+    const allStep1Inputs = [
+      nameInput,
+      phoneInput,
+      document.getElementById("b-phone-code"),
+      serviceSelect,
+      brandSelectEl,
+      brandOtherInputEl,
+      bikeInput,
+      locationInput,
+      document.getElementById("b-date"),
+      document.getElementById("b-time"),
+      issueInput
+    ];
+
+    allStep1Inputs.forEach(inputEl => {
+      if (!inputEl) return;
+      const handler = () => {
+        const rules = getStep1Rules();
+        const rule = rules.find(r => r.input === inputEl);
+        if (rule && inputEl.classList.contains("invalid")) {
+          const val = (inputEl.value !== undefined ? String(inputEl.value) : "").trim();
+          const isReq = typeof rule.required === "function" ? rule.required() : rule.required;
+          let ok = true;
+          if (isReq && !val) ok = false;
+          if (ok && rule.validator && val && !rule.validator(val)) ok = false;
+          if (ok) {
+            clearFieldError(inputEl, rule.error);
+          }
+        }
+        syncContinueBtnState();
+      };
+      inputEl.addEventListener("input", handler);
+      inputEl.addEventListener("change", handler);
+      inputEl.addEventListener("blur", handler);
+    });
+
+    // Initial check on load
+    syncContinueBtnState();
+
+    // 2. Step Navigation Trigger
+    continueBtn.addEventListener("click", () => {
+      const isSavedBike = savedBikesSelect && savedBikesSelect.value && savedBikesSelect.value !== "new";
+      const rules = getStep1Rules();
+
+      // Clear inactive conditional errors
+      if (!isSavedBike && brandSelectEl.value !== "Other") {
+        clearFieldError(brandOtherInputEl, document.getElementById("b-brand-other-error"));
+      }
+      const val = serviceSelect.value;
+      if (val === "workshop") {
+        clearFieldError(locationInput, document.getElementById("b-location-error"));
+      }
+      if (val === "emergency") {
+        clearFieldError(document.getElementById("b-date"), document.getElementById("b-date-error"));
+        clearFieldError(document.getElementById("b-time"), document.getElementById("b-time-error"));
+      }
+
+      if (!validateForm(rules)) {
+        continueBtn.classList.remove("shake");
+        void continueBtn.offsetWidth;
+        continueBtn.classList.add("shake");
+        syncContinueBtnState();
+        return;
+      }
 
       // Helper function to update 3-step timeline indicators
       function updateStepTimeline(activeStep) {

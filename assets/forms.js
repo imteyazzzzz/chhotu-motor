@@ -47,11 +47,8 @@ function showFieldError(inputEl, errorEl, message) {
     inputEl.setAttribute("aria-invalid", "true");
   }
   if (errorEl) {
-    if (message) {
-      errorEl.textContent = message;
-    } else if (!errorEl.textContent.trim()) {
-      errorEl.textContent = "This field is required.";
-    }
+    const msgText = message || "This field is required.";
+    errorEl.innerHTML = `<i class="fa-solid fa-circle-exclamation text-[#ef4444] shrink-0"></i> <span>${msgText}</span>`;
     errorEl.classList.add("show");
     errorEl.classList.remove("hidden");
   }
@@ -66,6 +63,21 @@ function clearFieldError(inputEl, errorEl) {
   if (errorEl) {
     errorEl.classList.remove("show");
   }
+}
+
+/**
+ * Check if a form is completely valid without displaying UI errors.
+ * Useful for dynamically highlighting / dehighlighting submit buttons.
+ */
+function isFormValid(rules) {
+  return rules.every(({ input, required, validator }) => {
+    if (!input) return true;
+    const val = (input.value !== undefined ? String(input.value) : "").trim();
+    const isReq = typeof required === "function" ? required() : required;
+    if (isReq && !val) return false;
+    if (validator && val && !validator(val)) return false;
+    return true;
+  });
 }
 
 /**

@@ -121,6 +121,21 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible{
   box-shadow: 0 6px 20px rgba(255,90,31,0.25);
 }
 .btn-primary:hover{ background: #ff6b37; }
+/* De-highlighted / incomplete form button state */
+.btn-primary.btn-dimmed,
+.btn.btn-dimmed {
+  background: #22262E !important;
+  color: #8C93A3 !important;
+  border: 1px solid #3A3F49 !important;
+  box-shadow: none !important;
+  opacity: 0.85;
+}
+.btn-primary.btn-dimmed:hover,
+.btn.btn-dimmed:hover {
+  background: #2A2F38 !important;
+  color: #B9B6AC !important;
+  border-color: #4E5564 !important;
+}
 .btn-outline{
   background: transparent;
   color: var(--off-white);

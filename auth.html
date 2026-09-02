@@ -497,11 +497,53 @@
     formSignin.classList.remove("hidden");
   });
 
+  // Helper for dynamic button highlight/dim states across auth forms
+  function setupAuthFormWatcher(rules, buttonEl) {
+    if (!buttonEl) return;
+    const sync = () => {
+      const valid = isFormValid(rules);
+      if (valid) {
+        buttonEl.classList.remove("btn-dimmed");
+      } else {
+        buttonEl.classList.add("btn-dimmed");
+      }
+    };
+    rules.forEach(rule => {
+      if (!rule.input) return;
+      const handler = () => {
+        if (rule.input.classList.contains("invalid")) {
+          const val = (rule.input.value !== undefined ? String(rule.input.value) : "").trim();
+          const isReq = typeof rule.required === "function" ? rule.required() : rule.required;
+          let ok = true;
+          if (isReq && !val) ok = false;
+          if (ok && rule.validator && val && !rule.validator(val)) ok = false;
+          if (ok) {
+            clearFieldError(rule.input, rule.error);
+          }
+        }
+        sync();
+      };
+      rule.input.addEventListener("input", handler);
+      rule.input.addEventListener("change", handler);
+      rule.input.addEventListener("blur", handler);
+    });
+    sync();
+  }
+
+  // 1. Forgot Password Watcher
+  const forgotEmailInput = document.getElementById("forgot-email");
+  const forgotRules = [{ input: forgotEmailInput, error: document.getElementById("forgot-email-error"), required: true }];
+  setupAuthFormWatcher(forgotRules, document.getElementById("forgot-submit"));
+
   formForgot.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const emailInput = document.getElementById("forgot-email");
-    const rules = [{ input: emailInput, error: document.getElementById("forgot-email-error"), required: true }];
-    if (!validateForm(rules)) return;
+    if (!validateForm(forgotRules)) {
+      const btn = document.getElementById("forgot-submit");
+      btn.classList.remove("shake");
+      void btn.offsetWidth;
+      btn.classList.add("shake");
+      return;
+    }
 
     const submitBtn = document.getElementById("forgot-submit");
     const originalText = submitBtn.innerHTML;
@@ -511,7 +553,7 @@
     try {
       if (!window.supabaseClient) throw new Error("Supabase client is not configured.");
 
-      const { error } = await window.supabaseClient.auth.resetPasswordForEmail(emailInput.value.trim(), {
+      const { error } = await window.supabaseClient.auth.resetPasswordForEmail(forgotEmailInput.value.trim(), {
         redirectTo: window.location.origin + window.location.pathname
       });
       if (error) throw error;
@@ -538,25 +580,30 @@
     }
   });
 
+  const resetPassInput = document.getElementById("reset-password");
+  const resetConfirmInput = document.getElementById("reset-password-confirm");
+  const resetRules = [
+    { input: resetPassInput, error: document.getElementById("reset-password-error"), required: true },
+    { input: resetConfirmInput, error: document.getElementById("reset-password-confirm-error"), required: true }
+  ];
+  setupAuthFormWatcher(resetRules, document.getElementById("reset-submit"));
+
   formReset.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const newPassInput = document.getElementById("reset-password");
-    const confirmInput = document.getElementById("reset-password-confirm");
-    const newPassError = document.getElementById("reset-password-error");
-    const confirmError = document.getElementById("reset-password-confirm-error");
-
-    const rules = [
-      { input: newPassInput, error: newPassError, required: true },
-      { input: confirmInput, error: confirmError, required: true }
-    ];
-    if (!validateForm(rules)) return;
-
-    if (newPassInput.value.length < 6) {
-      showFieldError(newPassInput, newPassError, "Password must be at least 6 characters.");
+    if (!validateForm(resetRules)) {
+      const btn = document.getElementById("reset-submit");
+      btn.classList.remove("shake");
+      void btn.offsetWidth;
+      btn.classList.add("shake");
       return;
     }
-    if (newPassInput.value !== confirmInput.value) {
-      showFieldError(confirmInput, confirmError, "Passwords don't match.");
+
+    if (resetPassInput.value.length < 6) {
+      showFieldError(resetPassInput, document.getElementById("reset-password-error"), "Password must be at least 6 characters.");
+      return;
+    }
+    if (resetPassInput.value !== resetConfirmInput.value) {
+      showFieldError(resetConfirmInput, document.getElementById("reset-password-confirm-error"), "Passwords don't match.");
       return;
     }
 
@@ -566,7 +613,7 @@
     submitBtn.innerHTML = `<span class="inline-block h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Updating...`;
 
     try {
-      const { error } = await window.supabaseClient.auth.updateUser({ password: newPassInput.value });
+      const { error } = await window.supabaseClient.auth.updateUser({ password: resetPassInput.value });
       if (error) throw error;
 
       formReset.classList.add("hidden");
@@ -581,17 +628,24 @@
   });
 
   // Handle Sign In submission
+  const signinEmailInput = document.getElementById("signin-email");
+  const signinPasswordInput = document.getElementById("signin-password");
+  const signinRules = [
+    { input: signinEmailInput, error: document.getElementById("signin-email-error"), required: true, message: "Please enter your email address." },
+    { input: signinPasswordInput, error: document.getElementById("signin-password-error"), required: true, message: "Please enter your password." }
+  ];
+  setupAuthFormWatcher(signinRules, document.getElementById("signin-submit"));
+
   formSignin.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const emailInput = document.getElementById("signin-email");
-    const passwordInput = document.getElementById("signin-password");
 
-    const rules = [
-      { input: emailInput, error: document.getElementById("signin-email-error"), required: true, message: "Please enter your email address." },
-      { input: passwordInput, error: document.getElementById("signin-password-error"), required: true, message: "Please enter your password." }
-    ];
-
-    if (!validateForm(rules)) return;
+    if (!validateForm(signinRules)) {
+      const btn = document.getElementById("signin-submit");
+      btn.classList.remove("shake");
+      void btn.offsetWidth;
+      btn.classList.add("shake");
+      return;
+    }
 
     const submitBtn = document.getElementById("signin-submit");
     const originalText = submitBtn.innerHTML;
@@ -602,8 +656,8 @@
       if (!window.supabaseClient) throw new Error("Supabase client is not configured.");
       
       const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-        email: emailInput.value.trim(),
-        password: passwordInput.value
+        email: signinEmailInput.value.trim(),
+        password: signinPasswordInput.value
       });
 
       if (error) throw error;
@@ -650,25 +704,33 @@
   });
 
   // Handle Sign Up submission
+  const signupNameInput = document.getElementById("signup-name");
+  const signupEmailInput = document.getElementById("signup-email");
+  const signupCodeSelect = document.getElementById("signup-phone-code");
+  const signupPhoneInput = document.getElementById("signup-phone");
+  const signupPasswordInput = document.getElementById("signup-password");
+
+  const signupRules = [
+    { input: signupNameInput, error: document.getElementById("signup-name-error"), required: true, message: "Please enter your full name." },
+    { input: signupEmailInput, error: document.getElementById("signup-email-error"), required: true, message: "Please enter your email address." },
+    { input: signupPhoneInput, error: document.getElementById("signup-phone-error"), required: true, validator: (val) => isValidPhone(val, signupCodeSelect.value), message: "Please enter a valid phone number." },
+    { input: signupPasswordInput, error: document.getElementById("signup-password-error"), required: true, message: "Please enter a password." }
+  ];
+  setupAuthFormWatcher(signupRules, document.getElementById("signup-submit"));
+
   formSignup.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const nameInput = document.getElementById("signup-name");
-    const emailInput = document.getElementById("signup-email");
-    const codeSelect = document.getElementById("signup-phone-code");
-    const phoneInput = document.getElementById("signup-phone");
-    const passwordInput = document.getElementById("signup-password");
 
-    const rules = [
-      { input: nameInput, error: document.getElementById("signup-name-error"), required: true, message: "Please enter your full name." },
-      { input: emailInput, error: document.getElementById("signup-email-error"), required: true, message: "Please enter your email address." },
-      { input: phoneInput, error: document.getElementById("signup-phone-error"), required: true, validator: (val) => isValidPhone(val, codeSelect.value), message: "Please enter a valid phone number." },
-      { input: passwordInput, error: document.getElementById("signup-password-error"), required: true, message: "Please enter a password." }
-    ];
+    if (!validateForm(signupRules)) {
+      const btn = document.getElementById("signup-submit");
+      btn.classList.remove("shake");
+      void btn.offsetWidth;
+      btn.classList.add("shake");
+      return;
+    }
 
-    if (!validateForm(rules)) return;
-
-    if (passwordInput.value.length < 6) {
-      showFieldError(passwordInput, document.getElementById("signup-password-error"), "Password must be at least 6 characters.");
+    if (signupPasswordInput.value.length < 6) {
+      showFieldError(signupPasswordInput, document.getElementById("signup-password-error"), "Password must be at least 6 characters.");
       return;
     }
 
@@ -680,15 +742,15 @@
     try {
       if (!window.supabaseClient) throw new Error("Supabase client is not configured.");
 
-      const cleanedLocal = cleanPhoneNumber(phoneInput.value, codeSelect.value);
-      const combinedPhone = `${codeSelect.value}${cleanedLocal}`;
+      const cleanedLocal = cleanPhoneNumber(signupPhoneInput.value, signupCodeSelect.value);
+      const combinedPhone = `${signupCodeSelect.value}${cleanedLocal}`;
 
       const { data, error } = await window.supabaseClient.auth.signUp({
-        email: emailInput.value.trim(),
-        password: passwordInput.value,
+        email: signupEmailInput.value.trim(),
+        password: signupPasswordInput.value,
         options: {
           data: {
-            full_name: nameInput.value.trim(),
+            full_name: signupNameInput.value.trim(),
             phone: combinedPhone
           }
         }
@@ -701,8 +763,8 @@
       if (!session) {
         try {
           const retry = await window.supabaseClient.auth.signInWithPassword({
-            email: emailInput.value.trim(),
-            password: passwordInput.value
+            email: signupEmailInput.value.trim(),
+            password: signupPasswordInput.value
           });
           if (!retry.error) session = retry.data.session;
         } catch (_) {}
