@@ -1318,6 +1318,20 @@
       });
     }
 
+    function formatTimeToPostgres(timeStr) {
+      if (!timeStr) return null;
+      const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+      if (!match) return null;
+      let hours = parseInt(match[1], 10);
+      const minutes = match[2];
+      const ampm = (match[3] || "").toUpperCase();
+
+      if (ampm === "PM" && hours < 12) hours += 12;
+      if (ampm === "AM" && hours === 12) hours = 0;
+
+      return `${String(hours).padStart(2, "0")}:${minutes}:00`;
+    }
+
     // 3. Final Submit Handler (Step 2)
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -1401,13 +1415,19 @@
         const finalPreferredDate = selectedSvc === "emergency"
           ? null
           : (document.getElementById("b-date").value || null);
+        const rawTimeSlot = document.getElementById("b-time").value || "";
         const finalPreferredTime = selectedSvc === "emergency"
           ? null
-          : (document.getElementById("b-time").value || null);
+          : formatTimeToPostgres(rawTimeSlot);
+
+        let finalIssueDescription = issueInput.value.trim() || null;
+        if (rawTimeSlot && rawTimeSlot.includes("-")) {
+          finalIssueDescription = `[Slot: ${rawTimeSlot}] ${finalIssueDescription || ""}`.trim();
+        }
 
         const insertData = {
           id: supabaseBookingId,
-          user_id: loggedInUserId,
+          user_id: loggedInUserId || null,
           name: nameInput.value.trim(),
           phone: combinedPhone,
           bike_brand: brandVal === "Other" ? brandOtherVal : brandVal,
@@ -1419,7 +1439,7 @@
           google_maps_link: selectedSvc === "workshop" ? null : (googleMapsLink || null),
           preferred_date: finalPreferredDate,
           preferred_time: finalPreferredTime,
-          issue_description: issueInput.value.trim() || null,
+          issue_description: finalIssueDescription,
           status: "pending_verification",
           payment_status: "submitted",
           payment_screenshot_url: base64Image, // Save base64 string directly
