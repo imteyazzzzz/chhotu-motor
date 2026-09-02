@@ -85,7 +85,7 @@
                         "DEFAULT": "0.125rem",
                         "lg": "0.25rem",
                         "xl": "0.5rem",
-                        "full": "0.75rem"
+                        "full": "9999px"
                     },
                     "spacing": {
                         "lg": "24px",
@@ -165,12 +165,25 @@
         letter-spacing: 0.08em;
     }
 
-    /* Analog gauge ring for the stats section, built from a conic-gradient instead of a blurred circle */
+    /* Analog gauge ring for the stats section - perfectly circular dial with inner core */
     .gauge-ring {
         --pct: 75%;
-        background: conic-gradient(#FF5A1F var(--pct), rgba(255,255,255,0.08) 0);
-        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 6px));
-        mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 6px));
+        background: conic-gradient(#FF5A1F var(--pct), rgba(255, 255, 255, 0.08) 0);
+        border-radius: 9999px;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 16px rgba(255, 90, 31, 0.15);
+    }
+    .gauge-ring-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 9999px;
+        background: #14161A;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     /* Rubber-stamp badge used on verified testimonials */
@@ -211,43 +224,43 @@
       </div>
     </div>
   </section>
-  
 
-<!-- =====================================================================
-     SHARED HEADER START — keep identical across all pages.
-     ===================================================================== -->
-<header class="bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
-  <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-    <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
-      <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU <span class="text-[#FF5A1F]">WORKSHOP</span></span>
-    </a>
-
-    <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
-      <a href="index.html" data-nav-link class="nav-link">Home</a>
-      <a href="booking.html" data-nav-link class="nav-link">Booking</a>
-      <a href="services.html" data-nav-link class="nav-link">Services</a>
-      <a href="about.html" data-nav-link class="nav-link">About</a>
-      <a href="contact.html" data-nav-link class="nav-link">Contact</a>
-    </nav>
-
-    <div class="hidden md:flex items-center gap-3" id="desktop-auth-actions">
-      <a href="auth.html" id="d-btn-auth" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-user-plus"></i> Sign In / Sign Up</a>
-      <a href="tracking.html" id="d-btn-track" class="btn btn-primary !py-2 !px-4 !text-xs"><i class="fa-solid fa-route"></i> Track Booking</a>
-    </div>
-
-    <div class="flex items-center gap-1 md:hidden">
-      <!-- Mobile-only WhatsApp button next to hamburger menu -->
-      <a href="#" class="emergency-wa-trigger flex items-center justify-center text-[#25D366] text-2xl w-11 h-11" title="Emergency WhatsApp" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ">
-        <i class="fa-brands fa-whatsapp"></i>
+  <!-- =====================================================================
+       SHARED HEADER START — keep identical across all pages.
+       ===================================================================== -->
+  <header class="bg-[#14161A]/95 backdrop-blur border-b border-[#3A3F49]">
+    <div class="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-2" aria-label="Chhotu Motorcycles Workshop — Home">
+        <span class="font-display font-semibold text-sm md:text-base tracking-wide">CHHOTU <span class="text-[#FF5A1F]">WORKSHOP</span></span>
       </a>
-      
-      <!-- Hamburger menu toggle -->
-      <button id="nav-toggle" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
-        <i class="fa-solid fa-bars"></i>
-      </button>
+
+      <nav class="hidden md:flex items-center gap-8" aria-label="Primary">
+        <a href="index.html" data-nav-link class="nav-link">Home</a>
+        <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+        <a href="services.html" data-nav-link class="nav-link">Services</a>
+        <a href="about.html" data-nav-link class="nav-link">About</a>
+        <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+      </nav>
+
+      <div class="hidden md:flex items-center gap-3" id="desktop-auth-actions">
+        <a href="auth.html" id="d-btn-auth" class="btn btn-outline !py-2 !px-4 !text-xs"><i class="fa-solid fa-user-plus"></i> Sign In / Sign Up</a>
+        <a href="tracking.html" id="d-btn-track" class="btn btn-primary !py-2 !px-4 !text-xs"><i class="fa-solid fa-route"></i> Track Booking</a>
+      </div>
+
+      <div class="flex items-center gap-1 md:hidden">
+        <!-- Mobile-only WhatsApp button next to hamburger menu -->
+        <a href="#" class="emergency-wa-trigger flex items-center justify-center text-[#25D366] text-2xl w-11 h-11" title="Emergency WhatsApp" data-wa-message="Hi Chhotu Motorcycles, I need EMERGENCY roadside help right now. My location: ">
+          <i class="fa-brands fa-whatsapp"></i>
+        </a>
+        
+        <!-- Hamburger menu toggle -->
+        <button id="nav-toggle" class="text-2xl w-11 h-11 flex items-center justify-center" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
     </div>
-  </div>
-</header>
+  </header>
+</div>
 
 <!-- Mobile slide-in menu -->
 <div id="mobile-menu" class="fixed inset-0 z-50 bg-[#14161A] translate-x-full transition-transform duration-300 md:hidden" aria-hidden="true">
@@ -259,10 +272,10 @@
   </div>
   <nav class="flex flex-col p-6 gap-6 text-lg" aria-label="Mobile Primary">
     <a href="index.html" data-nav-link class="nav-link">Home</a>
-      <a href="booking.html" data-nav-link class="nav-link">Booking</a>
-      <a href="services.html" data-nav-link class="nav-link">Services</a>
-      <a href="about.html" data-nav-link class="nav-link">About</a>
-      <a href="contact.html" data-nav-link class="nav-link">Contact</a>
+    <a href="booking.html" data-nav-link class="nav-link">Booking</a>
+    <a href="services.html" data-nav-link class="nav-link">Services</a>
+    <a href="about.html" data-nav-link class="nav-link">About</a>
+    <a href="contact.html" data-nav-link class="nav-link">Contact</a>
     
     <div class="flex flex-col gap-3 mt-4" id="m-auth-actions">
       <a href="auth.html" id="m-btn-auth" class="btn btn-primary w-full text-center"><i class="fa-solid fa-user-plus"></i> Sign In / Sign Up</a>
@@ -401,9 +414,9 @@
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
         <!-- Gauge 1 -->
         <div class="flex flex-col items-center text-center gap-4">
-          <div class="relative w-24 h-24 md:w-28 md:h-28 rounded-full gauge-ring" style="--pct:100%">
-            <div class="absolute inset-[6px] rounded-full bg-surface flex items-center justify-center">
-              <span class="material-symbols-outlined text-2xl text-primary-container">schedule</span>
+          <div class="w-24 h-24 md:w-28 md:h-28 gauge-ring" style="--pct:100%">
+            <div class="gauge-ring-inner">
+              <span class="material-symbols-outlined text-3xl text-[#FF5A1F]">schedule</span>
             </div>
           </div>
           <div>
@@ -413,9 +426,9 @@
         </div>
         <!-- Gauge 2 -->
         <div class="flex flex-col items-center text-center gap-4">
-          <div class="relative w-24 h-24 md:w-28 md:h-28 rounded-full gauge-ring" style="--pct:88%">
-            <div class="absolute inset-[6px] rounded-full bg-surface flex items-center justify-center">
-              <span class="material-symbols-outlined text-2xl text-primary-container">build_circle</span>
+          <div class="w-24 h-24 md:w-28 md:h-28 gauge-ring" style="--pct:88%">
+            <div class="gauge-ring-inner">
+              <span class="material-symbols-outlined text-3xl text-[#FF5A1F]">build_circle</span>
             </div>
           </div>
           <div>
@@ -425,9 +438,9 @@
         </div>
         <!-- Gauge 3 -->
         <div class="flex flex-col items-center text-center gap-4">
-          <div class="relative w-24 h-24 md:w-28 md:h-28 rounded-full gauge-ring" style="--pct:60%">
-            <div class="absolute inset-[6px] rounded-full bg-surface flex items-center justify-center">
-              <span class="material-symbols-outlined text-2xl text-primary-container">engineering</span>
+          <div class="w-24 h-24 md:w-28 md:h-28 gauge-ring" style="--pct:60%">
+            <div class="gauge-ring-inner">
+              <span class="material-symbols-outlined text-3xl text-[#FF5A1F]">engineering</span>
             </div>
           </div>
           <div>
@@ -437,9 +450,9 @@
         </div>
         <!-- Gauge 4 -->
         <div class="flex flex-col items-center text-center gap-4">
-          <div class="relative w-24 h-24 md:w-28 md:h-28 rounded-full gauge-ring" style="--pct:92%">
-            <div class="absolute inset-[6px] rounded-full bg-surface flex items-center justify-center">
-              <span class="material-symbols-outlined text-2xl text-primary-container">speed</span>
+          <div class="w-24 h-24 md:w-28 md:h-28 gauge-ring" style="--pct:92%">
+            <div class="gauge-ring-inner">
+              <span class="material-symbols-outlined text-3xl text-[#FF5A1F]">speed</span>
             </div>
           </div>
           <div>
