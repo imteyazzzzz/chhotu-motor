@@ -971,7 +971,6 @@
       const cleanedPhone = searchStr.replace(/[-\s()]/g, "");
       const isPhone = /^\+?[0-9]{7,15}$/.test(cleanedPhone);
 
-      // Self-healing: if logged in and searching a guest booking, auto-claim/merge it!
       const user = session.user;
       let userPhone = user.user_metadata?.phone || user.phone || "";
       if (!userPhone) {
@@ -989,83 +988,90 @@
         }
       }
 
-      // Build phone variations
-      const getPhoneVariations = (phone) => {
-        if (!phone) return [];
-        const cleaned = phone.replace(/[-\s()]/g, "");
-        const variations = [cleaned];
-        if (cleaned.startsWith("+977")) {
-          variations.push(cleaned.slice(1));
-          variations.push(cleaned.slice(4));
-        } else if (cleaned.startsWith("977") && cleaned.length > 10) {
-          variations.push("+" + cleaned);
-          variations.push(cleaned.slice(3));
-        } else if (cleaned.length === 10) {
-          variations.push("+977" + cleaned);
-          variations.push("977" + cleaned);
-          variations.push("+91" + cleaned);
-          variations.push("91" + cleaned);
-        }
-        return [...new Set(variations)];
-      };
-
-      const phoneList = getPhoneVariations(userPhone);
-
+      // Try RPC auto-claim first if available
       try {
-        let updateQuery = window.supabaseClient
-          .from("bookings")
-          .update({ user_id: user.id })
-          .is("user_id", null);
-          
-        if (isFullUUID) {
-          if (phoneList.length > 0) {
-            const orFilters = [`id.eq.${searchStr}`, ...phoneList.map(p => `phone.eq.${p}`)].join(",");
-            updateQuery = updateQuery.or(orFilters);
-          } else {
-            updateQuery = updateQuery.eq("id", searchStr);
+        await window.supabaseClient.rpc("claim_guest_booking", {
+          p_booking_id: isFullUUID ? searchStr : null,
+          p_phone: isPhone ? searchStr : (userPhone || null)
+        });
+      } catch (_) {}
+
+      // Direct exact ID lookup attempt
+      let matchedBookings = [];
+      if (isFullUUID) {
+        try {
+          const { data: directBooking } = await window.supabaseClient
+            .from("bookings")
+            .select("*")
+            .eq("id", searchStr)
+            .maybeSingle();
+
+          if (directBooking) {
+            matchedBookings = [directBooking];
+            // Auto-assign to logged in user if currently unassigned
+            if (!directBooking.user_id && user && user.id) {
+              try {
+                await window.supabaseClient
+                  .from("bookings")
+                  .update({ user_id: user.id })
+                  .eq("id", directBooking.id)
+                  .is("user_id", null);
+              } catch (_) {}
+            }
           }
-        } else if (phoneList.length > 0) {
-          const orFilters = phoneList.map(p => `phone.eq.${p}`).join(",");
-          updateQuery = updateQuery.or(orFilters);
-        } else {
-          updateQuery = null;
+        } catch (e) {
+          console.warn("Direct ID lookup error:", e);
         }
-        
-        if (updateQuery) {
-          await updateQuery;
-        }
-      } catch (e) {
-        console.error("Self-healing auto-claim failed:", e);
       }
 
-      // Query all bookings owned by this user
-      const { data, error } = await window.supabaseClient
-        .from("bookings")
-        .select("*")
-        .order("created_at", { ascending: false });
+      // If not found directly, query all bookings owned by this user
+      if (!matchedBookings || matchedBookings.length === 0) {
+        const { data, error } = await window.supabaseClient
+          .from("bookings")
+          .select("*")
+          .order("created_at", { ascending: false });
 
-      if (error) throw error;
+        if (error) console.warn("Supabase bookings list error:", error);
 
-      // Filter locally in JS to find matching bookings
-      let matchedBookings = [];
-      if (data && data.length > 0) {
-        if (isFullUUID || isShortUUID) {
-          matchedBookings = data.filter(b => b.id.toLowerCase().startsWith(searchStr.toLowerCase()));
-        } else if (isPhone) {
-          matchedBookings = data.filter(b => {
-            const bPhone = (b.phone || "").replace(/[-\s()]/g, "");
-            return bPhone === cleanedPhone;
-          });
-        } else {
-          // General search fallback (fuzzy name/model/ID match like admin)
-          matchedBookings = data.filter(b => {
-            const name = b.name || "";
-            const model = b.bike_model || "";
-            return b.id.toLowerCase().includes(searchStr.toLowerCase()) ||
-              name.toLowerCase().includes(searchStr.toLowerCase()) ||
-              model.toLowerCase().includes(searchStr.toLowerCase());
-          });
+        if (data && data.length > 0) {
+          if (isFullUUID || isShortUUID) {
+            matchedBookings = data.filter(b => b.id.toLowerCase().startsWith(searchStr.toLowerCase()));
+          } else if (isPhone) {
+            matchedBookings = data.filter(b => {
+              const bPhone = (b.phone || "").replace(/[-\s()]/g, "");
+              return bPhone === cleanedPhone;
+            });
+          } else {
+            // General search fallback (fuzzy name/model/ID match like admin)
+            matchedBookings = data.filter(b => {
+              const name = b.name || "";
+              const model = b.bike_model || "";
+              return b.id.toLowerCase().includes(searchStr.toLowerCase()) ||
+                name.toLowerCase().includes(searchStr.toLowerCase()) ||
+                model.toLowerCase().includes(searchStr.toLowerCase());
+            });
+          }
         }
+      }
+
+      // Fallback: check device local storage cache if searching full UUID
+      if ((!matchedBookings || matchedBookings.length === 0) && isFullUUID) {
+        try {
+          const localBookings = JSON.parse(localStorage.getItem("chhotu_my_bookings") || "[]");
+          const foundLocal = localBookings.find(b => (b.id || "").toLowerCase() === searchStr.toLowerCase());
+          if (foundLocal) {
+            matchedBookings = [{
+              id: foundLocal.id,
+              bike_brand: foundLocal.bike_brand || "Motorcycle",
+              bike_model: foundLocal.bike_model || "Service",
+              service_type: foundLocal.service_type || "workshop",
+              status: foundLocal.status || "pending_verification",
+              name: foundLocal.name || user?.user_metadata?.full_name || "Customer",
+              location: foundLocal.location || "Workshop (Jorpati, Boudha Rd)",
+              issue_description: foundLocal.issue_description || "Booking is currently undergoing payment verification."
+            }];
+          }
+        } catch (_) {}
       }
 
       if (!matchedBookings || matchedBookings.length === 0) {
