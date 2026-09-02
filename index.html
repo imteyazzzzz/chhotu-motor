@@ -123,6 +123,7 @@
         }
     </script>
 <style>
+    /* ============ Landing page redesign — work-order / job-card motif ============ */
     .hazard-stripe {
         background: repeating-linear-gradient(
             -45deg,
@@ -132,8 +133,63 @@
             rgba(255, 90, 31, 0.1) 20px
         );
     }
-    .glow-overlay {
-        background: radial-gradient(circle at center, rgba(255, 90, 31, 0.15) 0%, transparent 70%);
+
+    /* Fine steel-grain texture used behind dark panels instead of blurred colour circles */
+    .grain::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.5;
+        background-image: radial-gradient(rgba(244,241,232,0.035) 1px, transparent 1px);
+        background-size: 3px 3px;
+    }
+
+    /* Perforated edge, like the tear-line between the shop's copy of a ticket and the customer's */
+    .ticket-perf {
+        position: relative;
+    }
+    .ticket-perf::after {
+        content: "";
+        position: absolute;
+        left: 0; right: 0; bottom: -1px;
+        height: 1px;
+        background-image: radial-gradient(circle, rgba(17,19,23,1) 2px, transparent 2.5px);
+        background-size: 14px 1px;
+        background-repeat: repeat-x;
+        background-position: center;
+    }
+
+    .job-number {
+        font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 0.08em;
+    }
+
+    /* Analog gauge ring for the stats section, built from a conic-gradient instead of a blurred circle */
+    .gauge-ring {
+        --pct: 75%;
+        background: conic-gradient(#FF5A1F var(--pct), rgba(255,255,255,0.08) 0);
+        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 6px));
+        mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 6px));
+    }
+
+    /* Rubber-stamp badge used on verified testimonials */
+    .stamp {
+        transform: rotate(-6deg);
+        border: 2px solid currentColor;
+        border-radius: 4px;
+    }
+
+    @keyframes needle-sweep {
+        from { transform: rotate(-90deg); }
+        to { transform: rotate(0deg); }
+    }
+    .needle-sweep {
+        transform-origin: bottom center;
+        animation: needle-sweep 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .needle-sweep { animation: none; }
     }
 </style>
 <link rel="stylesheet" href="assets/style.css?v=1.0.1">
@@ -219,323 +275,245 @@
      ===================================================================== -->
 
 <main class="flex-grow">
+
   <!-- =====================================================================
-       MOBILE DESIGN SYSTEM LAYOUT (Visible on mobile/tablet viewports)
+       HERO — styled as the top sheet of a service work order
        ===================================================================== -->
-  <div class="block md:hidden flex flex-col">
-    <!-- Hero Section -->
-    <section class="px-md py-xl flex flex-col gap-lg border-b border-border-muted relative overflow-hidden bg-[#111317]">
-      <!-- Decorative Glow -->
-      <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary-container/20 rounded-full blur-3xl pointer-events-none"></div>
-      <div class="z-10">
-        <h1 class="font-display-lg-mobile text-display-lg-mobile text-text-primary uppercase mb-md font-bold tracking-tighter">
-          KATHMANDU'S 24/7 MOTORCYCLE WORKSHOP ON WHEELS
+  <section class="relative border-b border-border-muted overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <div class="bg-cover bg-center w-full h-full opacity-25 mix-blend-luminosity" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDO96Zha2D1ZbZBPJpVsAz0TTZexy4tQyiYWXbFpQAeqX8OPWysZ-xSZifjeRfmcEzpL2ssSFB6w1puVJmDTX_8vGm282S2Cqg7lLACbNH1x4X2BKWhq7JxixsYzxdQUJepmx4DYPyUPZbuGAibVbz4fnrJ4RkO50NsS3Hv_I-jCRBjUrjt9cYDBj6RjtR6mzYzchnyYK_Ws-oSC4czKr3z-GwWM5xeI8BumJZ286x9DEfE1hqiGFgo')"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-[#111317]/70 via-[#111317]/90 to-[#111317]"></div>
+    </div>
+
+    <div class="relative z-10 max-w-container-max mx-auto px-md md:px-xl pt-10 md:pt-16 pb-14 md:pb-20">
+      <!-- Job card header strip -->
+      <div class="flex items-center justify-between border border-border-muted bg-surface-container-lowest/70 px-4 py-2 mb-10 md:mb-14 max-w-2xl">
+        <span class="job-number text-[11px] text-text-muted">JOB TICKET #CMW-0417</span>
+        <span class="flex items-center gap-2 text-[11px] job-number text-status-success">
+          <span class="w-1.5 h-1.5 rounded-full bg-status-success animate-pulse"></span>
+          DISPATCH OPEN
+        </span>
+      </div>
+
+      <div class="max-w-3xl">
+        <h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-text-primary mb-6 tracking-tight">
+          Broken down?<br>
+          <span class="text-primary-container">We come to you.</span>
         </h1>
-        <p class="font-body-lg text-body-lg text-text-muted mb-xl max-w-md">
-          Stranded? Need a regular service at home? Our rugged, professional mechanics are dispatched instantly to get you back on the road.
+        <p class="font-body-lg text-body-lg text-text-muted mb-10 max-w-xl">
+          Jorpati's rapid-response motorcycle unit — a mechanic at your door in 15&ndash;20 minutes, or a slot waiting at the workshop. Every job logged, priced, and closed out in the open.
         </p>
-        <div class="flex flex-col gap-md">
-          <a href="booking.html?service=emergency" class="w-full bg-[#FFC530] text-[#111317] py-md px-lg font-button-text text-button-text uppercase flex items-center justify-center gap-sm hover:opacity-90 active:scale-95 transition-all text-center">
-            <span class="material-symbols-outlined">electric_bolt</span>
-            EMERGENCY ROADSIDE HELP
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="booking.html?service=emergency" class="font-button-text text-button-text uppercase px-8 py-4 bg-[#FFC530] text-[#111317] hover:bg-[#ffd35c] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">electric_bolt</span>
+            Get emergency help
           </a>
-          <a href="booking.html" class="w-full bg-primary-container text-white py-md px-lg font-button-text text-button-text uppercase border border-primary-container flex items-center justify-center gap-sm hover:bg-transparent hover:text-primary-container transition-all text-center">
+          <a href="booking.html" class="font-button-text text-button-text uppercase px-8 py-4 border border-border-muted text-text-primary hover:border-primary-container/50 transition-colors flex items-center justify-center gap-2">
             <span class="material-symbols-outlined">calendar_month</span>
-            SCHEDULE A VISIT
+            Book a service
           </a>
         </div>
       </div>
-      <div class="w-full h-64 mt-md border border-border-muted bg-cover bg-center relative" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC1-3uMa-TtULr4i1QDtgFPrxvqxqb813WwnUEIYu1HOAlOqDE5GSceYd9BfaDztAu-gPbUnEQdwzGPEp-AIsXeLh0jcsaO3qx_JVBPy4nUOCI1_yWPTszyVpzM2eyGKyWW1IfnemUa91x143Qs_zKyMHBVQZAh7y7meSliqqcvvSJVIC1KJIwxsEwcbyNz8660uRbhvDzH_8H_5jOmkF_1nKFzZDJ87CPCWsGZIyCITVEDhp68HjKc')">
-      </div>
-    </section>
+    </div>
 
-    <!-- Services Section -->
-    <section class="px-md py-xl border-b border-border-muted bg-surface-dim">
-      <h2 class="font-headline-md text-headline-md text-text-primary uppercase mb-lg">Core Services</h2>
-      <div class="flex flex-col gap-md">
-        <!-- Service Card 1 -->
-        <a href="booking.html?service=emergency" class="bg-surface-elevated border border-border-muted p-lg hover:border-primary-container/40 transition-colors cursor-pointer group block">
-          <div class="flex items-start gap-md">
-            <div class="bg-surface-highlight p-sm border border-border-muted group-hover:bg-primary-container/20 transition-colors">
-              <span class="material-symbols-outlined text-primary-container">emergency</span>
-            </div>
-            <div>
-              <h3 class="font-button-text text-button-text text-text-primary uppercase mb-xs">Emergency Repair</h3>
-              <p class="font-body-md text-body-md text-text-muted">Stuck on the ring road? We dispatch immediately for flat tires, dead batteries, and breakdowns.</p>
-            </div>
-          </div>
-        </a>
-        <!-- Service Card 2 -->
-        <a href="booking.html?service=home-visit" class="bg-surface-elevated border border-border-muted p-lg hover:border-primary-container/40 transition-colors cursor-pointer group block">
-          <div class="flex items-start gap-md">
-            <div class="bg-surface-highlight p-sm border border-border-muted group-hover:bg-primary-container/20 transition-colors">
-              <span class="material-symbols-outlined text-primary-container">home_repair_service</span>
-            </div>
-            <div>
-              <h3 class="font-button-text text-button-text text-text-primary uppercase mb-xs">Home Visit Service</h3>
-              <p class="font-body-md text-body-md text-text-muted">Full maintenance and servicing done right in your garage or driveway. No waiting in line.</p>
-            </div>
-          </div>
-        </a>
-        <!-- Service Card 3 -->
-        <a href="booking.html?service=workshop" class="bg-surface-elevated border border-border-muted p-lg hover:border-primary-container/40 transition-colors cursor-pointer group block">
-          <div class="flex items-start gap-md">
-            <div class="bg-surface-highlight p-sm border border-border-muted group-hover:bg-primary-container/20 transition-colors">
-              <span class="material-symbols-outlined text-primary-container">handyman</span>
-            </div>
-            <div>
-              <h3 class="font-button-text text-button-text text-text-primary uppercase mb-xs">Workshop Appointment</h3>
-              <p class="font-body-md text-body-md text-text-muted">Book a slot at our central hub for major overhauls, engine rebuilds, and custom work.</p>
-            </div>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="px-md py-xl border-b border-border-muted">
-      <h2 class="font-headline-md text-headline-md text-text-primary uppercase mb-lg text-center">By The Numbers</h2>
-      <div class="grid grid-cols-2 gap-md">
-        <!-- Stat Card 1 -->
-        <div class="bg-surface-elevated border border-border-muted p-md flex flex-col items-center justify-center text-center relative overflow-hidden h-32">
-          <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-xl scale-150"></div>
-          <span class="font-label-mono-sm text-label-mono-sm text-primary-container mb-xs z-10">UPTIME</span>
-          <span class="font-headline-md text-headline-md text-text-primary z-10">8 YEARS</span>
-          <span class="font-label-mono-xs text-label-mono-xs text-text-muted mt-sm z-10">RUNNING</span>
-        </div>
-        <!-- Stat Card 2 -->
-        <div class="bg-surface-elevated border border-border-muted p-md flex flex-col items-center justify-center text-center relative overflow-hidden h-32">
-          <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-xl scale-150"></div>
-          <span class="font-label-mono-sm text-label-mono-sm text-primary-container mb-xs z-10">SERVICED</span>
-          <span class="font-headline-md text-headline-md text-text-primary z-10 readout" data-count="20000">20,000+</span>
-          <span class="font-label-mono-xs text-label-mono-xs text-text-muted mt-sm z-10">BIKES</span>
-        </div>
-        <!-- Stat Card 3 -->
-        <div class="bg-surface-elevated border border-border-muted p-md flex flex-col items-center justify-center text-center relative overflow-hidden h-32">
-          <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-xl scale-150"></div>
-          <span class="font-label-mono-sm text-label-mono-sm text-primary-container mb-xs z-10">CREW</span>
-          <span class="font-headline-md text-headline-md text-text-primary z-10 readout" data-count="5">5</span>
-          <span class="font-label-mono-xs text-label-mono-xs text-text-muted mt-sm z-10">MECHANICS</span>
-        </div>
-        <!-- Stat Card 4 -->
-        <div class="bg-surface-elevated border border-border-muted p-md flex flex-col items-center justify-center text-center relative overflow-hidden h-32">
-          <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-xl scale-150"></div>
-          <span class="font-label-mono-sm text-label-mono-sm text-primary-container mb-xs z-10">ETA</span>
-          <span class="font-headline-md text-headline-md text-text-primary z-10">15-20m</span>
-          <span class="font-label-mono-xs text-label-mono-xs text-text-muted mt-sm z-10">RESPONSE</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Final CTA Section -->
-    <section class="py-xl bg-surface-elevated relative border-b border-border-muted flex flex-col items-center justify-center text-center px-md overflow-hidden">
-      <div class="absolute inset-0 bg-hazard-stripes opacity-10"></div>
-      <div class="z-10 bg-background border border-border-muted p-lg w-full max-w-sm relative">
-        <h2 class="font-display-lg-mobile text-display-lg-mobile text-text-primary uppercase mb-md font-bold">READY TO RIDE?</h2>
-        <p class="font-body-md text-body-md text-text-muted mb-lg">Don't let a breakdown ruin your day. Book a slot or call for immediate help.</p>
-        <a href="booking.html" class="w-full bg-primary-container text-white py-md px-lg font-button-text text-button-text uppercase hover:bg-opacity-90 active:scale-95 transition-all text-center block">
-          BOOK NOW
-        </a>
-      </div>
-    </section>
-  </div>
+    <!-- Perforated tear-line into the next section -->
+    <div class="ticket-perf"></div>
+  </section>
 
   <!-- =====================================================================
-       DESKTOP DESIGN SYSTEM LAYOUT (Visible on md and larger viewports)
+       READINESS STRIP — three plain facts, no cards, no icons-in-circles
        ===================================================================== -->
-  <div class="hidden md:block">
-    <!-- Hero Section -->
-    <section class="relative min-h-[700px] flex items-center justify-center border-b border-border-muted overflow-hidden">
-      <div class="absolute inset-0 z-0">
-        <div class="bg-cover bg-center w-full h-full opacity-30 mix-blend-luminosity" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDO96Zha2D1ZbZBPJpVsAz0TTZexy4tQyiYWXbFpQAeqX8OPWysZ-xSZifjeRfmcEzpL2ssSFB6w1puVJmDTX_8vGm282S2Cqg7lLACbNH1x4X2BKWhq7JxixsYzxdQUJepmx4DYPyUPZbuGAibVbz4fnrJ4RkO50NsS3Hv_I-jCRBjUrjt9cYDBj6RjtR6mzYzchnyYK_Ws-oSC4czKr3z-GwWM5xeI8BumJZ286x9DEfE1hqiGFgo')"></div>
-        <div class="absolute inset-0 hazard-stripe"></div>
+  <section class="border-b border-border-muted bg-surface-container-lowest">
+    <div class="max-w-container-max mx-auto px-md md:px-xl grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border-muted">
+      <div class="py-6 sm:py-8 sm:px-8 first:pt-8 sm:first:pt-8">
+        <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">24/7</div>
+        <p class="font-body-md text-body-md text-text-muted mt-1">Dispatch is always open — night rides and early starts included.</p>
       </div>
-      <div class="relative z-10 max-w-container-max mx-auto px-md md:px-xl w-full">
-        <div class="max-w-3xl">
-          <div class="inline-flex items-center gap-2 px-3 py-1 border border-border-muted bg-surface-elevated mb-6">
-            <span class="w-2 h-2 rounded-full bg-status-error animate-pulse"></span>
-            <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-widest">24/7 Emergency Service Active</span>
-          </div>
-          <h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-text-primary mb-6 uppercase tracking-tighter">
-            BROKEN DOWN? <br/>
-            <span class="text-primary-container">WE COME TO YOU.</span>
-          </h1>
-          <p class="font-body-lg text-body-lg text-text-muted mb-8 max-w-xl">
-            Kathmandu's premier rapid-response motorcycle technical unit. Operating 24/7.
-          </p>
-          <div class="flex flex-col sm:flex-row gap-4">
-            <a href="booking.html" class="font-button-text text-button-text uppercase px-8 py-4 bg-primary-container text-surface-container-lowest hover:bg-primary-container/90 transition-colors flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">build</span>
-              Book Immediate Repair
-            </a>
-            <a href="tel:+9779813691072" class="font-button-text text-button-text uppercase px-8 py-4 border-2 border-border-muted text-text-primary hover:border-primary-container/40 transition-colors flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">call</span>
-              Emergency Line
-            </a>
-          </div>
-        </div>
+      <div class="py-6 sm:py-8 sm:px-8">
+        <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">15&ndash;20m</div>
+        <p class="font-body-md text-body-md text-text-muted mt-1">Average time from your call to a mechanic on-site, within Kathmandu.</p>
       </div>
-    </section>
+      <div class="py-6 sm:py-8 sm:px-8">
+        <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">100%</div>
+        <p class="font-body-md text-body-md text-text-muted mt-1">Genuine parts, priced and itemised on the invoice before you pay.</p>
+      </div>
+    </div>
+  </section>
 
-    <!-- Stats/Gauges Section -->
-    <section class="py-xl border-b border-border-muted bg-surface-elevated">
-      <div class="max-w-container-max mx-auto px-md md:px-xl grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Gauge 1 -->
-        <div class="flex items-center gap-4 border border-border-muted p-4 relative overflow-hidden group hover:border-primary-container/40 transition-colors">
-          <div class="absolute inset-0 glow-overlay opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div class="relative z-10 w-16 h-16 rounded-full border-2 border-primary-container flex items-center justify-center text-primary-container">
-            <span class="material-symbols-outlined text-3xl">schedule</span>
+  <!-- =====================================================================
+       SERVICES — presented as line items on the ticket, not a card grid
+       ===================================================================== -->
+  <section class="py-xl md:py-[96px] border-b border-border-muted relative">
+    <div class="max-w-container-max mx-auto px-md md:px-xl">
+      <div class="mb-10 md:mb-14 max-w-xl">
+        <h2 class="font-headline-md text-headline-md text-text-primary mb-3">Pick what your bike needs</h2>
+        <p class="font-body-md text-body-md text-text-muted">Three ways to get seen. Choose one and we'll take it from there.</p>
+      </div>
+
+      <div class="border-t border-border-muted">
+        <!-- Line item 1: Emergency -->
+        <a href="booking.html?service=emergency" class="group flex flex-col md:flex-row md:items-center gap-4 md:gap-8 py-7 border-b border-border-muted hover:bg-surface-elevated/50 transition-colors px-2 -mx-2">
+          <span class="job-number text-status-error text-xs w-16 shrink-0">01 · SOS</span>
+          <div class="flex-1">
+            <h3 class="font-headline-md text-headline-md text-text-primary mb-1">Emergency roadside repair</h3>
+            <p class="font-body-md text-body-md text-text-muted max-w-lg">Flat tire, dead battery, or a bike that just won't start — tell us where you are and a mechanic is on the way.</p>
           </div>
-          <div class="relative z-10">
-            <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">24/7</div>
-            <div class="font-label-mono-sm text-label-mono-sm text-text-muted uppercase">Operational Readiness</div>
+          <span class="font-button-text text-button-text uppercase text-primary-container flex items-center gap-2 shrink-0 self-start md:self-center">
+            Call for help <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </span>
+        </a>
+        <!-- Line item 2: Home visit -->
+        <a href="booking.html?service=home-visit" class="group flex flex-col md:flex-row md:items-center gap-4 md:gap-8 py-7 border-b border-border-muted hover:bg-surface-elevated/50 transition-colors px-2 -mx-2">
+          <span class="job-number text-text-muted text-xs w-16 shrink-0">02 · HOME</span>
+          <div class="flex-1">
+            <h3 class="font-headline-md text-headline-md text-text-primary mb-1">Home or office visit</h3>
+            <p class="font-body-md text-body-md text-text-muted max-w-lg">Routine servicing done in your driveway or parking bay, on a slot that suits you — no queue at the shop.</p>
+          </div>
+          <span class="font-button-text text-button-text uppercase text-text-muted group-hover:text-text-primary flex items-center gap-2 shrink-0 self-start md:self-center transition-colors">
+            Schedule <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </span>
+        </a>
+        <!-- Line item 3: Workshop -->
+        <a href="booking.html?service=workshop" class="group flex flex-col md:flex-row md:items-center gap-4 md:gap-8 py-7 border-b border-border-muted hover:bg-surface-elevated/50 transition-colors px-2 -mx-2">
+          <span class="job-number text-text-muted text-xs w-16 shrink-0">03 · SHOP</span>
+          <div class="flex-1">
+            <h3 class="font-headline-md text-headline-md text-text-primary mb-1">Book the workshop</h3>
+            <p class="font-body-md text-body-md text-text-muted max-w-lg">Engine rebuilds, full teardowns, and anything that needs a lift and a bench — bring it in to Jorpati.</p>
+          </div>
+          <span class="font-button-text text-button-text uppercase text-text-muted group-hover:text-text-primary flex items-center gap-2 shrink-0 self-start md:self-center transition-colors">
+            View the shop <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+          </span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       STATS — analog gauge dials instead of glow-blurred cards
+       ===================================================================== -->
+  <section class="py-xl md:py-[96px] border-b border-border-muted bg-surface-container-lowest relative overflow-hidden">
+    <div class="absolute inset-0 hazard-stripe opacity-[0.04] pointer-events-none"></div>
+    <div class="max-w-container-max mx-auto px-md md:px-xl relative z-10">
+      <div class="mb-10 md:mb-14 max-w-xl">
+        <h2 class="font-headline-md text-headline-md text-text-primary mb-3">Eight years on the road</h2>
+        <p class="font-body-md text-body-md text-text-muted">The numbers behind the workshop, as of this season.</p>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+        <!-- Gauge 1 -->
+        <div class="flex flex-col items-center text-center gap-4">
+          <div class="relative w-24 h-24 md:w-28 md:h-28 rounded-full gauge-ring" style="--pct:100%">
+            <div class="absolute inset-[6px] rounded-full bg-surface flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl text-primary-container">schedule</span>
+            </div>
+          </div>
+          <div>
+            <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">8 yrs</div>
+            <div class="font-body-md text-body-md text-text-muted">Running in Jorpati</div>
           </div>
         </div>
         <!-- Gauge 2 -->
-        <div class="flex items-center gap-4 border border-border-muted p-4 relative overflow-hidden group hover:border-primary-container/40 transition-colors">
-          <div class="absolute inset-0 glow-overlay opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div class="relative z-10 w-16 h-16 rounded-full border-2 border-primary-container flex items-center justify-center text-primary-container">
-            <span class="material-symbols-outlined text-3xl">speed</span>
+        <div class="flex flex-col items-center text-center gap-4">
+          <div class="relative w-24 h-24 md:w-28 md:h-28 rounded-full gauge-ring" style="--pct:88%">
+            <div class="absolute inset-[6px] rounded-full bg-surface flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl text-primary-container">build_circle</span>
+            </div>
           </div>
-          <div class="relative z-10">
-            <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">&lt;20m</div>
-            <div class="font-label-mono-sm text-label-mono-sm text-text-muted uppercase">Avg Response Time</div>
+          <div>
+            <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary readout" data-count="20000">20,000+</div>
+            <div class="font-body-md text-body-md text-text-muted">Bikes serviced</div>
           </div>
         </div>
         <!-- Gauge 3 -->
-        <div class="flex items-center gap-4 border border-border-muted p-4 relative overflow-hidden group hover:border-primary-container/40 transition-colors">
-          <div class="absolute inset-0 glow-overlay opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          <div class="relative z-10 w-16 h-16 rounded-full border-2 border-primary-container flex items-center justify-center text-primary-container">
-            <span class="material-symbols-outlined text-3xl">verified</span>
+        <div class="flex flex-col items-center text-center gap-4">
+          <div class="relative w-24 h-24 md:w-28 md:h-28 rounded-full gauge-ring" style="--pct:60%">
+            <div class="absolute inset-[6px] rounded-full bg-surface flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl text-primary-container">engineering</span>
+            </div>
           </div>
-          <div class="relative z-10">
-            <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">100%</div>
-            <div class="font-label-mono-sm text-label-mono-sm text-text-muted uppercase">Genuine Parts</div>
+          <div>
+            <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary readout" data-count="5">5</div>
+            <div class="font-body-md text-body-md text-text-muted">Mechanics on the crew</div>
+          </div>
+        </div>
+        <!-- Gauge 4 -->
+        <div class="flex flex-col items-center text-center gap-4">
+          <div class="relative w-24 h-24 md:w-28 md:h-28 rounded-full gauge-ring" style="--pct:92%">
+            <div class="absolute inset-[6px] rounded-full bg-surface flex items-center justify-center">
+              <span class="material-symbols-outlined text-2xl text-primary-container">speed</span>
+            </div>
+          </div>
+          <div>
+            <div class="font-display-lg-mobile text-display-lg-mobile text-text-primary">15&ndash;20m</div>
+            <div class="font-body-md text-body-md text-text-muted">Average response</div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Services Section (Bento Grid) -->
-    <section class="py-xxl md:py-[112px] border-b border-border-muted relative overflow-hidden">
-      <!-- Background Image with Dark Contrast Overlay -->
-      <div class="absolute inset-0 z-0">
-        <div class="bg-cover bg-center w-full h-full opacity-20 mix-blend-luminosity" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDO96Zha2D1ZbZBPJpVsAz0TTZexy4tQyiYWXbFpQAeqX8OPWysZ-xSZifjeRfmcEzpL2ssSFB6w1puVJmDTX_8vGm282S2Cqg7lLACbNH1x4X2BKWhq7JxixsYzxdQUJepmx4DYPyUPZbuGAibVbz4fnrJ4RkO50NsS3Hv_I-jCRBjUrjt9cYDBj6RjtR6mzYzchnyYK_Ws-oSC4czKr3z-GwWM5xeI8BumJZ286x9DEfE1hqiGFgo')"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-[#14161A]/95 via-[#14161A]/85 to-[#14161A]/95"></div>
+  <!-- =====================================================================
+       TESTIMONIALS — signed-off job slips with a rubber-stamp verification
+       ===================================================================== -->
+  <section class="py-xl md:py-[96px] border-b border-border-muted">
+    <div class="max-w-container-max mx-auto px-md md:px-xl">
+      <div class="mb-10 md:mb-14 max-w-xl">
+        <h2 class="font-headline-md text-headline-md text-text-primary mb-3">Riders who've been stranded before</h2>
+        <p class="font-body-md text-body-md text-text-muted">Closed-out jobs, in the customers' own words.</p>
       </div>
-      <div class="relative z-10 max-w-container-max mx-auto px-md md:px-xl">
-        <div class="mb-12">
-          <h2 class="font-headline-md text-headline-md text-text-primary uppercase mb-2">Operational Modes</h2>
-          <p class="font-body-md text-body-md text-text-muted">Select service protocol based on current mechanical status.</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Slip 1 -->
+        <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col relative">
+          <div class="flex items-start justify-between mb-5">
+            <span class="job-number text-[10px] text-text-muted">JOB #CMW-0388 &middot; Pulsar 150</span>
+            <span class="stamp text-status-success text-[9px] font-bold uppercase px-1.5 py-0.5 leading-none whitespace-nowrap">Verified</span>
+          </div>
+          <p class="font-body-md text-body-md text-text-primary flex-1">Called at 11pm with a dead battery near Boudha. Mechanic was there in under twenty minutes and had me riding again before midnight.</p>
+          <p class="font-button-text text-button-text text-text-muted mt-5 text-xs">&mdash; Sagar R., Boudha</p>
         </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Service Card 1: Emergency -->
-          <div class="bg-surface-elevated border border-border-muted p-8 flex flex-col group hover:border-primary-container/40 transition-colors lg:col-span-2 lg:row-span-2 relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-primary-container/10 blur-3xl rounded-full"></div>
-            <div class="flex justify-between items-start mb-16 relative z-10">
-              <span class="material-symbols-outlined text-4xl text-primary-container" style="font-variation-settings: 'FILL' 1;">warning</span>
-              <span class="font-label-mono-xs text-label-mono-xs text-status-error uppercase border border-status-error/30 px-2 py-1 bg-status-error/10">1st Priority</span>
-            </div>
-            <div class="mt-auto relative z-10">
-              <h3 class="font-headline-md text-headline-md text-text-primary uppercase mb-4">Emergency Extraction</h3>
-              <p class="font-body-md text-body-md text-text-muted mb-6 max-w-md">Immediate roadside assistance. Diagnostic vehicle dispatched to your location within standard operating radius.</p>
-              <a href="booking.html?service=emergency" class="font-button-text text-button-text uppercase text-primary-container hover:text-primary-container/80 flex items-center gap-2">
-                Initiate Protocol <span class="material-symbols-outlined">arrow_forward</span>
-              </a>
-            </div>
+        <!-- Slip 2 -->
+        <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col relative">
+          <div class="flex items-start justify-between mb-5">
+            <span class="job-number text-[10px] text-text-muted">JOB #CMW-0402 &middot; Shine</span>
+            <span class="stamp text-status-success text-[9px] font-bold uppercase px-1.5 py-0.5 leading-none whitespace-nowrap">Verified</span>
           </div>
-          <!-- Service Card 2: Home Visit -->
-          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col group hover:border-primary-container/40 transition-colors">
-            <div class="flex justify-between items-start mb-8">
-              <span class="material-symbols-outlined text-3xl text-text-primary">home</span>
-            </div>
-            <div class="mt-auto">
-              <h3 class="font-button-text text-button-text text-text-primary uppercase mb-2">Home Visit Diagnostics</h3>
-              <p class="font-body-md text-body-md text-text-muted text-sm mb-4">Scheduled on-site maintenance at your location.</p>
-              <a href="booking.html?service=home-visit" class="font-label-mono-sm text-label-mono-sm uppercase text-text-muted hover:text-text-primary transition-colors flex items-center gap-1">
-                Schedule <span class="material-symbols-outlined text-sm">arrow_forward</span>
-              </a>
-            </div>
+          <p class="font-body-md text-body-md text-text-primary flex-1">Booked a home visit for a routine service. They came to my office parking lot, showed me every part they replaced, and the bill matched exactly what I'd been quoted.</p>
+          <p class="font-button-text text-button-text text-text-muted mt-5 text-xs">&mdash; Prashamsa K., Jorpati</p>
+        </div>
+        <!-- Slip 3 -->
+        <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col relative">
+          <div class="flex items-start justify-between mb-5">
+            <span class="job-number text-[10px] text-text-muted">JOB #CMW-0361 &middot; FZ</span>
+            <span class="stamp text-status-success text-[9px] font-bold uppercase px-1.5 py-0.5 leading-none whitespace-nowrap">Verified</span>
           </div>
-          <!-- Service Card 3: Workshop -->
-          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col group hover:border-primary-container/40 transition-colors">
-            <div class="flex justify-between items-start mb-8">
-              <span class="material-symbols-outlined text-3xl text-text-primary">engineering</span>
-            </div>
-            <div class="mt-auto">
-              <h3 class="font-button-text text-button-text text-text-primary uppercase mb-2">Base Workshop</h3>
-              <p class="font-body-md text-body-md text-text-muted text-sm mb-4">Full teardowns and complex mechanical overhauls.</p>
-              <a href="booking.html?service=workshop" class="font-label-mono-sm text-label-mono-sm uppercase text-text-muted hover:text-text-primary transition-colors flex items-center gap-1">
-                View Facility <span class="material-symbols-outlined text-sm">arrow_forward</span>
-              </a>
-            </div>
-          </div>
+          <p class="font-body-md text-body-md text-text-primary flex-1">Brought my bike in for a full engine rebuild. Eight years old and it runs better now than when I bought it. Worth the wait for a workshop slot.</p>
+          <p class="font-button-text text-button-text text-text-muted mt-5 text-xs">&mdash; Bikash T., Chabahil</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Stats Section (By The Numbers) -->
-    <section class="py-xl border-b border-border-muted bg-[#14161A] relative overflow-hidden">
-      <div class="absolute inset-0 bg-hazard-stripes opacity-5 pointer-events-none"></div>
-      <div class="max-w-container-max mx-auto px-md md:px-xl relative z-10">
-        <div class="mb-10 text-center">
-          <div class="inline-flex items-center gap-2 px-3 py-1 border border-border-muted bg-surface-elevated mb-3">
-            <span class="w-2 h-2 rounded-full bg-primary-container"></span>
-            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest">WORKSHOP TRACK RECORD</span>
-          </div>
-          <h2 class="font-headline-md text-headline-md text-text-primary uppercase">By The Numbers</h2>
-          <p class="font-body-md text-body-md text-text-muted mt-1 max-w-lg mx-auto">Proven track record of rapid roadside assistance and workshop precision across Kathmandu.</p>
-        </div>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          <!-- Stat Card 1 -->
-          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-primary-container/40 transition-all min-h-[140px]">
-            <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-2xl scale-150 group-hover:bg-primary-container/10 transition-colors"></div>
-            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest mb-2 z-10">UPTIME</span>
-            <span class="text-3xl lg:text-4xl text-text-primary font-bold z-10 font-display">8 YEARS</span>
-            <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-wider mt-2 z-10">RUNNING</span>
-          </div>
-          <!-- Stat Card 2 -->
-          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-primary-container/40 transition-all min-h-[140px]">
-            <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-2xl scale-150 group-hover:bg-primary-container/10 transition-colors"></div>
-            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest mb-2 z-10">SERVICED</span>
-            <span class="text-3xl lg:text-4xl text-text-primary font-bold z-10 readout font-display" data-count="20000">20,000+</span>
-            <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-wider mt-2 z-10">BIKES</span>
-          </div>
-          <!-- Stat Card 3 -->
-          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-primary-container/40 transition-all min-h-[140px]">
-            <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-2xl scale-150 group-hover:bg-primary-container/10 transition-colors"></div>
-            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest mb-2 z-10">CREW</span>
-            <span class="text-3xl lg:text-4xl text-text-primary font-bold z-10 readout font-display" data-count="5">5</span>
-            <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-wider mt-2 z-10">MECHANICS</span>
-          </div>
-          <!-- Stat Card 4 -->
-          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-primary-container/40 transition-all min-h-[140px]">
-            <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-2xl scale-150 group-hover:bg-primary-container/10 transition-colors"></div>
-            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest mb-2 z-10">ETA</span>
-            <span class="text-3xl lg:text-4xl text-text-primary font-bold z-10 font-display">15-20m</span>
-            <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-wider mt-2 z-10">RESPONSE</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Final CTA Section (Desktop) -->
-    <section class="py-xl bg-surface-elevated relative border-b border-border-muted flex flex-col items-center justify-center text-center px-md overflow-hidden">
-      <div class="absolute inset-0 bg-hazard-stripes opacity-10"></div>
-      <div class="z-10 bg-background border border-border-muted p-lg w-full max-w-xl relative">
-        <h2 class="font-headline-md text-headline-md text-text-primary uppercase mb-md font-bold">READY TO RIDE?</h2>
-        <p class="font-body-md text-body-md text-text-muted mb-lg">Don't let a breakdown ruin your day. Book a slot or call for immediate Kathmandu roadside assistance.</p>
-        <div class="flex justify-center gap-4">
-          <a href="booking.html" class="bg-primary-container text-white py-md px-lg font-button-text text-button-text uppercase hover:bg-opacity-90 active:scale-95 transition-all text-center">
-            BOOK NOW
+  <!-- =====================================================================
+       FINAL CTA — a tear-off ticket stub
+       ===================================================================== -->
+  <section class="py-xl md:py-[112px] bg-surface-elevated relative overflow-hidden">
+    <div class="absolute inset-0 hazard-stripe opacity-[0.06] pointer-events-none"></div>
+    <div class="relative z-10 max-w-container-max mx-auto px-md md:px-xl">
+      <div class="ticket-perf bg-background border border-border-muted p-8 md:p-12 max-w-2xl mx-auto text-center">
+        <p class="job-number text-[11px] text-text-muted mb-4">TEAR HERE &middot; TAKE THIS TICKET</p>
+        <h2 class="font-headline-md text-headline-md text-text-primary mb-3">Ready to ride?</h2>
+        <p class="font-body-md text-body-md text-text-muted mb-8 max-w-md mx-auto">Don't let a breakdown ruin your day. Book a slot online or call the hotline for immediate roadside help anywhere in Kathmandu.</p>
+        <div class="flex flex-col sm:flex-row justify-center gap-3">
+          <a href="booking.html" class="bg-primary-container text-white py-4 px-8 font-button-text text-button-text uppercase hover:bg-opacity-90 active:scale-[0.98] transition-all text-center">
+            Book now
           </a>
-          <a href="tel:+9779813691072" class="border border-border-muted text-text-primary py-md px-lg font-button-text text-button-text uppercase hover:border-primary-container/40 transition-all text-center">
-            CALL HOTLINE
+          <a href="tel:+9779813691072" class="border border-border-muted text-text-primary py-4 px-8 font-button-text text-button-text uppercase hover:border-primary-container/40 transition-all text-center">
+            Call hotline
           </a>
         </div>
       </div>
-    </section>
-  </div>
+    </div>
+  </section>
+
 </main>
 
 <!-- =====================================================================
