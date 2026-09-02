@@ -232,3 +232,62 @@ The **Chhotu Motorcycles Workshop** design system is engineered around **Industr
 | **`profile.html`** | Customer Portal | Active repair tracker, booking history, saved motorcycles CRUD, saved addresses, notification toggles. |
 | **`admin-*.html`** | Admin Command Center | Real-time booking triage, payment verification & OCR inspection, mechanic dispatch, customer CRM. |
 | **`job.html`** | Mechanic Mobile Portal | Field mechanic job execution view, status toggle (En Route, In Progress, Completed), invoice itemizer, payment collector. |
+
+---
+
+## 7. Additional Instructions for Stitch (AI & UI Generation Rules)
+
+### A. Core Architecture & Theme Rules
+1. **Strict Dark Mode Enforcement:**
+   - Every screen generated must follow the **Garage-at-Night** dark theme.
+   - Use `#14161A` (`bg-[#14161A]`) for page backgrounds, `#1B1E24` (`bg-[#1B1E24]`) for cards and panels, and `#22262E` (`bg-[#22262E]`) for interactive sub-containers and hover states.
+   - Never use white or light backgrounds for main structural canvases.
+2. **Container Constraints & Grid System:**
+   - Standard max-width: `max-w-7xl` or `max-w-[1280px]` with horizontal padding `px-4 sm:px-6 md:px-8`.
+   - Use an 8px spatial grid: `gap-2` (8px), `gap-4` (16px), `gap-6` (24px), `gap-8` (32px), `gap-12` (48px).
+
+### B. Typography & Font Binding Rules
+1. **Headings & Titles (`Oswald`):**
+   - Must be styled with uppercase tracking: `font-display uppercase tracking-wider` or `tracking-tight`.
+   - Used for `<h1>` to `<h4>`, main hero titles, card titles, navigation items, and button labels.
+2. **Body & Prose (`Inter`):**
+   - Used for paragraph copy, helper instructions, form field inputs, and user messages.
+   - Maintain line-height `leading-relaxed` (1.6) and color `#B9B6AC` (dim) or `#F4F1E8` (high emphasis).
+3. **Telemetry & Readouts (`JetBrains Mono`):**
+   - Must be used for any numerical values, odometer/service counters, booking UUIDs (`#BK-XXXXXXXX`), phone numbers, dates, timeslots, and status tags (`font-mono`).
+
+### C. Color Application & Signal Hierarchy
+1. **Primary Conversion Action:**
+   - Use `#FF5A1F` (Safety Orange) exclusively for the primary action on every screen (e.g., "Book Immediate Repair", "Continue to Payment", "Search Booking", "Sign In").
+2. **Emergency & Urgency Moments:**
+   - Use `#FFC530` (Hazard Yellow) for the 24/7 emergency roadside banner, "Call Emergency Line" buttons, and high-visibility focus states.
+3. **Status Feedback Tokens:**
+   - **Pending / In Verification:** `bg-[#FF5A1F]/10 border border-[#FF5A1F]/30 text-[#FF5A1F]`
+   - **Confirmed / Verified / Success:** `bg-green-500/10 border border-green-500/30 text-green-400`
+   - **Rejected / Urgent Error:** `bg-red-500/10 border border-red-500/30 text-red-400`
+   - **WhatsApp Action:** `bg-[#25D366] text-[#14161A]` or `text-green-400`
+
+### D. Component Generation Standards
+1. **Buttons & Touch Targets:**
+   - Minimum tap height: `min-h-[48px]` for primary CTA buttons.
+   - Incomplete / Disabled states must use dimmed slate (`bg-[#22262E] text-[#8C93A3] border border-[#3A3F49]`).
+2. **Cards & Bento Modules:**
+   - Must include `border border-[#3A3F49]` and `rounded-lg` or `rounded-md`.
+   - Hover transition: `hover:border-[#FF5A1F]/40 hover:-translate-y-0.5 transition-all duration-200`.
+3. **Form Fields:**
+   - Input containers: `bg-[#14161A] border border-[#3A3F49] text-[#F4F1E8] placeholder-[#8C93A3] rounded px-3.5 py-2.5 focus:border-[#FF5A1F] focus:ring-1 focus:ring-[#FF5A1F] outline-none`.
+   - Required fields must display an orange asterisk `*` in label.
+   - Validation errors must display below the input in red monospace text (`text-xs text-red-400 mt-1`).
+4. **Signature Hazard Stripe:**
+   - Include `.hazard-stripe` (10px diagonal orange/carbon pattern) as a top banner or section break when designing emergency, roadside, or high-priority screens.
+
+### E. Screen States & Ergonomics
+1. **Empty States:**
+   - Must include an automotive/mechanical icon, bold uppercase heading, clear explanation, and a direct primary action button (e.g. `No active repairs` -> `Book Immediate Service`).
+2. **Loading States:**
+   - Use dark skeleton shimmer (`bg-[#22262E] animate-pulse rounded`) or spinning gradient circles. Never render blank containers.
+3. **Error Handling:**
+   - Provide human-readable diagnostic messages with a direct one-tap WhatsApp support link (`https://wa.me/9779813691072`).
+4. **Floating Action Buttons (FABs):**
+   - Floating WhatsApp button (`#25D366`) and Back to Top must be anchored at the bottom-right corner with `z-50`.
+
