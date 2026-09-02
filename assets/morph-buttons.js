@@ -122,6 +122,14 @@ function initMorphButtons() {
             </svg>
             <span class="bsm-txt">Done</span>
           </span>
+          <span class="bsm-face bsm-face-error" aria-hidden="true">
+            <svg class="bsm-error-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span class="bsm-txt bsm-txt-error">Failed</span>
+          </span>
         </span>
       `;
     };
@@ -142,14 +150,30 @@ function initMorphButtons() {
             btn.setAttribute("data-state", "loading");
             if (live) live.textContent = `${loadingText}...`;
           } else if (!isDisabled && currentState === "loading") {
-            btn.setAttribute("data-state", "success");
-            if (live) live.textContent = "Done";
-            setTimeout(() => {
+            // Check if there was an error in the form or error container
+            const form = btn.closest("form");
+            const hasError = form && (
+              form.querySelector(".field-error.show") ||
+              form.querySelector(".error-box:not(.hidden)") ||
+              document.querySelector("#auth-error:not(.hidden)") ||
+              document.querySelector("#b-error:not(.hidden)")
+            );
+
+            if (hasError) {
+              btn.setAttribute("data-state", "error");
+              if (live) live.textContent = "Failed";
+              setTimeout(() => {
+                isMutatingSelf = true;
+                btn.setAttribute("data-state", "idle");
+                if (live) live.textContent = "";
+                isMutatingSelf = false;
+              }, 2000);
+            } else {
               isMutatingSelf = true;
               btn.setAttribute("data-state", "idle");
               if (live) live.textContent = "";
               isMutatingSelf = false;
-            }, 1500);
+            }
           }
         }
       });
@@ -208,3 +232,34 @@ function initMorphButtons() {
     scheduleAuto(1000);
   });
 }
+
+window.setMorphButtonState = function(btn, state, customText) {
+  if (!btn) return;
+  const live = btn.parentElement?.parentElement?.querySelector(".bsm-live");
+  const errorTxtEl = btn.querySelector(".bsm-face-error .bsm-txt-error");
+  const doneTxtEl = btn.querySelector(".bsm-face-done .bsm-txt");
+
+  if (state === "loading") {
+    btn.setAttribute("data-state", "loading");
+    if (live) live.textContent = customText || "Loading...";
+  } else if (state === "success") {
+    if (customText && doneTxtEl) doneTxtEl.textContent = customText;
+    btn.setAttribute("data-state", "success");
+    if (live) live.textContent = customText || "Done";
+    setTimeout(() => {
+      btn.setAttribute("data-state", "idle");
+      if (live) live.textContent = "";
+    }, 1800);
+  } else if (state === "error") {
+    if (customText && errorTxtEl) errorTxtEl.textContent = customText;
+    btn.setAttribute("data-state", "error");
+    if (live) live.textContent = customText || "Failed";
+    setTimeout(() => {
+      btn.setAttribute("data-state", "idle");
+      if (live) live.textContent = "";
+    }, 2000);
+  } else {
+    btn.setAttribute("data-state", "idle");
+    if (live) live.textContent = "";
+  }
+};

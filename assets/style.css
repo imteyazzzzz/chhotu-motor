@@ -831,6 +831,18 @@ img.lazy-ph{
   background: radial-gradient(56% 56% at 50% 50%, rgba(var(--bsm-ok), 0.24), rgba(var(--bsm-ok), 0) 72%);
 }
 
+.bsm-btn[data-state="error"] {
+  border-color: rgba(239, 68, 68, 0.75) !important;
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  animation: bsm-shake 0.45s ease-in-out;
+}
+.bsm-btn[data-state="error"] ~ .bsm-aura,
+.bsm-cell:has(.bsm-btn[data-state="error"]) .bsm-aura {
+  opacity: 0.9;
+  background: radial-gradient(56% 56% at 50% 50%, rgba(239, 68, 68, 0.35), rgba(239, 68, 68, 0) 72%);
+}
+
 /* Ripple */
 .bsm-ripple {
   position: absolute;
@@ -940,6 +952,9 @@ img.lazy-ph{
 .bsm-face-idle { opacity: 1; transform: none; filter: none; }
 .bsm-face-load { opacity: 0; transform: scale(.74) translateY(7px); filter: blur(1.5px); }
 .bsm-face-done { opacity: 0; transform: scale(.55); filter: blur(1px); }
+.bsm-face-error { opacity: 0; transform: scale(.55); filter: blur(1px); color: #ef4444; }
+.bsm-face-error .bsm-txt { color: #ef4444; }
+.bsm-error-icon { color: #ef4444; }
 
 .bsm-btn[data-state="loading"] .bsm-face-idle { opacity: 0; transform: translateY(-9px) scale(.88); filter: blur(2px); }
 .bsm-btn[data-state="loading"] .bsm-face-load { opacity: 1; transform: none; filter: none; }
@@ -947,6 +962,12 @@ img.lazy-ph{
 .bsm-btn[data-state="success"] .bsm-face-idle { opacity: 0; }
 .bsm-btn[data-state="success"] .bsm-face-load { opacity: 0; transform: translateY(9px) scale(.88); filter: blur(2px); }
 .bsm-btn[data-state="success"] .bsm-face-done { opacity: 1; transform: none; filter: none; }
+.bsm-btn[data-state="success"] .bsm-face-error { opacity: 0; }
+
+.bsm-btn[data-state="error"] .bsm-face-idle { opacity: 0; }
+.bsm-btn[data-state="error"] .bsm-face-load { opacity: 0; transform: translateY(9px) scale(.88); filter: blur(2px); }
+.bsm-btn[data-state="error"] .bsm-face-done { opacity: 0; }
+.bsm-btn[data-state="error"] .bsm-face-error { opacity: 1; transform: none; filter: none; }
 
 /* Sparks */
 .bsm-spark-ring {
@@ -980,6 +1001,14 @@ img.lazy-ph{
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+@keyframes bsm-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
 }
 
 @keyframes bsm-spin { to { transform: rotate(360deg); } }

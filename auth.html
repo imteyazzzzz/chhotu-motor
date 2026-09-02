@@ -565,6 +565,9 @@
     } catch (err) {
       console.error(err);
       showMessage("error", "", err.message || err);
+      if (typeof window.setMorphButtonState === "function") {
+        window.setMorphButtonState(submitBtn, "error", "Failed");
+      }
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
     }
@@ -622,6 +625,9 @@
     } catch (err) {
       console.error(err);
       showMessage("error", "", err.message || err);
+      if (typeof window.setMorphButtonState === "function") {
+        window.setMorphButtonState(submitBtn, "error", "Failed");
+      }
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
     }
@@ -698,6 +704,9 @@
     } catch (err) {
       console.error(err);
       showMessage("error", "", err.message || err);
+      if (typeof window.setMorphButtonState === "function") {
+        window.setMorphButtonState(submitBtn, "error", "Invalid");
+      }
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
     }
@@ -822,6 +831,9 @@
       submitBtn.innerHTML = originalText;
     } catch (err) {
       console.error(err);
+      if (typeof window.setMorphButtonState === "function") {
+        window.setMorphButtonState(submitBtn, "error", "Failed");
+      }
       const errMsg = (err.message || err).toLowerCase();
       if (errMsg.includes("profiles_phone_unique") || (errMsg.includes("duplicate") && errMsg.includes("phone"))) {
         showFieldError(phoneInput, document.getElementById("signup-phone-error"), "This phone number is already registered to another account.");
