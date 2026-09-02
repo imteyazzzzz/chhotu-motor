@@ -258,8 +258,13 @@
       </div>
 
       <div id="auth-error" class="hidden bg-[#1B1E24] border border-red-500/40 rounded-md p-4 text-sm">
-        <p class="text-red-400 font-semibold mb-1"><i class="fa-solid fa-triangle-exclamation"></i> ACTION FAILED</p>
+        <p class="text-red-400 font-semibold mb-1" id="error-title"><i class="fa-solid fa-triangle-exclamation"></i> ACTION FAILED</p>
         <p class="text-[#B9B6AC]" id="error-desc"></p>
+        <div id="error-action-wrap" class="mt-3 pt-3 border-t border-[#3A3F49] hidden flex flex-col sm:flex-row gap-2">
+          <button type="button" id="error-signup-btn" class="btn btn-primary !py-2.5 !px-3 !text-xs !min-h-0 flex-1 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-user-plus"></i> Create New Account (Sign Up)
+          </button>
+        </div>
       </div>
 
     </div>
@@ -423,9 +428,11 @@
     }
   }
 
-  function showMessage(type, title, desc) {
+  function showMessage(type, title, desc, showSignupAction = false) {
     successEl.classList.add("hidden");
     errorEl.classList.add("hidden");
+    const errorActionWrap = document.getElementById("error-action-wrap");
+    if (errorActionWrap) errorActionWrap.classList.add("hidden");
     
     if (type === "success") {
       document.getElementById("success-title").innerHTML = title;
@@ -441,7 +448,14 @@
       void successEl.offsetWidth;
       successEl.classList.add("auth-success-pop");
     } else {
+      const errorTitleEl = document.getElementById("error-title");
+      if (errorTitleEl) {
+        errorTitleEl.innerHTML = title || `<i class="fa-solid fa-triangle-exclamation"></i> ACTION FAILED`;
+      }
       document.getElementById("error-desc").innerText = desc;
+      if (showSignupAction && errorActionWrap) {
+        errorActionWrap.classList.remove("hidden");
+      }
       errorEl.classList.remove("hidden");
     }
   }
@@ -706,7 +720,27 @@
 
     } catch (err) {
       console.error(err);
-      showMessage("error", "", err.message || err);
+      const errMsg = (err.message || String(err)).trim();
+      const isInvalidCredentials = /invalid login credentials|user not found|invalid email or password/i.test(errMsg);
+      
+      if (isInvalidCredentials) {
+        showMessage(
+          "error",
+          "<i class='fa-solid fa-user-xmark text-red-400'></i> ACCOUNT NOT REGISTERED OR INVALID DETAILS",
+          "This email is not registered yet, or the password entered is incorrect. Please check your registered email or click below to create a new account.",
+          true
+        );
+      } else if (/email not confirmed/i.test(errMsg)) {
+        showMessage(
+          "error",
+          "<i class='fa-solid fa-envelope text-red-400'></i> EMAIL NOT VERIFIED",
+          "Please verify your email address using the link sent to your inbox before signing in.",
+          false
+        );
+      } else {
+        showMessage("error", "<i class='fa-solid fa-triangle-exclamation text-red-400'></i> ACTION FAILED", errMsg, false);
+      }
+      
       if (typeof window.setMorphButtonState === "function") {
         window.setMorphButtonState(submitBtn, "error", "Invalid");
       }
@@ -714,6 +748,23 @@
       submitBtn.innerHTML = originalText;
     }
   });
+
+  // Link error box to Sign Up tab
+  const errorSignupBtn = document.getElementById("error-signup-btn");
+  if (errorSignupBtn) {
+    errorSignupBtn.addEventListener("click", () => {
+      const enteredEmail = signinEmailInput ? signinEmailInput.value.trim() : "";
+      tabSignup.click();
+      if (enteredEmail && signupEmailInput) {
+        signupEmailInput.value = enteredEmail;
+        signupEmailInput.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      if (signupNameInput) {
+        signupNameInput.focus();
+      }
+      errorEl.classList.add("hidden");
+    });
+  }
 
   // Handle Sign Up submission
   const signupNameInput = document.getElementById("signup-name");
