@@ -417,8 +417,13 @@
     </section>
 
     <!-- Services Section (Bento Grid) -->
-    <section class="py-xxl md:py-[112px] border-b border-border-muted">
-      <div class="max-w-container-max mx-auto px-md md:px-xl">
+    <section class="py-xxl md:py-[112px] border-b border-border-muted relative overflow-hidden">
+      <!-- Background Image with Dark Contrast Overlay -->
+      <div class="absolute inset-0 z-0">
+        <div class="bg-cover bg-center w-full h-full opacity-20 mix-blend-luminosity" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDO96Zha2D1ZbZBPJpVsAz0TTZexy4tQyiYWXbFpQAeqX8OPWysZ-xSZifjeRfmcEzpL2ssSFB6w1puVJmDTX_8vGm282S2Cqg7lLACbNH1x4X2BKWhq7JxixsYzxdQUJepmx4DYPyUPZbuGAibVbz4fnrJ4RkO50NsS3Hv_I-jCRBjUrjt9cYDBj6RjtR6mzYzchnyYK_Ws-oSC4czKr3z-GwWM5xeI8BumJZ286x9DEfE1hqiGFgo')"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-[#14161A]/95 via-[#14161A]/85 to-[#14161A]/95"></div>
+      </div>
+      <div class="relative z-10 max-w-container-max mx-auto px-md md:px-xl">
         <div class="mb-12">
           <h2 class="font-headline-md text-headline-md text-text-primary uppercase mb-2">Operational Modes</h2>
           <p class="font-body-md text-body-md text-text-muted">Select service protocol based on current mechanical status.</p>
@@ -465,6 +470,68 @@
               </a>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Section (By The Numbers) -->
+    <section class="py-xl border-b border-border-muted bg-[#14161A] relative overflow-hidden">
+      <div class="absolute inset-0 bg-hazard-stripes opacity-5 pointer-events-none"></div>
+      <div class="max-w-container-max mx-auto px-md md:px-xl relative z-10">
+        <div class="mb-10 text-center">
+          <div class="inline-flex items-center gap-2 px-3 py-1 border border-border-muted bg-surface-elevated mb-3">
+            <span class="w-2 h-2 rounded-full bg-primary-container"></span>
+            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest">WORKSHOP TRACK RECORD</span>
+          </div>
+          <h2 class="font-headline-md text-headline-md text-text-primary uppercase">By The Numbers</h2>
+          <p class="font-body-md text-body-md text-text-muted mt-1 max-w-lg mx-auto">Proven track record of rapid roadside assistance and workshop precision across Kathmandu.</p>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <!-- Stat Card 1 -->
+          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-primary-container/40 transition-all min-h-[140px]">
+            <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-2xl scale-150 group-hover:bg-primary-container/10 transition-colors"></div>
+            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest mb-2 z-10">UPTIME</span>
+            <span class="text-3xl lg:text-4xl text-text-primary font-bold z-10 font-display">8 YEARS</span>
+            <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-wider mt-2 z-10">RUNNING</span>
+          </div>
+          <!-- Stat Card 2 -->
+          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-primary-container/40 transition-all min-h-[140px]">
+            <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-2xl scale-150 group-hover:bg-primary-container/10 transition-colors"></div>
+            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest mb-2 z-10">SERVICED</span>
+            <span class="text-3xl lg:text-4xl text-text-primary font-bold z-10 readout font-display" data-count="20000">20,000+</span>
+            <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-wider mt-2 z-10">BIKES</span>
+          </div>
+          <!-- Stat Card 3 -->
+          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-primary-container/40 transition-all min-h-[140px]">
+            <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-2xl scale-150 group-hover:bg-primary-container/10 transition-colors"></div>
+            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest mb-2 z-10">CREW</span>
+            <span class="text-3xl lg:text-4xl text-text-primary font-bold z-10 readout font-display" data-count="5">5</span>
+            <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-wider mt-2 z-10">MECHANICS</span>
+          </div>
+          <!-- Stat Card 4 -->
+          <div class="bg-surface-elevated border border-border-muted p-6 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-primary-container/40 transition-all min-h-[140px]">
+            <div class="absolute inset-0 bg-primary-container/5 rounded-full blur-2xl scale-150 group-hover:bg-primary-container/10 transition-colors"></div>
+            <span class="font-label-mono-xs text-label-mono-xs text-primary-container uppercase tracking-widest mb-2 z-10">ETA</span>
+            <span class="text-3xl lg:text-4xl text-text-primary font-bold z-10 font-display">15-20m</span>
+            <span class="font-label-mono-xs text-label-mono-xs text-text-muted uppercase tracking-wider mt-2 z-10">RESPONSE</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA Section (Desktop) -->
+    <section class="py-xl bg-surface-elevated relative border-b border-border-muted flex flex-col items-center justify-center text-center px-md overflow-hidden">
+      <div class="absolute inset-0 bg-hazard-stripes opacity-10"></div>
+      <div class="z-10 bg-background border border-border-muted p-lg w-full max-w-xl relative">
+        <h2 class="font-headline-md text-headline-md text-text-primary uppercase mb-md font-bold">READY TO RIDE?</h2>
+        <p class="font-body-md text-body-md text-text-muted mb-lg">Don't let a breakdown ruin your day. Book a slot or call for immediate Kathmandu roadside assistance.</p>
+        <div class="flex justify-center gap-4">
+          <a href="booking.html" class="bg-primary-container text-white py-md px-lg font-button-text text-button-text uppercase hover:bg-opacity-90 active:scale-95 transition-all text-center">
+            BOOK NOW
+          </a>
+          <a href="tel:+9779813691072" class="border border-border-muted text-text-primary py-md px-lg font-button-text text-button-text uppercase hover:border-primary-container/40 transition-all text-center">
+            CALL HOTLINE
+          </a>
         </div>
       </div>
     </section>
@@ -535,15 +602,16 @@
 <script>
   document.getElementById("year").textContent = new Date().getFullYear();
 
-  // Simple count-up animation for .readout[data-count] elements, triggered on scroll reveal
+  // Count-up animation for .readout[data-count] elements, triggered on load or scroll
   function animateReadouts() {
     document.querySelectorAll(".readout[data-count]").forEach((el) => {
       const target = parseInt(el.getAttribute("data-count"), 10);
       let current = 0;
+      const isLargeNumber = target >= 1000;
       const step = Math.max(1, Math.round(target / 40));
       const tick = () => {
         current = Math.min(target, current + step);
-        el.textContent = current;
+        el.textContent = isLargeNumber ? current.toLocaleString("en-US") + "+" : current;
         if (current < target) requestAnimationFrame(tick);
       };
       requestAnimationFrame(tick);
@@ -553,7 +621,8 @@
     window.addEventListener("load", animateReadouts);
   } else {
     document.querySelectorAll(".readout[data-count]").forEach((el) => {
-      el.textContent = el.getAttribute("data-count");
+      const target = parseInt(el.getAttribute("data-count"), 10);
+      el.textContent = target >= 1000 ? target.toLocaleString("en-US") + "+" : target;
     });
   }
 </script>
