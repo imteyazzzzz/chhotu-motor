@@ -291,3 +291,11 @@ The **Chhotu Motorcycles Workshop** design system is engineered around **Industr
 4. **Floating Action Buttons (FABs):**
    - Floating WhatsApp button (`#25D366`) and Back to Top must be anchored at the bottom-right corner with `z-50`.
 
+### F. Technology Stack Constraints (Pure HTML5 / Vanilla JS / Tailwind CDN)
+1. **No Next.js / No React / No TypeScript:**
+   - Code and markup output must be **Standard Semantic HTML5** (`index.html`, `services.html`, etc.).
+   - Styling uses **Tailwind CSS (Play CDN)** and vanilla CSS variables (`assets/style.css`).
+   - Client scripts use **Standard Vanilla JavaScript (ES6+)** with standard DOM manipulation (`document.getElementById`, `addEventListener`).
+   - Third-party CDNs: FontAwesome 6, Google Fonts (Oswald, Inter, JetBrains Mono), and `@supabase/supabase-js`.
+
+
