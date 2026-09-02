@@ -1371,8 +1371,19 @@ setTimeout(() => {
       };
 
       try {
-        submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Converting Image...`;
-        const base64Image = await fileToBase64(reuploadFile);
+        submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Uploading Proof...`;
+        
+        let uploadedScreenshotUrl = "";
+        try {
+          if (typeof window.uploadToCloudinary === "function") {
+            uploadedScreenshotUrl = await window.uploadToCloudinary(reuploadFile, "advance_payments");
+          } else {
+            uploadedScreenshotUrl = await fileToBase64(reuploadFile);
+          }
+        } catch (uploadErr) {
+          console.warn("Cloudinary upload fallback to base64:", uploadErr);
+          uploadedScreenshotUrl = await fileToBase64(reuploadFile);
+        }
 
         submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Saving Proof...`;
         
@@ -1382,7 +1393,7 @@ setTimeout(() => {
           .update({
             status: "pending_verification",
             payment_status: "submitted",
-            payment_screenshot_url: base64Image,
+            payment_screenshot_url: uploadedScreenshotUrl,
             upi_reference: utr || null,
             rejection_reason: null
           })
@@ -1407,7 +1418,7 @@ setTimeout(() => {
           issueDescription: bInfo ? bInfo.issue_description : "",
           booking_charge: 249,
           upi_reference: utr || null,
-          screenshot_base64: base64Image,
+          screenshot_url: uploadedScreenshotUrl,
           submittedAt: new Date().toISOString()
         };
 

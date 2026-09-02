@@ -145,6 +145,7 @@
 <link rel="stylesheet" href="assets/style.css?v=1.0.1">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/supabase.js"></script>
+<script src="assets/cloudinary.js"></script>
 <style>
   /* Timeline custom styles */
   .step-circle {
@@ -1316,10 +1317,21 @@
       };
 
       try {
-        submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Converting Image...`;
-        const base64Data = await fileToBase64(selectedInvoiceFile);
+        submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Uploading Proof...`;
+        
+        let uploadedScreenshotUrl = "";
+        try {
+          if (typeof window.uploadToCloudinary === "function") {
+            uploadedScreenshotUrl = await window.uploadToCloudinary(selectedInvoiceFile, "final_payments");
+          } else {
+            uploadedScreenshotUrl = await fileToBase64(selectedInvoiceFile);
+          }
+        } catch (uploadErr) {
+          console.warn("Cloudinary upload fallback to base64:", uploadErr);
+          uploadedScreenshotUrl = await fileToBase64(selectedInvoiceFile);
+        }
 
-        submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Uploading...`;
+        submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Updating Booking...`;
 
         const utrVal = utrInput.value.trim();
 
@@ -1329,7 +1341,7 @@
           .update({
             status: "payment_submitted",
             final_payment_status: "submitted",
-            final_payment_screenshot_url: base64Data,
+            final_payment_screenshot_url: uploadedScreenshotUrl,
             final_payment_upi_reference: utrVal || null,
             final_payment_rejection_reason: null
           })
@@ -1346,7 +1358,7 @@
           bike: `${booking.bike_brand} ${booking.bike_model}`,
           invoice_total: totalAmount,
           upi_reference: utrVal || null,
-          screenshot_base64: base64Data,
+          screenshot_url: uploadedScreenshotUrl,
           submittedAt: new Date().toISOString()
         };
 
