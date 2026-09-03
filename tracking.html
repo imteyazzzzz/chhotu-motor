@@ -1606,8 +1606,7 @@
             payment_status: "submitted",
             payment_screenshot_url: uploadedUrl,
             upi_reference: utrVal || currentActiveBooking.upi_reference || null,
-            rejection_reason: null,
-            payment_rejection_reason: null
+            rejection_reason: null
           })
           .eq("id", currentActiveBooking.id);
 
@@ -1637,7 +1636,6 @@
         currentActiveBooking.payment_status = "submitted";
         currentActiveBooking.payment_screenshot_url = uploadedUrl;
         currentActiveBooking.rejection_reason = null;
-        currentActiveBooking.payment_rejection_reason = null;
         if (utrVal) currentActiveBooking.upi_reference = utrVal;
 
         displayBooking(currentActiveBooking);
