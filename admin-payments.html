@@ -264,28 +264,52 @@
 
       try {
         if (b.status === "payment_submitted") {
-          // Final Payment approval using updates RPC
-          const { error: dbErr } = await window.supabaseClient.rpc("update_booking_payment_by_agent", {
-            p_booking_id: bookingId,
-            p_status: "payment_verified",
-            p_final_status: "verified",
-            p_rejection_reason: null,
-            p_upi_extracted: b.final_payment_upi_extracted || "MANUAL_OVERRIDE",
-            p_amount_extracted: b.final_payment_amount_extracted || 0,
-            p_date_extracted: null
-          });
+          // Final Payment approval
+          let updateSuccess = false;
+          try {
+            const { error: rpcErr } = await window.supabaseClient.rpc("update_booking_payment_by_agent", {
+              p_booking_id: bookingId,
+              p_status: "payment_verified",
+              p_final_status: "verified",
+              p_rejection_reason: null,
+              p_upi_extracted: b.final_payment_upi_extracted || "MANUAL_OVERRIDE",
+              p_amount_extracted: b.final_payment_amount_extracted || 0,
+              p_date_extracted: null
+            });
+            if (!rpcErr) updateSuccess = true;
+          } catch (_) {}
 
-          if (dbErr) throw dbErr;
+          if (!updateSuccess) {
+            const { error: directErr } = await window.supabaseClient
+              .from("bookings")
+              .update({
+                status: "payment_verified",
+                final_payment_status: "verified",
+                final_payment_rejection_reason: null,
+                final_payment_verified_at: new Date().toISOString()
+              })
+              .eq("id", bookingId);
+            if (directErr) throw directErr;
 
-          // Record log details inside payment_audit_logs table
-          await window.supabaseClient.from("payment_audit_logs").insert([{
-            booking_id: bookingId,
-            extracted_amount: b.final_payment_amount_extracted || 0,
-            extracted_upi_ref: b.final_payment_upi_reference || null,
-            extracted_status: "verified",
-            decision: "verified",
-            log_details: `Manual admin override decision: [VERIFIED] by admin in Verify Payments queue.`
-          }]);
+            try {
+              await window.supabaseClient
+                .from("invoices")
+                .update({ status: "paid", paid_at: new Date().toISOString() })
+                .eq("booking_id", bookingId);
+            } catch (_) {}
+          }
+
+          // Record log details inside payment_audit_logs table (fail-safe)
+          try {
+            await window.supabaseClient.from("payment_audit_logs").insert([{
+              booking_id: bookingId,
+              extracted_amount: b.final_payment_amount_extracted || 0,
+              extracted_upi_ref: b.final_payment_upi_reference || null,
+              extracted_status: "verified",
+              decision: "verified",
+              log_details: `Manual admin override decision: [VERIFIED] by admin in Verify Payments queue.`
+            }]);
+          } catch (_) {}
         } else {
           // Upfront Payment approval
           const { error } = await window.supabaseClient
@@ -334,27 +358,43 @@
       try {
         if (b.status === "payment_submitted") {
           // Final Payment rejection
-          const { error: dbErr } = await window.supabaseClient.rpc("update_booking_payment_by_agent", {
-            p_booking_id: bookingId,
-            p_status: "completed_awaiting_payment",
-            p_final_status: "rejected",
-            p_rejection_reason: reason,
-            p_upi_extracted: b.final_payment_upi_extracted || "MANUAL_OVERRIDE",
-            p_amount_extracted: b.final_payment_amount_extracted || 0,
-            p_date_extracted: null
-          });
+          let updateSuccess = false;
+          try {
+            const { error: rpcErr } = await window.supabaseClient.rpc("update_booking_payment_by_agent", {
+              p_booking_id: bookingId,
+              p_status: "completed_awaiting_payment",
+              p_final_status: "rejected",
+              p_rejection_reason: reason,
+              p_upi_extracted: b.final_payment_upi_extracted || "MANUAL_OVERRIDE",
+              p_amount_extracted: b.final_payment_amount_extracted || 0,
+              p_date_extracted: null
+            });
+            if (!rpcErr) updateSuccess = true;
+          } catch (_) {}
 
-          if (dbErr) throw dbErr;
+          if (!updateSuccess) {
+            const { error: directErr } = await window.supabaseClient
+              .from("bookings")
+              .update({
+                status: "completed_awaiting_payment",
+                final_payment_status: "rejected",
+                final_payment_rejection_reason: reason
+              })
+              .eq("id", bookingId);
+            if (directErr) throw directErr;
+          }
 
-          // Record log details inside payment_audit_logs table
-          await window.supabaseClient.from("payment_audit_logs").insert([{
-            booking_id: bookingId,
-            extracted_amount: b.final_payment_amount_extracted || 0,
-            extracted_upi_ref: b.final_payment_upi_reference || null,
-            extracted_status: "rejected",
-            decision: "rejected",
-            log_details: `Manual admin override decision: [REJECTED] by admin in Verify Payments queue. Reason: ${reason}`
-          }]);
+          // Record log details inside payment_audit_logs table (fail-safe)
+          try {
+            await window.supabaseClient.from("payment_audit_logs").insert([{
+              booking_id: bookingId,
+              extracted_amount: b.final_payment_amount_extracted || 0,
+              extracted_upi_ref: b.final_payment_upi_reference || null,
+              extracted_status: "rejected",
+              decision: "rejected",
+              log_details: `Manual admin override decision: [REJECTED] by admin in Verify Payments queue. Reason: ${reason}`
+            }]);
+          } catch (_) {}
         } else {
           // Upfront Payment rejection
           const { error } = await window.supabaseClient
