@@ -92,7 +92,7 @@
         // Query bookings where service_type = 'emergency' and status = 'pending' or 'assigned' or 'dispatched' (but not in_progress/completed/cancelled)
         const { data, error } = await window.supabaseClient
           .from("bookings")
-          .select("*, profiles(full_name, phone)")
+          .select("*")
           .eq("service_type", "emergency")
           .in("status", ["pending", "assigned", "dispatched"])
           .order("created_at", { ascending: true }); // oldest first

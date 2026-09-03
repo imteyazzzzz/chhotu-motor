@@ -334,7 +334,7 @@
       try {
         const { data, error } = await window.supabaseClient
           .from("bookings")
-          .select("*, profiles(full_name, phone)")
+          .select("*")
           .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -666,7 +666,7 @@
       try {
         const { data, error } = await window.supabaseClient
           .from("bookings_activity")
-          .select("*, profiles(full_name)")
+          .select("*")
           .eq("booking_id", bookingId)
           .order("created_at", { ascending: false });
 
