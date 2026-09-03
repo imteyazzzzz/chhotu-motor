@@ -434,7 +434,7 @@
 
           <div class="card p-5 text-center space-y-3">
             <p class="text-xs text-[#B9B6AC]">Need to contact the mechanic or update details?</p>
-            <a href="tel:+9779813691072" class="btn btn-call w-full !min-h-[40px] !py-2"><i class="fa-solid fa-phone"></i> Call Workshop</a>
+            <a href="tel:+9779813691072" class="btn btn-primary w-full !min-h-[40px] !py-2"><i class="fa-solid fa-phone"></i> Call Workshop</a>
             <a href="#" id="wa-discuss" class="btn btn-outline w-full !min-h-[40px] !py-2"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>
           </div>
         </div>
@@ -566,6 +566,68 @@
   </div>
 </main>
 
+<!-- Deposit Payment Re-Upload Modal -->
+<div id="deposit-reupload-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-[#14161A]/90 backdrop-blur-sm hidden" role="dialog" aria-modal="true" aria-labelledby="reupload-modal-title">
+  <div class="card max-w-lg w-full p-6 space-y-5 mx-4 border border-[#3A3F49] bg-[#1B1E24] shadow-2xl relative">
+    <!-- Close button -->
+    <button onclick="closeDepositReuploadModal()" class="absolute top-4 right-4 text-[#B9B6AC] hover:text-[#F4F1E8] text-xl p-1.5 transition-colors" aria-label="Close modal">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <div class="border-b border-[#3A3F49]/60 pb-3">
+      <h3 id="reupload-modal-title" class="font-display text-base font-bold text-[#FF5A1F] uppercase tracking-wide flex items-center gap-2">
+        <i class="fa-solid fa-arrow-up-from-bracket"></i> Re-Upload Deposit Payment Proof
+      </h3>
+      <p class="text-xs text-[#B9B6AC] mt-1 font-mono">Deposit Amount: <span class="text-[#F4F1E8] font-bold">Rs. 249 NPR</span> (100% Refundable / Adjusted in final bill)</p>
+    </div>
+
+    <!-- QR Code & Payment Info Quick View -->
+    <div class="bg-[#14161A] p-3 rounded-md border border-[#3A3F49]/40 flex flex-col sm:flex-row items-center gap-4">
+      <div class="w-24 h-24 bg-white p-1 rounded-md shrink-0 flex items-center justify-center">
+        <img src="assets/images/qr-chhotu-payment.png" alt="Scan & Pay Rs. 249" class="w-full h-full object-contain" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi%3A%2F%2Fpay%3Fpa%3D9813691072%40fonepay%26pn%3DChhotu%2BMotorcycle%26am%3D249'">
+      </div>
+      <div class="text-xs space-y-1 text-center sm:text-left">
+        <p class="font-display font-semibold text-[#F4F1E8]">Chhotu Motorcycle Workshop</p>
+        <p class="text-[#B9B6AC] font-mono text-[11px]">FonePay / eSewa / Khalti: <span class="text-[#FF5A1F] font-bold">9813691072</span></p>
+        <p class="text-[10px] text-[#B9B6AC] pt-1">Scan above QR to pay Rs. 249, then upload the new screenshot below.</p>
+      </div>
+    </div>
+
+    <form id="deposit-reupload-form" class="space-y-4" novalidate>
+      <!-- Dropzone -->
+      <div class="border-2 border-dashed border-[#3A3F49] hover:border-[#FF5A1F] rounded-md p-4 text-center cursor-pointer transition-colors relative bg-[#14161A]/50" id="reupload-dropzone">
+        <input type="file" id="reupload-file-input" class="hidden" accept="image/png, image/jpeg, image/webp">
+        <div id="reupload-dropzone-prompt" class="space-y-2 py-1">
+          <i class="fa-solid fa-cloud-arrow-up text-3xl text-[#FF5A1F]"></i>
+          <p class="text-xs text-[#F4F1E8] font-semibold">Click or drag screenshot here</p>
+          <p class="text-[10px] text-[#B9B6AC]">Supports PNG, JPG, JPEG (Max 10MB)</p>
+        </div>
+        <div id="reupload-dropzone-preview" class="hidden space-y-2 py-1">
+          <p class="text-xs text-green-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Screenshot Selected</p>
+          <p class="text-[11px] text-[#F4F1E8] font-mono truncate max-w-[260px] mx-auto" id="reupload-file-name">screenshot.png</p>
+          <button type="button" id="reupload-remove-file-btn" class="text-xs text-red-400 hover:underline">Change File</button>
+        </div>
+      </div>
+
+      <div>
+        <label class="field-label !text-xs" for="reupload-utr-input">Transaction UTR / Reference ID (Optional)</label>
+        <input type="text" id="reupload-utr-input" class="w-full bg-[#14161A] text-[#F4F1E8] border border-[#3A3F49] rounded p-2.5 font-mono text-xs focus:outline-none focus:border-[#FF5A1F] transition-colors" placeholder="e.g. 402931827492">
+      </div>
+
+      <div id="reupload-error" class="hidden text-xs text-red-400 font-semibold bg-red-500/10 p-2.5 border border-red-500/20 rounded">
+        Upload failed.
+      </div>
+
+      <div class="flex justify-end gap-3 pt-1">
+        <button type="button" onclick="closeDepositReuploadModal()" class="btn btn-outline !py-2 !px-4 !text-xs">Cancel</button>
+        <button type="submit" id="btn-reupload-submit" class="btn btn-primary !py-2 !px-5 !text-xs flex items-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Submit New Proof
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- =====================================================================
      SHARED FOOTER START
      ===================================================================== -->
@@ -671,8 +733,12 @@
       .subscribe();
   }
 
+  let currentActiveBooking = null;
+
   // Load a single booking's timeline
   function displayBooking(booking) {
+    currentActiveBooking = booking;
+
     // Populate dynamic verification alerts if pending/rejected
     const paymentAlert = document.getElementById("tracking-payment-alert");
     if (paymentAlert) {
@@ -689,14 +755,24 @@
         `;
         paymentAlert.classList.remove("hidden");
       } else if (booking.status === "payment_rejected") {
+        const reasonText = booking.rejection_reason || booking.payment_rejection_reason || booking.final_payment_rejection_reason || "Invalid screenshot.";
         paymentAlert.className = "mb-6 p-4 rounded border font-mono text-xs bg-red-500/10 border-red-500/30 text-red-400";
         paymentAlert.innerHTML = `
           <div class="flex items-start gap-3">
-            <i class="fa-solid fa-circle-exclamation mt-0.5 text-base"></i>
-            <div>
-              <h5 class="font-bold uppercase mb-1">Deposit Payment Rejected</h5>
-              <p class="text-[#B9B6AC] mb-2">The submitted payment proof was rejected by our admin. Reason: <span class="text-red-400 font-bold">${booking.payment_rejection_reason || "Invalid screenshot."}</span></p>
-              <a href="https://wa.me/9779813691072?text=${encodeURIComponent('Hi Chhotu Motorcycles, my payment screenshot was rejected for Booking ID: ' + booking.id)}" target="_blank" class="btn btn-outline !py-1.5 !px-3 !text-[10px]"><i class="fa-brands fa-whatsapp text-green-400"></i> Contact Support via WhatsApp</a>
+            <i class="fa-solid fa-circle-exclamation mt-0.5 text-base text-red-500"></i>
+            <div class="space-y-3 w-full">
+              <div>
+                <h5 class="font-bold uppercase mb-1 text-red-400">Deposit Payment Rejected</h5>
+                <p class="text-[#B9B6AC]">The submitted payment proof was rejected by our admin. Reason: <span class="text-red-400 font-bold">${reasonText}</span></p>
+              </div>
+              <div class="flex flex-wrap items-center gap-3 pt-1">
+                <button type="button" onclick="openDepositReuploadModal()" class="btn btn-primary !py-2 !px-4 !text-xs flex items-center gap-2">
+                  <i class="fa-solid fa-arrow-up-from-bracket"></i> Re-Upload Payment Proof
+                </button>
+                <a href="https://wa.me/9779813691072?text=${encodeURIComponent('Hi Chhotu Motorcycles, my payment screenshot was rejected for Booking ID: ' + booking.id + ' (Reason: ' + reasonText + ')')}" target="_blank" class="btn btn-outline !py-2 !px-4 !text-xs flex items-center gap-2">
+                  <i class="fa-brands fa-whatsapp text-green-400"></i> Contact Support via WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         `;
@@ -1381,6 +1457,176 @@
         submitBtn.innerHTML = originalBtnText;
       }
     };
+  }
+
+  // Deposit Payment Re-Upload Modal Handlers
+  let reuploadSelectedFile = null;
+
+  window.openDepositReuploadModal = function() {
+    if (!currentActiveBooking) return;
+    const modal = document.getElementById("deposit-reupload-modal");
+    if (!modal) return;
+
+    reuploadSelectedFile = null;
+    document.getElementById("reupload-file-input").value = "";
+    document.getElementById("reupload-utr-input").value = "";
+    document.getElementById("reupload-dropzone-preview").classList.add("hidden");
+    document.getElementById("reupload-dropzone-prompt").classList.remove("hidden");
+    document.getElementById("reupload-error").classList.add("hidden");
+
+    modal.classList.remove("hidden");
+  };
+
+  window.closeDepositReuploadModal = function() {
+    const modal = document.getElementById("deposit-reupload-modal");
+    if (modal) modal.classList.add("hidden");
+  };
+
+  // Setup Deposit Re-upload File listeners
+  const reuploadDropzone = document.getElementById("reupload-dropzone");
+  const reuploadFileInput = document.getElementById("reupload-file-input");
+  const reuploadRemoveBtn = document.getElementById("reupload-remove-file-btn");
+
+  if (reuploadDropzone && reuploadFileInput) {
+    reuploadDropzone.addEventListener("click", (e) => {
+      if (e.target !== reuploadRemoveBtn && !reuploadRemoveBtn?.contains(e.target)) {
+        reuploadFileInput.click();
+      }
+    });
+
+    reuploadDropzone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      reuploadDropzone.classList.add("border-[#FF5A1F]");
+    });
+
+    reuploadDropzone.addEventListener("dragleave", () => {
+      reuploadDropzone.classList.remove("border-[#FF5A1F]");
+    });
+
+    reuploadDropzone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      reuploadDropzone.classList.remove("border-[#FF5A1F]");
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleReuploadFileSelect(e.dataTransfer.files[0]);
+      }
+    });
+
+    reuploadFileInput.addEventListener("change", (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleReuploadFileSelect(e.target.files[0]);
+      }
+    });
+
+    if (reuploadRemoveBtn) {
+      reuploadRemoveBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        reuploadSelectedFile = null;
+        reuploadFileInput.value = "";
+        document.getElementById("reupload-dropzone-preview").classList.add("hidden");
+        document.getElementById("reupload-dropzone-prompt").classList.remove("hidden");
+      });
+    }
+  }
+
+  function handleReuploadFileSelect(file) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload a valid image file (PNG, JPG, JPEG).");
+      return;
+    }
+    reuploadSelectedFile = file;
+    document.getElementById("reupload-file-name").textContent = file.name;
+    document.getElementById("reupload-dropzone-prompt").classList.add("hidden");
+    document.getElementById("reupload-dropzone-preview").classList.remove("hidden");
+    document.getElementById("reupload-error").classList.add("hidden");
+  }
+
+  // Handle Deposit Re-upload Form Submit
+  const depositReuploadForm = document.getElementById("deposit-reupload-form");
+  if (depositReuploadForm) {
+    depositReuploadForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentActiveBooking) return;
+
+      const errorEl = document.getElementById("reupload-error");
+      errorEl.classList.add("hidden");
+
+      if (!reuploadSelectedFile) {
+        errorEl.textContent = "Please select or upload a payment screenshot first.";
+        errorEl.classList.remove("hidden");
+        return;
+      }
+
+      const submitBtn = document.getElementById("btn-reupload-submit");
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Uploading Proof...`;
+
+      try {
+        let uploadedUrl = "";
+        if (typeof window.uploadToCloudinary === "function") {
+          uploadedUrl = await window.uploadToCloudinary(reuploadSelectedFile, "advance_payments");
+        } else {
+          uploadedUrl = await fileToBase64(reuploadSelectedFile);
+        }
+
+        const utrVal = document.getElementById("reupload-utr-input").value.trim();
+
+        // Update booking in Supabase
+        const { error: updateErr } = await window.supabaseClient
+          .from("bookings")
+          .update({
+            status: "pending_verification",
+            payment_status: "submitted",
+            payment_screenshot_url: uploadedUrl,
+            upi_reference: utrVal || currentActiveBooking.upi_reference || null,
+            rejection_reason: null,
+            payment_rejection_reason: null
+          })
+          .eq("id", currentActiveBooking.id);
+
+        if (updateErr) throw updateErr;
+
+        // Trigger asynchronous webhook
+        try {
+          fetch("https://imteefy.duckdns.org/webhook-test/chhotu-payment-verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              form_type: "reupload_deposit_payment",
+              booking_id: currentActiveBooking.id,
+              name: currentActiveBooking.name,
+              phone: currentActiveBooking.phone,
+              upi_reference: utrVal || currentActiveBooking.upi_reference || null,
+              screenshot_url: uploadedUrl,
+              submittedAt: new Date().toISOString()
+            })
+          }).catch(err => console.error("Webhook notification error:", err));
+        } catch (_) {}
+
+        closeDepositReuploadModal();
+
+        // Update local object & re-render
+        currentActiveBooking.status = "pending_verification";
+        currentActiveBooking.payment_status = "submitted";
+        currentActiveBooking.payment_screenshot_url = uploadedUrl;
+        currentActiveBooking.rejection_reason = null;
+        currentActiveBooking.payment_rejection_reason = null;
+        if (utrVal) currentActiveBooking.upi_reference = utrVal;
+
+        displayBooking(currentActiveBooking);
+
+        alert("Payment proof re-submitted successfully! Our team will verify it shortly.");
+
+      } catch (err) {
+        console.error("Deposit re-upload failed:", err);
+        errorEl.textContent = "Re-upload failed: " + (err.message || err);
+        errorEl.classList.remove("hidden");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    });
   }
 
   // Check initial parameters and session

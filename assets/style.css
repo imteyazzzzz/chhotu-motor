@@ -143,10 +143,10 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible{
 }
 .btn-outline:hover{ border-color: var(--orange); color: var(--orange); }
 .btn-call{
-  background: var(--yellow);
+  background: var(--orange);
   color: #14161A;
 }
-.btn-call:hover{ background: #ffd257; }
+.btn-call:hover{ background: #ff723f; }
 
 /* ---- Nav ---- */
 .nav-link{
@@ -787,17 +787,18 @@ img.lazy-ph{
 
 /* Call adaptation */
 .bsm-btn.btn-call {
-  background: linear-gradient(180deg, rgba(255, 197, 48, 0.22), rgba(255, 197, 48, 0.08)) !important;
-  border-color: rgba(255, 197, 48, 0.45) !important;
-  color: #ffd257 !important;
+  background: linear-gradient(180deg, rgba(255, 90, 31, 0.28), rgba(255, 90, 31, 0.12)) !important;
+  border-color: rgba(255, 90, 31, 0.55) !important;
+  color: #FF5A1F !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 197, 48, 0.3),
+    inset 0 1px 0 rgba(255, 90, 31, 0.35),
     inset 0 -2px 4px rgba(0,0,0,0.3),
-    0 12px 28px -16px rgba(255, 197, 48, 0.4),
+    0 12px 28px -16px rgba(255, 90, 31, 0.4),
     0 2px 4px rgba(0,0,0,0.3) !important;
 }
 .bsm-btn.btn-call:hover {
-  border-color: rgba(255, 197, 48, 0.75) !important;
+  border-color: rgba(255, 90, 31, 0.85) !important;
+  color: #ff723f !important;
 }
 
 /* Outline adaptation */
