@@ -32,19 +32,25 @@ DECLARE
     v_name TEXT;
 BEGIN
     v_phone := NULLIF(TRIM(COALESCE(NEW.raw_user_meta_data->>'phone', '')), '');
+    -- Clean backend phone: strip '+' and non-digit characters
+    IF v_phone IS NOT NULL THEN
+        v_phone := REGEXP_REPLACE(v_phone, '[^0-9]', '', 'g');
+    END IF;
     v_name := COALESCE(NULLIF(TRIM(NEW.raw_user_meta_data->>'full_name'), ''), 'Customer');
 
     -- 1. Insert or update profile first
     BEGIN
-        INSERT INTO public.profiles (id, full_name, phone, role)
+        INSERT INTO public.profiles (id, full_name, email, phone, role)
         VALUES (
             NEW.id,
             v_name,
+            NEW.email,
             v_phone,
             'customer'
         )
         ON CONFLICT (id) DO UPDATE SET
             full_name = EXCLUDED.full_name,
+            email = COALESCE(EXCLUDED.email, public.profiles.email),
             phone = COALESCE(EXCLUDED.phone, public.profiles.phone),
             updated_at = NOW();
     EXCEPTION WHEN OTHERS THEN

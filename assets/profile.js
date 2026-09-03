@@ -90,6 +90,25 @@ async function fetchProfileInfo() {
   populateProfileHeaders();
 }
 
+// Format phone for UI display (+977 / +91)
+function formatPhoneDisplay(phone) {
+  if (!phone) return "";
+  const clean = phone.toString().replace(/\D/g, "");
+  if (clean.startsWith("977") && clean.length >= 13) {
+    return `+977 ${clean.slice(3, 6)}-${clean.slice(6, 9)}-${clean.slice(9)}`;
+  }
+  if (clean.startsWith("977")) {
+    return `+977 ${clean.slice(3)}`;
+  }
+  if (clean.startsWith("91") && clean.length >= 12) {
+    return `+91 ${clean.slice(2, 7)}-${clean.slice(7)}`;
+  }
+  if (clean.startsWith("91")) {
+    return `+91 ${clean.slice(2)}`;
+  }
+  return clean.length === 10 ? `+977 ${clean}` : (clean ? `+${clean}` : phone);
+}
+
 function populateProfileHeaders() {
   const name = profileData.full_name;
   const email = currentUser.email;
@@ -117,7 +136,7 @@ function populateProfileHeaders() {
   const dEmail = document.getElementById("d-email");
   if (dEmail) dEmail.textContent = email;
   const dPhone = document.getElementById("d-phone");
-  if (dPhone) dPhone.textContent = phone || "No phone added";
+  if (dPhone) dPhone.textContent = formatPhoneDisplay(phone) || "No phone added";
   const dMember = document.getElementById("d-member-since");
   if (dMember) dMember.textContent = formattedMemberSince;
 
@@ -135,7 +154,7 @@ function populateProfileHeaders() {
   const mEmail = document.getElementById("m-email");
   if (mEmail) mEmail.textContent = email;
   const mPhone = document.getElementById("m-phone");
-  if (mPhone) mPhone.textContent = phone || "No phone added";
+  if (mPhone) mPhone.textContent = formatPhoneDisplay(phone) || "No phone added";
 }
 
 // ---- Tab Switching Controller ----

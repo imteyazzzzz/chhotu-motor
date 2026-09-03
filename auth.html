@@ -130,9 +130,16 @@
           </div>
         </div>
         <div>
-          <label class="field-label" for="signin-email">Email Address *</label>
-          <input id="signin-email" type="email" class="field-input" placeholder="name@example.com" required>
-          <p class="field-error" id="signin-email-error">Please enter your email.</p>
+          <label class="field-label" for="signin-credential">Email Address or Phone Number *</label>
+          <div class="flex gap-2">
+            <select id="signin-phone-code" class="field-input !w-[110px] shrink-0" aria-label="Sign-in identifier type or country code">
+              <option value="email">Email</option>
+              <option value="+977">+977 (NP)</option>
+              <option value="+91">+91 (IN)</option>
+            </select>
+            <input id="signin-credential" type="text" class="field-input flex-1" placeholder="name@example.com or 98XXXXXXXX" required>
+          </div>
+          <p class="field-error" id="signin-credential-error">Please enter your email or mobile number.</p>
         </div>
         <div>
           <label class="field-label" for="signin-password">Password *</label>
@@ -349,82 +356,71 @@
   // Helper to merge/claim guest bookings for the newly authenticated user
   async function claimGuestBookings(session) {
     if (!session || !session.user) return;
+    const user = session.user;
+    
+    // 1. Get user phone from metadata or public.profiles
+    let userPhone = user.user_metadata?.phone || user.phone || "";
+    if (!userPhone) {
+      try {
+        const { data: profile } = await window.supabaseClient
+          .from("profiles")
+          .select("phone")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (profile && profile.phone) {
+          userPhone = profile.phone;
+        }
+      } catch (e) {
+        console.warn("Could not load user phone from profiles table:", e);
+      }
+    }
+
+    // 2. Build variations of the user's phone number to match different formats in database
+    const getPhoneVariations = (phone) => {
+      if (!phone) return [];
+      const cleaned = phone.toString().replace(/[-\s()]/g, "");
+      const digitsOnly = cleaned.replace(/\D/g, "");
+      const variations = [cleaned, digitsOnly];
+      if (digitsOnly.startsWith("977") && digitsOnly.length > 10) {
+        variations.push(digitsOnly.slice(3)); // 98...
+        variations.push("+" + digitsOnly);
+      } else if (digitsOnly.startsWith("91") && digitsOnly.length > 10) {
+        variations.push(digitsOnly.slice(2));
+        variations.push("+" + digitsOnly);
+      } else if (digitsOnly.length === 10) {
+        variations.push("977" + digitsOnly);
+        variations.push("+977" + digitsOnly);
+        variations.push("91" + digitsOnly);
+        variations.push("+91" + digitsOnly);
+      }
+      return [...new Set(variations.filter(Boolean))];
+    };
+
+    const phoneList = getPhoneVariations(userPhone);
     const urlParams = new URLSearchParams(window.location.search);
     const bookingId = urlParams.get("id");
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookingId);
     
-    if (urlParams.get("redirect") === "tracking.html" && bookingId) {
-      const user = session.user;
-      
-      // 1. Get user phone from metadata or public.profiles
-      let userPhone = user.user_metadata?.phone || user.phone || "";
-      if (!userPhone) {
-        try {
-          const { data: profile } = await window.supabaseClient
-            .from("profiles")
-            .select("phone")
-            .eq("id", user.id)
-            .maybeSingle();
-          if (profile && profile.phone) {
-            userPhone = profile.phone;
-          }
-        } catch (e) {
-          console.warn("Could not load user phone from profiles table:", e);
+    try {
+      if (phoneList.length > 0) {
+        for (const p of phoneList) {
+          await window.supabaseClient
+            .from("bookings")
+            .update({ user_id: user.id })
+            .is("user_id", null)
+            .eq("phone", p);
         }
       }
-
-      console.log("Merging guest bookings to account:", user.id, "phone:", userPhone);
-      
-      // 2. Build variations of the user's phone number to match different formats in database
-      const getPhoneVariations = (phone) => {
-        if (!phone) return [];
-        const cleaned = phone.replace(/[-\s()]/g, "");
-        const variations = [cleaned];
-        if (cleaned.startsWith("+977")) {
-          variations.push(cleaned.slice(1)); // 97798...
-          variations.push(cleaned.slice(4)); // 98...
-        } else if (cleaned.startsWith("977") && cleaned.length > 10) {
-          variations.push("+" + cleaned); // +97798...
-          variations.push(cleaned.slice(3)); // 98...
-        } else if (cleaned.length === 10) {
-          variations.push("+977" + cleaned);
-          variations.push("977" + cleaned);
-          variations.push("+91" + cleaned);
-          variations.push("91" + cleaned);
-        }
-        return [...new Set(variations)];
-      };
-
-      const phoneList = getPhoneVariations(userPhone);
-      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(bookingId);
-      
-      try {
-        let updateQuery = window.supabaseClient
+      if (isUUID) {
+        await window.supabaseClient
           .from("bookings")
           .update({ user_id: user.id })
-          .is("user_id", null);
-          
-        if (isUUID) {
-          if (phoneList.length > 0) {
-            const orFilters = [`id.eq.${bookingId}`, ...phoneList.map(p => `phone.eq.${p}`)].join(",");
-            updateQuery = updateQuery.or(orFilters);
-          } else {
-            updateQuery = updateQuery.eq("id", bookingId);
-          }
-        } else if (phoneList.length > 0) {
-          const orFilters = phoneList.map(p => `phone.eq.${p}`).join(",");
-          updateQuery = updateQuery.or(orFilters);
-        } else {
-          updateQuery = null;
-        }
-        
-        if (updateQuery) {
-          const { error } = await updateQuery;
-          if (error) throw error;
-          console.log("Merge completed successfully.");
-        }
-      } catch (err) {
-        console.error("Failed to claim guest bookings:", err);
+          .is("user_id", null)
+          .eq("id", bookingId);
       }
+      console.log("Guest bookings auto-claim completed for user:", user.id);
+    } catch (err) {
+      console.warn("Failed to claim guest bookings:", err);
     }
   }
 
@@ -650,11 +646,37 @@
     }
   });
 
-  // Handle Sign In submission
-  const signinEmailInput = document.getElementById("signin-email");
+  // Handle Sign In submission with Email or Phone Number
+  const signinCredentialInput = document.getElementById("signin-credential");
+  const signinCodeSelect = document.getElementById("signin-phone-code");
   const signinPasswordInput = document.getElementById("signin-password");
+
+  // Dynamic input mode & placeholder adjustments on sign in
+  if (signinCodeSelect && signinCredentialInput) {
+    signinCodeSelect.addEventListener("change", () => {
+      if (signinCodeSelect.value === "email") {
+        signinCredentialInput.placeholder = "name@example.com";
+        signinCredentialInput.setAttribute("inputmode", "email");
+      } else {
+        signinCredentialInput.placeholder = "98XXXXXXXX";
+        signinCredentialInput.setAttribute("inputmode", "tel");
+      }
+    });
+
+    signinCredentialInput.addEventListener("input", (e) => {
+      const val = e.target.value.trim();
+      if (val.includes("@")) {
+        signinCodeSelect.value = "email";
+        signinCredentialInput.setAttribute("inputmode", "email");
+      } else if (/^\d{3,}/.test(val) && signinCodeSelect.value === "email") {
+        signinCodeSelect.value = "+977";
+        signinCredentialInput.setAttribute("inputmode", "tel");
+      }
+    });
+  }
+
   const signinRules = [
-    { input: signinEmailInput, error: document.getElementById("signin-email-error"), required: true, message: "Please enter your email address." },
+    { input: signinCredentialInput, error: document.getElementById("signin-credential-error"), required: true, message: "Please enter your email address or phone number." },
     { input: signinPasswordInput, error: document.getElementById("signin-password-error"), required: true, message: "Please enter your password." }
   ];
   setupAuthFormWatcher(signinRules, document.getElementById("signin-submit"));
@@ -678,8 +700,80 @@
     try {
       if (!window.supabaseClient) throw new Error("Supabase client is not configured.");
       
+      const rawCred = signinCredentialInput.value.trim();
+      const codeVal = signinCodeSelect ? signinCodeSelect.value : "email";
+      const isEmail = rawCred.includes("@");
+
+      let emailToLogin = rawCred;
+
+      if (!isEmail) {
+        // 1. Phone number entered: Resolve registered email
+        const cleanDigits = rawCred.replace(/\D/g, "");
+        const countryDigits = (codeVal && codeVal !== "email") ? codeVal.replace(/\D/g, "") : "977";
+
+        if (!cleanDigits) {
+          throw new Error("Please enter a valid mobile number.");
+        }
+
+        const phoneVariations = [
+          cleanDigits,
+          `${countryDigits}${cleanDigits}`,
+          `+${countryDigits}${cleanDigits}`,
+          `977${cleanDigits}`,
+          `+977${cleanDigits}`,
+          `91${cleanDigits}`,
+          `+91${cleanDigits}`
+        ];
+        const uniquePhones = [...new Set(phoneVariations)];
+        const orFilter = uniquePhones.map(p => `phone.eq.${p}`).join(",");
+
+        // Search profiles table
+        let matchedEmail = null;
+        try {
+          const { data: matchedProfiles } = await window.supabaseClient
+            .from("profiles")
+            .select("id, email, phone")
+            .or(orFilter)
+            .limit(1);
+
+          if (matchedProfiles && matchedProfiles.length > 0 && matchedProfiles[0].email) {
+            matchedEmail = matchedProfiles[0].email;
+          }
+        } catch (_) {}
+
+        // Fallback: Search bookings table for user_id
+        if (!matchedEmail) {
+          try {
+            const { data: matchedBookings } = await window.supabaseClient
+              .from("bookings")
+              .select("user_id")
+              .or(orFilter)
+              .not("user_id", "is", null)
+              .limit(1);
+
+            if (matchedBookings && matchedBookings.length > 0 && matchedBookings[0].user_id) {
+              const { data: userProfile } = await window.supabaseClient
+                .from("profiles")
+                .select("id, email")
+                .eq("id", matchedBookings[0].user_id)
+                .maybeSingle();
+
+              if (userProfile && userProfile.email) {
+                matchedEmail = userProfile.email;
+              }
+            }
+          } catch (_) {}
+        }
+
+        if (!matchedEmail) {
+          throw new Error(`No account found with phone number ${codeVal !== 'email' ? codeVal : '+977'} ${cleanDigits}. Please check your phone number or create a new account.`);
+        }
+
+        emailToLogin = matchedEmail;
+      }
+
       const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-        email: signinEmailInput.value.trim(),
+        email: emailToLogin,
         password: signinPasswordInput.value
       });
 
@@ -689,7 +783,7 @@
         await claimGuestBookings(data.session);
       }
 
-      formSignin.classList.add("hidden"); // hide the form so the success card takes its place, not sits below it
+      formSignin.classList.add("hidden"); // hide form so success card takes its place
       
       showMessage("success", "<i class='fa-solid fa-circle-check'></i> SIGN IN SUCCESSFUL", "Welcome back! Redirecting you...");
       
@@ -727,7 +821,7 @@
         showMessage(
           "error",
           "<i class='fa-solid fa-user-xmark text-red-400'></i> ACCOUNT NOT REGISTERED OR INVALID DETAILS",
-          "This email is not registered yet, or the password entered is incorrect. Please check your registered email or click below to create a new account.",
+          "This email or phone number is not registered yet, or the password entered is incorrect. Please check your details or click below to create a new account.",
           true
         );
       } else if (/email not confirmed/i.test(errMsg)) {
@@ -738,7 +832,7 @@
           false
         );
       } else {
-        showMessage("error", "<i class='fa-solid fa-triangle-exclamation text-red-400'></i> ACTION FAILED", errMsg, false);
+        showMessage("error", "<i class='fa-solid fa-triangle-exclamation text-red-400'></i> ACTION FAILED", errMsg, /no account found/i.test(errMsg));
       }
       
       if (typeof window.setMorphButtonState === "function") {
@@ -753,11 +847,14 @@
   const errorSignupBtn = document.getElementById("error-signup-btn");
   if (errorSignupBtn) {
     errorSignupBtn.addEventListener("click", () => {
-      const enteredEmail = signinEmailInput ? signinEmailInput.value.trim() : "";
+      const enteredCred = signinCredentialInput ? signinCredentialInput.value.trim() : "";
       tabSignup.click();
-      if (enteredEmail && signupEmailInput) {
-        signupEmailInput.value = enteredEmail;
+      if (enteredCred && enteredCred.includes("@") && signupEmailInput) {
+        signupEmailInput.value = enteredCred;
         signupEmailInput.dispatchEvent(new Event("input", { bubbles: true }));
+      } else if (enteredCred && !enteredCred.includes("@") && signupPhoneInput) {
+        signupPhoneInput.value = enteredCred.replace(/\D/g, "");
+        signupPhoneInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       if (signupNameInput) {
         signupNameInput.focus();
@@ -806,7 +903,9 @@
       if (!window.supabaseClient) throw new Error("Supabase client is not configured.");
 
       const cleanedLocal = cleanPhoneNumber(signupPhoneInput.value, signupCodeSelect.value);
-      const combinedPhone = `${signupCodeSelect.value}${cleanedLocal}`;
+      // Clean backend phone: digits only, NO '+' sign!
+      const codeDigits = signupCodeSelect.value.replace(/\D/g, "");
+      const backendPhone = `${codeDigits}${cleanedLocal}`;
 
       const { data, error } = await window.supabaseClient.auth.signUp({
         email: signupEmailInput.value.trim(),
@@ -814,7 +913,7 @@
         options: {
           data: {
             full_name: signupNameInput.value.trim(),
-            phone: combinedPhone
+            phone: backendPhone
           }
         }
       });
@@ -833,7 +932,19 @@
         } catch (_) {}
       }
 
-      if (session) {
+      // Explicitly update profiles table to ensure phone and email are saved without '+'
+      if (session && session.user) {
+        try {
+          await window.supabaseClient
+            .from("profiles")
+            .upsert({
+              id: session.user.id,
+              full_name: signupNameInput.value.trim(),
+              email: signupEmailInput.value.trim(),
+              phone: backendPhone,
+              role: 'customer'
+            });
+        } catch (_) {}
         await claimGuestBookings(session);
       }
 
@@ -862,47 +973,35 @@
           } catch(_) {}
         }
         showMessage("success", "<i class='fa-solid fa-circle-check'></i> ACCOUNT CREATED", "You're all set — signed in automatically. Redirecting you...");
-        setTimeout(() => { window.location.href = targetUrl; }, 1500);
-        return;
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 1500);
+      } else {
+        showMessage(
+          "success",
+          "<i class='fa-solid fa-envelope text-[#FF5A1F]'></i> VERIFICATION EMAIL SENT",
+          "We sent a confirmation link to " + signupEmailInput.value.trim() + ". Please check your email to activate your account."
+        );
       }
 
-      showMessage("success", "<i class='fa-solid fa-envelope-circle-check'></i> REGISTRATION COMPLETE", "Account created! Your Supabase project requires email verification, so please check your inbox, confirm your address, then sign in.");
-      
-      const successSigninBtn = document.getElementById("auth-success-signin-btn");
-      if (successSigninBtn) {
-        successSigninBtn.classList.remove("hidden");
-        successSigninBtn.onclick = (e) => {
-          e.preventDefault();
-          successSigninBtn.classList.add("hidden");
-          successEl.classList.add("hidden");
-          formSignup.reset();
-          formSignup.classList.remove("hidden");
-          tabSignin.click(); // Switch to Sign In tab
-        };
-      }
-      
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalText;
     } catch (err) {
       console.error(err);
+      const errMsg = (err.message || String(err)).trim();
+      const isUserAlreadyExists = /already registered|already in use|unique constraint/i.test(errMsg);
+      
+      if (isUserAlreadyExists) {
+        showMessage(
+          "error",
+          "<i class='fa-solid fa-triangle-exclamation text-yellow-400'></i> EMAIL ALREADY REGISTERED",
+          "An account with this email address already exists. Please sign in instead.",
+          false
+        );
+      } else {
+        showMessage("error", "<i class='fa-solid fa-triangle-exclamation text-red-400'></i> REGISTRATION FAILED", errMsg, false);
+      }
+      
       if (typeof window.setMorphButtonState === "function") {
         window.setMorphButtonState(submitBtn, "error", "Failed");
-      }
-      const errMsg = (err.message || err).toLowerCase();
-      if (errMsg.includes("profiles_phone_unique") || (errMsg.includes("duplicate") && errMsg.includes("phone"))) {
-        showFieldError(phoneInput, document.getElementById("signup-phone-error"), "This phone number is already registered to another account.");
-        phoneInput.focus();
-      } else if (errMsg.includes("already registered") || errMsg.includes("already exists") || errMsg.includes("email")) {
-        showFieldError(emailInput, document.getElementById("signup-email-error"), "This email address is already registered.");
-        emailInput.focus();
-      } else if (errMsg.includes("password")) {
-        showFieldError(passwordInput, document.getElementById("signup-password-error"), err.message || "Invalid password.");
-        passwordInput.focus();
-      } else if (errMsg.includes("phone")) {
-        showFieldError(phoneInput, document.getElementById("signup-phone-error"), err.message || "Invalid phone number.");
-        phoneInput.focus();
-      } else {
-        showMessage("error", "", err.message || err);
       }
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;

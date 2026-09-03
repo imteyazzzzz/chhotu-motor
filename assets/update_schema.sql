@@ -370,5 +370,36 @@ CREATE POLICY "Customers can update their own bookings" ON public.bookings
     FOR UPDATE TO authenticated USING (user_id = auth.uid() OR user_id IS NULL) WITH CHECK (user_id = auth.uid());
 
 
--- 11. Force Supabase PostgREST schema cache to reload
+-- 11. Profile extensions and phone auth lookup helper
+ALTER TABLE public.profiles
+ADD COLUMN IF NOT EXISTS email TEXT,
+ADD COLUMN IF NOT EXISTS address TEXT;
+
+-- RPC to look up email by phone securely for login
+CREATE OR REPLACE FUNCTION public.get_email_by_phone(p_phone TEXT)
+RETURNS JSON AS $$
+DECLARE
+    v_clean_phone TEXT;
+    v_profile RECORD;
+BEGIN
+    v_clean_phone := REGEXP_REPLACE(p_phone, '[^0-9]', '', 'g');
+    
+    SELECT id, email, phone, full_name INTO v_profile
+    FROM public.profiles
+    WHERE phone = v_clean_phone 
+       OR phone = RIGHT(v_clean_phone, 10)
+       OR phone = '977' || RIGHT(v_clean_phone, 10)
+       OR phone = '91' || RIGHT(v_clean_phone, 10)
+       OR phone = '+' || v_clean_phone
+    LIMIT 1;
+
+    IF v_profile.email IS NOT NULL THEN
+        RETURN json_build_object('success', true, 'email', v_profile.email, 'full_name', v_profile.full_name);
+    ELSE
+        RETURN json_build_object('success', false, 'error', 'No user found with this phone number');
+    END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 12. Force Supabase PostgREST schema cache to reload
 NOTIFY pgrst, 'reload schema';

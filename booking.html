@@ -1064,15 +1064,61 @@
           if (error) throw error;
           if (session && session.user) {
             loggedInUserId = session.user.id;
-            if (nameInput && !nameInput.value) nameInput.value = session.user.user_metadata?.full_name || session.user.user_metadata?.name || "";
-            const { data: profile } = await window.supabaseClient.from("profiles").select("phone").eq("id", loggedInUserId).maybeSingle();
-            const profilePhone = profile?.phone || session.user.phone || "";
+            
+            // Query user profile details
+            let userProfile = null;
+            try {
+              const { data: prof } = await window.supabaseClient
+                .from("profiles")
+                .select("full_name, phone, address")
+                .eq("id", loggedInUserId)
+                .maybeSingle();
+              userProfile = prof;
+            } catch (_) {}
+
+            // Pre-fill Name
+            if (nameInput && !nameInput.value) {
+              nameInput.value = userProfile?.full_name || session.user.user_metadata?.full_name || session.user.user_metadata?.name || "";
+            }
+
+            // Pre-fill Phone with Country Code matching
+            const profilePhone = userProfile?.phone || session.user.user_metadata?.phone || session.user.phone || "";
             if (phoneInput && !phoneInput.value && profilePhone) {
+              const cleanDigits = profilePhone.replace(/\D/g, "");
               if (phoneCodeEl) {
-                const codes = Array.from(phoneCodeEl.options).map(o => o.value);
-                const matchedCode = codes.find(c => profilePhone.startsWith(c));
-                if (matchedCode) { phoneCodeEl.value = matchedCode; phoneInput.value = profilePhone.substring(matchedCode.length); } else phoneInput.value = profilePhone;
-              } else phoneInput.value = profilePhone;
+                if (cleanDigits.startsWith("977") && cleanDigits.length >= 13) {
+                  phoneCodeEl.value = "+977";
+                  phoneInput.value = cleanDigits.slice(3);
+                } else if (cleanDigits.startsWith("91") && cleanDigits.length >= 12) {
+                  phoneCodeEl.value = "+91";
+                  phoneInput.value = cleanDigits.slice(2);
+                } else if (cleanDigits.length === 10) {
+                  phoneCodeEl.value = "+977";
+                  phoneInput.value = cleanDigits;
+                } else {
+                  phoneInput.value = profilePhone.replace(/^\+/, "");
+                }
+              } else {
+                phoneInput.value = profilePhone.replace(/^\+/, "");
+              }
+            }
+
+            // Pre-fill Location / Address
+            if (locationInput && !locationInput.value) {
+              if (userProfile?.address) {
+                locationInput.value = userProfile.address;
+              } else {
+                try {
+                  const { data: addr } = await window.supabaseClient
+                    .from("addresses")
+                    .select("home_address, office_address")
+                    .eq("user_id", loggedInUserId)
+                    .maybeSingle();
+                  if (addr?.home_address) {
+                    locationInput.value = addr.home_address;
+                  }
+                } catch (_) {}
+              }
             }
             const { data: bikes, error: bikesError } = await window.supabaseClient.from("motorcycles").select("*").eq("user_id", loggedInUserId).order("created_at", { ascending: false });
             if (!bikesError && bikes && bikes.length > 0) {
@@ -1386,7 +1432,9 @@
 
       const phoneCodeEl = document.getElementById("b-phone-code");
       const cleanedLocalPhone = cleanPhoneNumber(phoneInput.value, phoneCodeEl.value);
-      const combinedPhone = `${phoneCodeEl.value}${cleanedLocalPhone}`;
+      // Clean backend phone: pure digits only, NO '+' sign in database!
+      const codeDigits = phoneCodeEl.value.replace(/\D/g, "");
+      const backendPhone = `${codeDigits}${cleanedLocalPhone}`;
 
       const coordsVal = document.getElementById("b-coords").value;
       const googleMapsLink = coordsVal ? `https://www.google.com/maps?q=${coordsVal}` : "";
@@ -1470,7 +1518,7 @@
           id: supabaseBookingId,
           user_id: loggedInUserId || null,
           name: nameInput.value.trim(),
-          phone: combinedPhone,
+          phone: backendPhone,
           bike_brand: brandVal === "Other" ? brandOtherVal : brandVal,
           bike_model: modelVal,
           registration_no: regNoVal || null,
@@ -1501,7 +1549,7 @@
           const localList = JSON.parse(localStorage.getItem("chhotu_my_bookings") || "[]");
           localList.unshift({
             id: supabaseBookingId,
-            phone: combinedPhone,
+            phone: backendPhone,
             name: nameInput.value.trim(),
             bike_brand: brandVal === "Other" ? brandOtherVal : brandVal,
             bike_model: modelVal,
@@ -1523,14 +1571,46 @@
           const finalBrand = brandVal === "Other" ? brandOtherVal : brandVal;
           if (finalBrand && modelVal) {
             const combinedModelName = `${finalBrand} ${modelVal}`.trim();
+            try {
+              await window.supabaseClient
+                .from("motorcycles")
+                .insert([{
+                  user_id: loggedInUserId,
+                  model: combinedModelName,
+                  registration_no: regNoVal || null,
+                  type: 'motorcycle'
+                }]);
+            } catch (_) {}
+          }
+        }
+
+        // D. Auto-link user's phone, full_name, and address to their profile if logged in
+        if (loggedInUserId) {
+          try {
+            const profileUpdates = {
+              phone: backendPhone,
+              full_name: nameInput.value.trim()
+            };
+            if (finalLocation && selectedSvc !== "workshop") {
+              profileUpdates.address = finalLocation;
+            }
             await window.supabaseClient
-              .from("motorcycles")
-              .insert([{
-                user_id: loggedInUserId,
-                model: combinedModelName,
-                registration_no: regNoVal || null,
-                type: 'motorcycle'
-              }]);
+              .from("profiles")
+              .update(profileUpdates)
+              .eq("id", loggedInUserId);
+
+            if (finalLocation && selectedSvc !== "workshop") {
+              try {
+                await window.supabaseClient
+                  .from("addresses")
+                  .upsert({
+                    user_id: loggedInUserId,
+                    home_address: finalLocation
+                  });
+              } catch (_) {}
+            }
+          } catch (profileLinkErr) {
+            console.warn("Could not auto-update profile:", profileLinkErr);
           }
         }
 
@@ -1557,7 +1637,7 @@
             const text = `Hi Chhotu Motorcycles, my website booking submission failed.\n\n` +
               `*Booking Details:*\n` +
               `- Name: ${nameInput.value.trim()}\n` +
-              `- Phone: ${combinedPhone}\n` +
+              `- Phone: +${backendPhone}\n` +
               `- Bike: ${bikeBrand} ${modelVal}\n` +
               `- Service: ${serviceType}\n` +
               `- Location: ${locationVal}\n` +
@@ -1580,7 +1660,7 @@
         form_type: "booking_payment_n8n",
         supabase_booking_id: supabaseBookingId,
         name: nameInput.value.trim(),
-        phone: combinedPhone,
+        phone: backendPhone,
         bikeModel: combinedBikeModel,
         serviceType: serviceSelect.value,
         location: serviceSelect.value === "workshop" ? "Workshop (Jorpati, Boudha Rd, Kathmandu)" : locationInput.value.trim(),
@@ -1592,20 +1672,18 @@
         preferredTime: serviceSelect.value === "emergency" ? "" : document.getElementById("b-time").value,
         issueDescription: issueInput.value.trim(),
         booking_charge: 249,
-        payment_ref: paymentRef,
-        upi_reference: document.getElementById("booking-utr").value.trim() || null,
-        screenshot_url: uploadedScreenshotUrl,
-        screenshot_base64: uploadedScreenshotUrl || "",
-        submittedAt: now.toISOString(),
-        source: "booking.html"
+        upi_reference: document.getElementById("booking-utr").value.trim() || "NOT_PROVIDED",
+        payment_proof_url: uploadedScreenshotUrl || "",
+        submittedAt: new Date().toISOString()
       };
 
-      // Asynchronous Webhook trigger to n8n
-      fetch("https://imteefy.duckdns.org/webhook-test/chhotu-payment-verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      }).catch(e => console.error("Asynchronous webhook failed:", e));
+      try {
+        fetch("https://imteefy.duckdns.org/webhook-test/chhotu-payment-verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).catch(err => console.error("Webhook notification error:", err));
+      } catch (_) {}
 
       // D. Populate Step 3 "Booked" Screen Details
       const shortId = (supabaseBookingId || "").slice(0, 8).toUpperCase();
@@ -1619,7 +1697,9 @@
       if (sCustNameEl) sCustNameEl.textContent = nameInput.value.trim();
 
       const sCustPhoneEl = document.getElementById("s-customer-phone");
-      if (sCustPhoneEl) sCustPhoneEl.textContent = combinedPhone;
+      if (sCustPhoneEl) {
+        sCustPhoneEl.textContent = `+${codeDigits} ${cleanedLocalPhone}`;
+      }
 
       const sBikeModelEl = document.getElementById("s-bike-model");
       if (sBikeModelEl) sBikeModelEl.textContent = combinedBikeModel;
@@ -1689,7 +1769,7 @@
       if (sBtnWa) {
         const text = `Hi Chhotu Motorcycles, I just created a new repair booking on your website!\n\n` +
           `*Booking ID:* #BK-${shortId}\n` +
-          `*Customer:* ${nameInput.value.trim()} (${combinedPhone})\n` +
+          `*Customer:* ${nameInput.value.trim()} (+${backendPhone})\n` +
           `*Bike:* ${combinedBikeModel}\n` +
           `*Service:* ${serviceSelect.value}\n` +
           `*Location:* ${locationInput.value.trim() || 'Workshop'}\n` +
