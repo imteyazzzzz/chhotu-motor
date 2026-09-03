@@ -121,6 +121,7 @@
       </div>
 
       <!-- Sign In Form -->
+      <!-- Sign In Form -->
       <form id="auth-signin-form" class="space-y-4" novalidate>
         <div id="signin-tracking-alert" class="hidden p-4 rounded-md border text-xs bg-[#FF5A1F]/10 border-[#FF5A1F]/30 text-[#F4F1E8] leading-relaxed flex items-start gap-3 font-body">
           <i class="fa-solid fa-shield-halved text-[#FF5A1F] text-base mt-0.5 shrink-0"></i>
@@ -129,18 +130,45 @@
             <p class="text-[#B9B6AC]">Please sign in to securely view and manage your repair tracking details. If you do not have an account yet, switch to the <strong>Sign Up</strong> tab to register.</p>
           </div>
         </div>
+
+        <!-- Dedicated Sign-In Method Selector -->
         <div>
-          <label class="field-label" for="signin-credential">Email Address or Phone Number *</label>
-          <div class="flex gap-2">
-            <select id="signin-phone-code" class="field-input !w-[110px] shrink-0" aria-label="Sign-in identifier type or country code">
-              <option value="email">Email</option>
-              <option value="+977">+977 (NP)</option>
-              <option value="+91">+91 (IN)</option>
-            </select>
-            <input id="signin-credential" type="text" class="field-input flex-1" placeholder="name@example.com or 98XXXXXXXX" required>
+          <label class="field-label block mb-1.5 text-xs text-[#B9B6AC]">Choose Sign-In Method</label>
+          <div class="grid grid-cols-2 p-1 bg-[#14161A] border border-[#3A3F49] rounded-lg gap-1" id="signin-method-toggle" role="tablist">
+            <button type="button" id="method-email-btn" role="tab" aria-selected="true" class="py-2 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-2 bg-[#FF5A1F] text-[#F4F1E8] shadow-sm">
+              <i class="fa-solid fa-envelope"></i> Email Address
+            </button>
+            <button type="button" id="method-phone-btn" role="tab" aria-selected="false" class="py-2 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-2 text-[#B9B6AC] hover:text-[#F4F1E8] hover:bg-[#1B1E24]">
+              <i class="fa-solid fa-phone"></i> Mobile Number
+            </button>
           </div>
-          <p class="field-error" id="signin-credential-error">Please enter your email or mobile number.</p>
         </div>
+
+        <!-- Option 1: Email Input -->
+        <div id="signin-email-group" class="space-y-1">
+          <label class="field-label" for="signin-email">Email Address *</label>
+          <input id="signin-email" type="email" class="field-input" placeholder="name@example.com" inputmode="email" required>
+          <p class="field-error" id="signin-email-error">Please enter your email address.</p>
+        </div>
+
+        <!-- Option 2: Phone Input with Country Code Selector -->
+        <div id="signin-phone-group" class="space-y-1 hidden">
+          <label class="field-label" for="signin-phone">Mobile Phone Number *</label>
+          <div class="flex gap-2">
+            <select id="signin-phone-code" class="field-input !w-[115px] shrink-0 text-xs" aria-label="Country Code">
+              <option value="+977" selected>+977 (NP)</option>
+              <option value="+91">+91 (IN)</option>
+              <option value="+1">+1 (US)</option>
+              <option value="+44">+44 (UK)</option>
+              <option value="+971">+971 (UAE)</option>
+              <option value="+61">+61 (AU)</option>
+            </select>
+            <input id="signin-phone" type="tel" class="field-input flex-1" placeholder="98XXXXXXXX" inputmode="tel">
+          </div>
+          <p class="field-error" id="signin-phone-error">Please enter a valid mobile number.</p>
+        </div>
+
+        <!-- Password Input -->
         <div>
           <label class="field-label" for="signin-password">Password *</label>
           <div class="relative">
@@ -225,11 +253,13 @@
         <div>
           <label class="field-label" for="signup-phone">Phone Number *</label>
           <div class="flex gap-2">
-            <select id="signup-phone-code" class="field-input !w-[100px] shrink-0" required>
-              <option value="+977">+977 (NP)</option>
+            <select id="signup-phone-code" class="field-input !w-[115px] shrink-0 text-xs" required>
+              <option value="+977" selected>+977 (NP)</option>
               <option value="+91">+91 (IN)</option>
               <option value="+1">+1 (US)</option>
               <option value="+44">+44 (UK)</option>
+              <option value="+971">+971 (UAE)</option>
+              <option value="+61">+61 (AU)</option>
             </select>
             <input id="signup-phone" type="tel" class="field-input flex-1" placeholder="98XXXXXXXX" required>
           </div>
@@ -646,37 +676,76 @@
     }
   });
 
-  // Handle Sign In submission with Email or Phone Number
-  const signinCredentialInput = document.getElementById("signin-credential");
-  const signinCodeSelect = document.getElementById("signin-phone-code");
+  // Handle Sign In submission with Dedicated Email or Phone Number Option
+  let activeSigninMethod = "email"; // "email" or "phone"
+
+  const methodEmailBtn = document.getElementById("method-email-btn");
+  const methodPhoneBtn = document.getElementById("method-phone-btn");
+  const signinEmailGroup = document.getElementById("signin-email-group");
+  const signinPhoneGroup = document.getElementById("signin-phone-group");
+  const signinEmailInput = document.getElementById("signin-email");
+  const signinPhoneInput = document.getElementById("signin-phone");
+  const signinPhoneCodeSelect = document.getElementById("signin-phone-code");
   const signinPasswordInput = document.getElementById("signin-password");
 
-  // Dynamic input mode & placeholder adjustments on sign in
-  if (signinCodeSelect && signinCredentialInput) {
-    signinCodeSelect.addEventListener("change", () => {
-      if (signinCodeSelect.value === "email") {
-        signinCredentialInput.placeholder = "name@example.com";
-        signinCredentialInput.setAttribute("inputmode", "email");
-      } else {
-        signinCredentialInput.placeholder = "98XXXXXXXX";
-        signinCredentialInput.setAttribute("inputmode", "tel");
+  function setSigninMethod(method) {
+    activeSigninMethod = method;
+    if (method === "email") {
+      if (methodEmailBtn) {
+        methodEmailBtn.className = "py-2 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-2 bg-[#FF5A1F] text-[#F4F1E8] shadow-sm";
+        methodEmailBtn.setAttribute("aria-selected", "true");
       }
-    });
+      if (methodPhoneBtn) {
+        methodPhoneBtn.className = "py-2 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-2 text-[#B9B6AC] hover:text-[#F4F1E8] hover:bg-[#1B1E24]";
+        methodPhoneBtn.setAttribute("aria-selected", "false");
+      }
+      if (signinEmailGroup) signinEmailGroup.classList.remove("hidden");
+      if (signinPhoneGroup) signinPhoneGroup.classList.add("hidden");
+      clearFieldError(signinPhoneInput, document.getElementById("signin-phone-error"));
+      if (signinEmailInput) signinEmailInput.focus();
+    } else {
+      if (methodPhoneBtn) {
+        methodPhoneBtn.className = "py-2 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-2 bg-[#FF5A1F] text-[#F4F1E8] shadow-sm";
+        methodPhoneBtn.setAttribute("aria-selected", "true");
+      }
+      if (methodEmailBtn) {
+        methodEmailBtn.className = "py-2 px-3 text-xs font-semibold rounded-md transition-all flex items-center justify-center gap-2 text-[#B9B6AC] hover:text-[#F4F1E8] hover:bg-[#1B1E24]";
+        methodEmailBtn.setAttribute("aria-selected", "false");
+      }
+      if (signinPhoneGroup) signinPhoneGroup.classList.remove("hidden");
+      if (signinEmailGroup) signinEmailGroup.classList.add("hidden");
+      clearFieldError(signinEmailInput, document.getElementById("signin-email-error"));
+      if (signinPhoneInput) signinPhoneInput.focus();
+    }
+  }
 
-    signinCredentialInput.addEventListener("input", (e) => {
-      const val = e.target.value.trim();
-      if (val.includes("@")) {
-        signinCodeSelect.value = "email";
-        signinCredentialInput.setAttribute("inputmode", "email");
-      } else if (/^\d{3,}/.test(val) && signinCodeSelect.value === "email") {
-        signinCodeSelect.value = "+977";
-        signinCredentialInput.setAttribute("inputmode", "tel");
-      }
-    });
+  if (methodEmailBtn && methodPhoneBtn) {
+    methodEmailBtn.addEventListener("click", () => setSigninMethod("email"));
+    methodPhoneBtn.addEventListener("click", () => setSigninMethod("phone"));
   }
 
   const signinRules = [
-    { input: signinCredentialInput, error: document.getElementById("signin-credential-error"), required: true, message: "Please enter your email address or phone number." },
+    { 
+      input: signinEmailInput, 
+      error: document.getElementById("signin-email-error"), 
+      validator: () => {
+        if (activeSigninMethod !== "email") return true;
+        const val = signinEmailInput ? signinEmailInput.value.trim() : "";
+        return val.length > 0 && val.includes("@");
+      }, 
+      message: "Please enter a valid email address." 
+    },
+    { 
+      input: signinPhoneInput, 
+      error: document.getElementById("signin-phone-error"), 
+      validator: () => {
+        if (activeSigninMethod !== "phone") return true;
+        const val = signinPhoneInput ? signinPhoneInput.value.trim() : "";
+        const code = signinPhoneCodeSelect ? signinPhoneCodeSelect.value : "+977";
+        return isValidPhone(val, code);
+      }, 
+      message: "Please enter a valid mobile number." 
+    },
     { input: signinPasswordInput, error: document.getElementById("signin-password-error"), required: true, message: "Please enter your password." }
   ];
   setupAuthFormWatcher(signinRules, document.getElementById("signin-submit"));
@@ -700,19 +769,19 @@
     try {
       if (!window.supabaseClient) throw new Error("Supabase client is not configured.");
       
-      const rawCred = signinCredentialInput.value.trim();
-      const codeVal = signinCodeSelect ? signinCodeSelect.value : "email";
-      const isEmail = rawCred.includes("@");
+      let emailToLogin = "";
 
-      let emailToLogin = rawCred;
-
-      if (!isEmail) {
-        // 1. Phone number entered: Resolve registered email
-        const cleanDigits = rawCred.replace(/\D/g, "");
-        const countryDigits = (codeVal && codeVal !== "email") ? codeVal.replace(/\D/g, "") : "977";
+      if (activeSigninMethod === "email") {
+        emailToLogin = signinEmailInput.value.trim();
+      } else {
+        // Phone number login resolution
+        const rawPhone = signinPhoneInput.value.trim();
+        const codeVal = signinPhoneCodeSelect ? signinPhoneCodeSelect.value : "+977";
+        const cleanDigits = rawPhone.replace(/\D/g, "");
+        const countryDigits = codeVal.replace(/\D/g, "");
 
         if (!cleanDigits) {
-          throw new Error("Please enter a valid mobile number.");
+          throw new Error("Please enter your mobile phone number.");
         }
 
         const phoneVariations = [
@@ -766,7 +835,7 @@
         }
 
         if (!matchedEmail) {
-          throw new Error(`No account found with phone number ${codeVal !== 'email' ? codeVal : '+977'} ${cleanDigits}. Please check your phone number or create a new account.`);
+          throw new Error(`No account found with mobile number ${codeVal} ${cleanDigits}. Please check your phone number or switch to Sign Up to create an account.`);
         }
 
         emailToLogin = matchedEmail;
@@ -783,7 +852,7 @@
         await claimGuestBookings(data.session);
       }
 
-      formSignin.classList.add("hidden"); // hide form so success card takes its place
+      formSignin.classList.add("hidden");
       
       showMessage("success", "<i class='fa-solid fa-circle-check'></i> SIGN IN SUCCESSFUL", "Welcome back! Redirecting you...");
       
@@ -847,13 +916,15 @@
   const errorSignupBtn = document.getElementById("error-signup-btn");
   if (errorSignupBtn) {
     errorSignupBtn.addEventListener("click", () => {
-      const enteredCred = signinCredentialInput ? signinCredentialInput.value.trim() : "";
       tabSignup.click();
-      if (enteredCred && enteredCred.includes("@") && signupEmailInput) {
-        signupEmailInput.value = enteredCred;
+      if (activeSigninMethod === "email" && signinEmailInput && signinEmailInput.value.trim() && signupEmailInput) {
+        signupEmailInput.value = signinEmailInput.value.trim();
         signupEmailInput.dispatchEvent(new Event("input", { bubbles: true }));
-      } else if (enteredCred && !enteredCred.includes("@") && signupPhoneInput) {
-        signupPhoneInput.value = enteredCred.replace(/\D/g, "");
+      } else if (activeSigninMethod === "phone" && signinPhoneInput && signinPhoneInput.value.trim() && signupPhoneInput) {
+        if (signinPhoneCodeSelect && signupCodeSelect) {
+          signupCodeSelect.value = signinPhoneCodeSelect.value;
+        }
+        signupPhoneInput.value = signinPhoneInput.value.trim().replace(/\D/g, "");
         signupPhoneInput.dispatchEvent(new Event("input", { bubbles: true }));
       }
       if (signupNameInput) {
