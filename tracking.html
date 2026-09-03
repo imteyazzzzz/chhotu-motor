@@ -400,12 +400,19 @@
 
         </div>
 
-        <!-- Details Info Card (Right 1 col) -->
+        <!-- Details Info Card (Right 1 col) - Collapsible Accordion Dropdown -->
         <div class="space-y-4">
-          <div class="bg-[#14161A] border border-[#3A3F49] p-5 rounded-md space-y-4 text-sm">
-            <h3 class="font-display text-xs text-[#FF5A1F] tracking-wider uppercase border-b border-[#3A3F49] pb-2">Booking Details</h3>
+          <div class="card overflow-hidden border border-[#3A3F49] !p-0">
+            <!-- Accordion Toggle Header (Closed by default) -->
+            <button type="button" id="toggle-booking-details-btn" onclick="toggleBookingDetailsAccordion()" class="w-full flex items-center justify-between p-4 bg-[#1B1E24] hover:bg-[#22262E] transition-colors text-left" aria-expanded="false" aria-controls="booking-details-content">
+              <span class="font-display text-xs text-[#FF5A1F] tracking-wider uppercase flex items-center gap-2">
+                <i class="fa-solid fa-table-cells-large"></i> Booking Details
+              </span>
+              <i id="booking-details-chevron" class="fa-solid fa-chevron-down text-xs text-[#B9B6AC] transition-transform duration-200"></i>
+            </button>
             
-            <div class="font-mono text-xs space-y-3">
+            <!-- Accordion Content Body (Hidden by default) -->
+            <div id="booking-details-content" class="hidden p-5 border-t border-[#3A3F49] space-y-3 font-mono text-xs bg-[#14161A]/60">
               <div>
                 <span class="text-[#B9B6AC] block">Customer:</span>
                 <span class="text-[#F4F1E8]" id="detail-name">--</span>
@@ -767,10 +774,10 @@
               </div>
               <div class="flex flex-wrap items-center gap-3 pt-1">
                 <button type="button" onclick="openDepositReuploadModal()" class="btn btn-primary !py-2 !px-4 !text-xs flex items-center gap-2">
-                  <i class="fa-solid fa-arrow-up-from-bracket"></i> Re-Upload Payment Proof
+                  <i class="fa-solid fa-arrow-up-from-bracket"></i> Re-Upload
                 </button>
                 <a href="https://wa.me/9779813691072?text=${encodeURIComponent('Hi Chhotu Motorcycles, my payment screenshot was rejected for Booking ID: ' + booking.id + ' (Reason: ' + reasonText + ')')}" target="_blank" class="btn btn-outline !py-2 !px-4 !text-xs flex items-center gap-2">
-                  <i class="fa-brands fa-whatsapp text-green-400"></i> Contact Support via WhatsApp
+                  <i class="fa-brands fa-whatsapp text-green-400"></i> Contact Support
                 </a>
               </div>
             </div>
@@ -1458,6 +1465,25 @@
       }
     };
   }
+
+  // Booking Details Accordion Toggle (Closed by default)
+  window.toggleBookingDetailsAccordion = function() {
+    const content = document.getElementById("booking-details-content");
+    const chevron = document.getElementById("booking-details-chevron");
+    const btn = document.getElementById("toggle-booking-details-btn");
+    if (!content || !chevron) return;
+
+    const isHidden = content.classList.contains("hidden");
+    if (isHidden) {
+      content.classList.remove("hidden");
+      chevron.classList.add("rotate-180");
+      if (btn) btn.setAttribute("aria-expanded", "true");
+    } else {
+      content.classList.add("hidden");
+      chevron.classList.remove("rotate-180");
+      if (btn) btn.setAttribute("aria-expanded", "false");
+    }
+  };
 
   // Deposit Payment Re-Upload Modal Handlers
   let reuploadSelectedFile = null;
