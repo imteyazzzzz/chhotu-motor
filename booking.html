@@ -1594,7 +1594,8 @@
         booking_charge: 249,
         payment_ref: paymentRef,
         upi_reference: document.getElementById("booking-utr").value.trim() || null,
-        screenshot_base64: base64Image,
+        screenshot_url: uploadedScreenshotUrl,
+        screenshot_base64: uploadedScreenshotUrl || "",
         submittedAt: now.toISOString(),
         source: "booking.html"
       };
