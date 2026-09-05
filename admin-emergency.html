@@ -56,13 +56,42 @@
     let emergencyBookings = [];
     let mechanics = [];
     let timerInterval = null;
+    let knownEmergencyIds = new Set();
+    let audioAlertEnabled = true;
+
+    // Web Audio alert beep generator (no external mp3 dependency)
+    function playEmergencyAlertBeep() {
+      if (!audioAlertEnabled) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, now); // A5
+        osc.frequency.setValueAtTime(1320, now + 0.15); // E6
+        
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } catch (_) {}
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       const checkInterval = setInterval(async () => {
         if (window.currentAdmin && window.supabaseClient) {
           clearInterval(checkInterval);
           await loadMechanicsList();
-          await fetchEmergencyQueue();
+          await fetchEmergencyQueue(true);
           initRealtimeEmergency();
           
           // Start ticking client-side timers every second
@@ -76,7 +105,7 @@
         const { data, error } = await window.supabaseClient
           .from("mechanics")
           .select("*")
-          .eq("on_duty", true)
+          .order("on_duty", { ascending: false })
           .order("name", { ascending: true });
         
         if (!error && data) {
@@ -87,21 +116,30 @@
       }
     }
 
-    async function fetchEmergencyQueue() {
+    async function fetchEmergencyQueue(isInitial = false) {
       const container = document.getElementById("emergency-cards-container");
       if (!container) return;
 
       try {
-        // Query bookings where service_type = 'emergency' and status = 'pending' or 'assigned' or 'dispatched' (but not in_progress/completed/cancelled)
+        // Query bookings where service_type = 'emergency' and active
         const { data, error } = await window.supabaseClient
           .from("bookings")
           .select("*")
           .eq("service_type", "emergency")
-          .in("status", ["pending", "assigned", "dispatched"])
+          .in("status", ["pending_verification", "pending", "assigned", "dispatched", "en_route"])
           .order("created_at", { ascending: true }); // oldest first
 
         if (error) throw error;
         emergencyBookings = data || [];
+
+        // Check for newly arrived emergencies and play chime
+        if (!isInitial && emergencyBookings.length > 0) {
+          const hasNew = emergencyBookings.some(b => !knownEmergencyIds.has(b.id));
+          if (hasNew) {
+            playEmergencyAlertBeep();
+          }
+        }
+        knownEmergencyIds = new Set(emergencyBookings.map(b => b.id));
 
         renderEmergencyQueue();
 
@@ -131,23 +169,54 @@
         return;
       }
 
-      activeCount.className = "px-2.5 py-1 rounded bg-red-950/20 border border-red-500/30 text-xs font-mono font-bold text-red-500";
+      activeCount.className = "px-2.5 py-1 rounded bg-red-950/20 border border-red-500/30 text-xs font-mono font-bold text-red-500 animate-pulse";
 
       container.innerHTML = emergencyBookings.map(b => {
-        const createdDate = new Date(b.created_at);
         const mapUrl = b.coordinates 
-          ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.coordinates)}" target="_blank" class="text-[#FF5A1F] hover:underline font-mono text-[10px]"><i class="fa-solid fa-map-location-dot"></i> View Coordinates</a>`
+          ? `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.coordinates)}" target="_blank" class="text-[#FF5A1F] hover:underline font-mono text-[10px]"><i class="fa-solid fa-map-location-dot"></i> View GPS Coordinates</a>`
           : "";
 
-        // Build mechanics selection dropdown options
-        const mechanicsOptions = mechanics.map(m => {
-          const selected = b.assigned_mechanic_id === m.id ? "selected" : "";
-          return `<option value="${m.id}" ${selected}>${m.name}</option>`;
-        }).join("");
+        // Build mechanics selection dropdown options (with on-duty and off-duty groups)
+        const onDuty = mechanics.filter(m => m.on_duty);
+        const offDuty = mechanics.filter(m => !m.on_duty);
 
-        const statusPill = b.status === "pending" 
-          ? `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold bg-red-500/15 text-red-400 border border-red-500/20 animate-pulse">Waiting Dispatch</span>`
-          : `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">${b.status}</span>`;
+        let mechanicsOptions = `<option value="">Unassigned...</option>`;
+        if (onDuty.length > 0) {
+          mechanicsOptions += `<optgroup label="ON DUTY">` + onDuty.map(m => {
+            const selected = b.assigned_mechanic_id === m.id ? "selected" : "";
+            return `<option value="${m.id}" ${selected}>${m.name} (${m.specialty})</option>`;
+          }).join("") + `</optgroup>`;
+        }
+        if (offDuty.length > 0) {
+          mechanicsOptions += `<optgroup label="OFF DUTY">` + offDuty.map(m => {
+            const selected = b.assigned_mechanic_id === m.id ? "selected" : "";
+            return `<option value="${m.id}" ${selected}>${m.name} (Off Duty)</option>`;
+          }).join("") + `</optgroup>`;
+        }
+
+        let statusPill = "";
+        let paymentActionAlert = "";
+
+        if (b.status === "pending_verification") {
+          statusPill = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/20 animate-pulse"><i class="fa-solid fa-hourglass-half"></i> Verifying Deposit</span>`;
+          paymentActionAlert = `
+            <div class="bg-amber-950/20 border border-amber-500/30 rounded p-2 flex items-center justify-between text-[11px] text-amber-300">
+              <span>Upfront payment deposit submitted</span>
+              <a href="admin-payments.html" class="btn btn-outline !py-0.5 !px-2 !text-[10px] border-amber-400 text-amber-300 hover:bg-amber-400/10">Verify Now →</a>
+            </div>
+          `;
+        } else if (b.status === "pending") {
+          statusPill = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold bg-red-500/15 text-red-400 border border-red-500/20 animate-pulse"><i class="fa-solid fa-triangle-exclamation"></i> Waiting Dispatch</span>`;
+        } else if (b.status === "assigned") {
+          statusPill = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold bg-blue-500/15 text-blue-400 border border-blue-500/20">Assigned</span>`;
+        } else if (b.status === "en_route" || b.status === "dispatched") {
+          statusPill = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 animate-pulse">En Route</span>`;
+        } else {
+          statusPill = `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">${b.status}</span>`;
+        }
+
+        const custName = b.name || "Customer";
+        const custPhone = b.phone || "No Phone";
 
         return `
           <div id="emergency-card-${b.id}" class="card p-5 space-y-4 relative flex flex-col justify-between" data-created="${b.created_at}">
@@ -160,14 +229,16 @@
                 ${statusPill}
               </div>
 
+              ${paymentActionAlert}
+
               <div class="text-xs space-y-1">
-                <p class="font-bold text-[#F4F1E8]">${b.profiles?.full_name || b.name}</p>
+                <p class="font-bold text-[#F4F1E8]">${custName}</p>
                 <p class="flex items-center gap-2">
-                  <span class="font-mono text-[#B9B6AC]">${b.profiles?.phone || b.phone}</span>
-                  <a href="tel:${b.profiles?.phone || b.phone}" class="px-1.5 py-0.5 bg-[#FFC530] text-[#14161A] font-mono text-[9px] rounded font-bold uppercase"><i class="fa-solid fa-phone"></i> Call</a>
+                  <span class="font-mono text-[#B9B6AC]">${custPhone}</span>
+                  <a href="tel:${custPhone}" class="px-1.5 py-0.5 bg-[#FFC530] text-[#14161A] font-mono text-[9px] rounded font-bold uppercase"><i class="fa-solid fa-phone"></i> Call</a>
                 </p>
-                <p class="text-[#B9B6AC] font-semibold">${b.bike_brand || ""} ${b.bike_model}</p>
-                <p class="text-[#B9B6AC]"><i class="fa-solid fa-location-dot text-[9px] text-[#FF5A1F]"></i> Address: ${b.location}</p>
+                <p class="text-[#B9B6AC] font-semibold">${b.bike_brand || ""} ${b.bike_model || "Motorcycle"}</p>
+                <p class="text-[#B9B6AC]"><i class="fa-solid fa-location-dot text-[9px] text-[#FF5A1F]"></i> ${b.location || "Location not specified"}</p>
                 ${mapUrl}
                 <p class="text-[#F4F1E8] italic bg-[#14161A] p-2 rounded text-[11px] mt-2">" ${b.issue_description || 'No description'} "</p>
               </div>
@@ -178,12 +249,11 @@
               <div>
                 <label class="text-[9px] font-mono text-[#B9B6AC] uppercase block mb-1">Quick Assign Mechanic</label>
                 <select onchange="quickAssignMechanic('${b.id}', this.value)" class="field-input text-xs !py-1 !min-height-[34px] bg-[#14161A] border-[#3A3F49]">
-                  <option value="">Select On-Duty Mechanic...</option>
                   ${mechanicsOptions}
                 </select>
               </div>
               <div class="flex gap-2">
-                <button onclick="quickStatusUpdate('${b.id}', 'dispatched')" class="btn btn-primary !py-1.5 !px-3 !text-[11px] w-full text-center"><i class="fa-solid fa-motorcycle"></i> Mark En Route</button>
+                <button onclick="quickStatusUpdate('${b.id}', 'en_route')" class="btn btn-primary !py-1.5 !px-3 !text-[11px] w-full text-center"><i class="fa-solid fa-motorcycle"></i> Mark En Route</button>
                 <button onclick="window.location.href='admin-bookings.html?id=${b.id}'" class="btn btn-outline !py-1.5 !px-3 !text-[11px] shrink-0" title="More Details"><i class="fa-solid fa-ellipsis"></i></button>
               </div>
             </div>
@@ -230,14 +300,16 @@
 
         // Log audit trail
         const mName = mechanicId ? (mechanics.find(item => item.id === mechanicId)?.name || "Mechanic") : "Unassigned";
-        await window.supabaseClient
-          .from("bookings_activity")
-          .insert([{
-            booking_id: bookingId,
-            actor_id: window.currentAdmin.id,
-            action: "mechanic_assigned",
-            detail: `Quick-assigned job to ${mName}`
-          }]);
+        try {
+          await window.supabaseClient
+            .from("bookings_activity")
+            .insert([{
+              booking_id: bookingId,
+              actor_id: window.currentAdmin.id,
+              action: "mechanic_assigned",
+              detail: `Quick-assigned job to ${mName}`
+            }]);
+        } catch (_) {}
 
         await fetchEmergencyQueue();
 
@@ -259,14 +331,16 @@
         if (error) throw error;
 
         // Log audit trail
-        await window.supabaseClient
-          .from("bookings_activity")
-          .insert([{
-            booking_id: bookingId,
-            actor_id: window.currentAdmin.id,
-            action: "status_changed",
-            detail: `Quick-changed status from '${original.status}' to '${targetStatus}'`
-          }]);
+        try {
+          await window.supabaseClient
+            .from("bookings_activity")
+            .insert([{
+              booking_id: bookingId,
+              actor_id: window.currentAdmin.id,
+              action: "status_changed",
+              detail: `Quick-changed status from '${original.status}' to '${targetStatus}'`
+            }]);
+        } catch (_) {}
 
         await fetchEmergencyQueue();
 

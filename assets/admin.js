@@ -69,6 +69,36 @@ function injectAdminLayout(pageName) {
   const sidebar = document.getElementById("admin-sidebar");
   const topbar = document.getElementById("admin-topbar");
 
+  // Create mobile backdrop if not already existing
+  let backdrop = document.getElementById("admin-sidebar-backdrop");
+  if (!backdrop) {
+    backdrop = document.createElement("div");
+    backdrop.id = "admin-sidebar-backdrop";
+    backdrop.className = "fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity";
+    document.body.appendChild(backdrop);
+    backdrop.addEventListener("click", closeMobileSidebar);
+  }
+
+  function closeMobileSidebar() {
+    if (sidebar) {
+      sidebar.classList.add("hidden");
+      sidebar.classList.remove("fixed", "inset-y-0", "left-0", "z-50", "w-[260px]");
+    }
+    if (backdrop) {
+      backdrop.classList.add("hidden");
+    }
+  }
+
+  function openMobileSidebar() {
+    if (sidebar) {
+      sidebar.classList.remove("hidden");
+      sidebar.classList.add("fixed", "inset-y-0", "left-0", "z-50", "w-[260px]");
+    }
+    if (backdrop) {
+      backdrop.classList.remove("hidden");
+    }
+  }
+
   // Sidebar Injection
   if (sidebar) {
     const navItems = [
@@ -85,8 +115,8 @@ function injectAdminLayout(pageName) {
     const navLinksHTML = navItems.map(item => {
       const isActive = pageName === item.page;
       const activeClass = isActive 
-        ? "border-l-2 border-[#FF5A1F] text-[#FF5A1F]" 
-        : "border-l-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8]";
+        ? "border-l-2 border-[#FF5A1F] text-[#FF5A1F] bg-[#FF5A1F]/5" 
+        : "border-l-2 border-transparent text-[#B9B6AC] hover:text-[#F4F1E8] hover:bg-[#22262E]/50";
       
       const badgeHTML = item.badgeId 
         ? `<span id="${item.badgeId}" class="hidden ml-auto px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[#FF5A1F] text-black ${item.pulse ? 'animate-pulse bg-red-600 text-white' : ''}">0</span>`
@@ -125,19 +155,21 @@ function injectAdminLayout(pageName) {
     // Handle Mobile Drawer Navigation close trigger
     const navCloseBtn = document.getElementById("admin-nav-close");
     if (navCloseBtn) {
-      navCloseBtn.addEventListener("click", () => {
-        sidebar.classList.add("hidden");
-        sidebar.classList.remove("fixed", "inset-y-0", "left-0", "z-50", "w-[260px]");
-      });
+      navCloseBtn.addEventListener("click", closeMobileSidebar);
     }
   }
 
   // Topbar Injection
   if (topbar) {
     const formattedTitle = pageName.replace("admin-", "").replace(".html", "").replace("-", " ").toUpperCase();
-    const initials = adminProfile && adminProfile.full_name
-      ? adminProfile.full_name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2)
-      : "AD";
+    const adminFullName = (adminProfile && adminProfile.full_name) ? adminProfile.full_name.trim() : "Administrator";
+    const initials = adminFullName
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(n => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2) || "AD";
 
     topbar.innerHTML = `
       <div class="flex items-center gap-3">
@@ -160,7 +192,7 @@ function injectAdminLayout(pageName) {
         <!-- Admin Profile Info -->
         <div class="flex items-center gap-3">
           <div class="text-right hidden md:block">
-            <p class="text-xs font-semibold text-[#F4F1E8]">${adminProfile ? adminProfile.full_name : "Administrator"}</p>
+            <p class="text-xs font-semibold text-[#F4F1E8]">${adminFullName}</p>
             <p class="text-[10px] text-[#B9B6AC] uppercase font-mono">${adminProfile ? adminProfile.role : "Staff"}</p>
           </div>
           <div class="w-9 h-9 rounded-full bg-[#FF5A1F]/15 text-[#FF5A1F] border border-[#FF5A1F]/30 flex items-center justify-center text-xs font-bold font-display uppercase">
@@ -172,11 +204,8 @@ function injectAdminLayout(pageName) {
 
     // Handle Mobile Hamburger Trigger
     const navToggleBtn = document.getElementById("admin-nav-toggle");
-    if (navToggleBtn && sidebar) {
-      navToggleBtn.addEventListener("click", () => {
-        sidebar.classList.remove("hidden");
-        sidebar.classList.add("fixed", "inset-y-0", "left-0", "z-50", "w-[260px]");
-      });
+    if (navToggleBtn) {
+      navToggleBtn.addEventListener("click", openMobileSidebar);
     }
   }
 
@@ -215,11 +244,11 @@ async function initRealtimeCounters() {
 
 async function updateSidebarBadges() {
   try {
-    // 1. Fetch pending bookings count
+    // 1. Fetch pending & pending_verification bookings count
     const { data: pendingB, error: pendingErr } = await window.supabaseClient
       .from("bookings")
       .select("id")
-      .eq("status", "pending");
+      .in("status", ["pending", "pending_verification"]);
 
     if (!pendingErr && pendingB) {
       const bookingsBadge = document.getElementById("badge-bookings-count");
@@ -238,7 +267,7 @@ async function updateSidebarBadges() {
       .from("bookings")
       .select("id")
       .eq("service_type", "emergency")
-      .eq("status", "pending");
+      .in("status", ["pending", "pending_verification"]);
 
     if (!emergencyErr && emergencyB) {
       const emergencyBadge = document.getElementById("badge-emergency-count");
@@ -252,11 +281,11 @@ async function updateSidebarBadges() {
       }
     }
 
-    // 3. Fetch bookings in pending_verification status
+    // 3. Fetch all bookings awaiting payment verification (both upfront deposit and final bill)
     const { data: verifyB, error: verifyErr } = await window.supabaseClient
       .from("bookings")
       .select("id")
-      .eq("status", "pending_verification");
+      .in("status", ["pending_verification", "payment_submitted"]);
 
     if (!verifyErr && verifyB) {
       const paymentsBadge = document.getElementById("badge-payments-count");

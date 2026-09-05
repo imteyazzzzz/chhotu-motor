@@ -150,7 +150,7 @@
       // Map active job counts
       const activeJobsMap = {};
       bookingsList.forEach(b => {
-        if (b.assigned_mechanic_id && ["assigned", "in_progress", "dispatched"].includes(b.status)) {
+        if (b.assigned_mechanic_id && ["assigned", "in_progress", "in-progress", "dispatched", "en_route", "completed_awaiting_payment"].includes(b.status)) {
           activeJobsMap[b.assigned_mechanic_id] = (activeJobsMap[b.assigned_mechanic_id] || 0) + 1;
         }
       });
@@ -183,12 +183,33 @@
 
             <div class="flex justify-between items-center border-t border-[#3A3F49]/40 pt-3 text-xs">
               <span class="text-[#B9B6AC] font-mono">Jobs: <strong class="text-[#FF5A1F]">${activeJobsCount} Active</strong></span>
-              <button onclick="editMechanicInline('${m.id}')" class="text-[10px] font-mono text-[#B9B6AC] hover:text-[#FF5A1F] uppercase tracking-wider"><i class="fa-solid fa-pencil"></i> Edit</button>
+              <div class="flex items-center gap-3">
+                <button onclick="editMechanicInline('${m.id}')" class="text-[10px] font-mono text-[#B9B6AC] hover:text-[#FF5A1F] uppercase tracking-wider"><i class="fa-solid fa-pencil"></i> Edit</button>
+                <button onclick="deleteMechanic('${m.id}', '${m.name.replace(/'/g, "\\'")}')" class="text-[10px] font-mono text-red-400 hover:text-red-300 uppercase tracking-wider"><i class="fa-solid fa-trash"></i> Delete</button>
+              </div>
             </div>
           </div>
         `;
       }).join("");
     }
+
+    window.deleteMechanic = async function(mechanicId, mechanicName) {
+      const confirmDelete = confirm(`Are you sure you want to remove mechanic "${mechanicName}" from the roster?`);
+      if (!confirmDelete) return;
+
+      try {
+        const { error } = await window.supabaseClient
+          .from("mechanics")
+          .delete()
+          .eq("id", mechanicId);
+
+        if (error) throw error;
+        await fetchRosterData();
+      } catch (err) {
+        console.error("Delete mechanic failed:", err);
+        alert("Failed to delete mechanic: " + (err.message || err));
+      }
+    };
 
     async function toggleDutyStatus(mechanicId, toggleInput) {
       const isChecked = toggleInput.checked;

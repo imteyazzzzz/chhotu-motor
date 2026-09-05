@@ -35,6 +35,9 @@
             <h1 class="text-2xl font-bold tracking-wide font-display">BOOKINGS QUEUE</h1>
             <p class="text-xs text-[#B9B6AC] mt-0.5 font-mono">Manage, allocate, and track repair requests in real-time.</p>
           </div>
+          <div>
+            <button onclick="exportBookingsCSV()" class="btn btn-outline !py-2 !px-4 !text-xs text-[#FF5A1F] border-[#FF5A1F]/40 hover:bg-[#FF5A1F]/10"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+          </div>
         </div>
 
         <!-- Filter Bar -->
@@ -42,10 +45,11 @@
           <!-- Status filter pills -->
           <div class="flex flex-wrap gap-2" id="status-filter-pills">
             <button onclick="setStatusFilter('all')" id="pill-all" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold">All</button>
-            <button onclick="setStatusFilter('pending')" id="pill-pending" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Pending</button>
-            <button onclick="setStatusFilter('assigned')" id="pill-assigned" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Assigned</button>
+            <button onclick="setStatusFilter('pending_verification')" id="pill-pending_verification" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Verifying Deposit</button>
+            <button onclick="setStatusFilter('pending')" id="pill-pending" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Pending Dispatch</button>
             <button onclick="setStatusFilter('in_progress')" id="pill-in_progress" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">In Progress</button>
-            <button onclick="setStatusFilter('completed')" id="pill-completed" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Completed</button>
+            <button onclick="setStatusFilter('completed_awaiting_payment')" id="pill-completed_awaiting_payment" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Awaiting Payment</button>
+            <button onclick="setStatusFilter('payment_verified')" id="pill-payment_verified" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Paid &amp; Done</button>
             <button onclick="setStatusFilter('cancelled')" id="pill-cancelled" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Cancelled</button>
           </div>
 
@@ -173,13 +177,18 @@
             <div>
               <label class="field-label" for="drawer-status">Current Status</label>
               <select id="drawer-status" class="field-input text-xs">
-                <option value="pending">Pending</option>
+                <option value="pending_verification">Pending Deposit Verification</option>
+                <option value="payment_rejected">Deposit Rejected</option>
+                <option value="pending">Pending Queue</option>
                 <option value="assigned">Assigned</option>
                 <option value="dispatched">Dispatched</option>
+                <option value="en_route">En Route</option>
                 <option value="in_progress">In Progress</option>
                 <option value="completed_awaiting_payment">Completed Awaiting Payment</option>
-                <option value="payment_submitted">Payment Submitted</option>
-                <option value="payment_verified">Payment Verified</option>
+                <option value="payment_submitted">Final Payment Submitted</option>
+                <option value="payment_verified">Final Payment Verified</option>
+                <option value="completed">Completed</option>
+                <option value="paid">Paid</option>
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
@@ -352,7 +361,13 @@
 
         // 1. Status Filter
         if (currentFilterStatus !== "all") {
-          filtered = filtered.filter(b => b.status === currentFilterStatus);
+          if (currentFilterStatus === "in_progress") {
+            filtered = filtered.filter(b => ["in_progress", "in-progress", "assigned", "dispatched", "en_route"].includes(b.status));
+          } else if (currentFilterStatus === "payment_verified") {
+            filtered = filtered.filter(b => ["payment_verified", "paid", "completed"].includes(b.status));
+          } else {
+            filtered = filtered.filter(b => b.status === currentFilterStatus);
+          }
         }
 
         // 2. Service Filter
@@ -377,15 +392,24 @@
           });
         }
 
-        // 4. Search Filter (customer name, phone, reference)
+        // 4. Search Filter (customer name, phone, ref, bike, location)
         if (searchVal) {
           filtered = filtered.filter(b => {
-            const name = b.profiles?.full_name || b.name || "";
-            const phone = b.profiles?.phone || b.phone || "";
-            return b.id.toLowerCase().includes(searchVal) ||
-              name.toLowerCase().includes(searchVal) ||
+            const name = (b.name || b.customer_name || (b.profiles && b.profiles.full_name) || "").toLowerCase();
+            const phone = (b.phone || (b.profiles && b.profiles.phone) || "");
+            const model = (b.bike_model || "").toLowerCase();
+            const brand = (b.bike_brand || "").toLowerCase();
+            const regNo = (b.registration_no || "").toLowerCase();
+            const loc = (b.location || "").toLowerCase();
+            const id = (b.id || "").toLowerCase();
+            
+            return id.includes(searchVal) ||
+              name.includes(searchVal) ||
               phone.includes(searchVal) ||
-              (b.bike_model && b.bike_model.toLowerCase().includes(searchVal));
+              model.includes(searchVal) ||
+              brand.includes(searchVal) ||
+              regNo.includes(searchVal) ||
+              loc.includes(searchVal);
           });
         }
 
@@ -417,9 +441,9 @@
         return `
           <tr onclick="openDetailsDrawer('${b.id}')" class="border-b border-[#3A3F49] hover:bg-[#1B1E24]/30 cursor-pointer transition-all">
             <td class="p-4 font-mono text-xs font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</td>
-            <td class="p-4 text-xs font-semibold text-[#F4F1E8]">${b.profiles?.full_name || b.name}</td>
-            <td class="p-4 text-xs text-[#B9B6AC] uppercase">${b.bike_brand || ""} ${b.bike_model}</td>
-            <td class="p-4 text-xs text-[#B9B6AC] capitalize">${b.service_type.replace("-", " ")}</td>
+            <td class="p-4 text-xs font-semibold text-[#F4F1E8]">${b.name || "Customer"}</td>
+            <td class="p-4 text-xs text-[#B9B6AC] uppercase">${b.bike_brand || ""} ${b.bike_model || "Motorcycle"}</td>
+            <td class="p-4 text-xs text-[#B9B6AC] capitalize">${(b.service_type || "Service").replace("-", " ")}</td>
             <td class="p-4">${statusPill}</td>
             <td class="p-4 text-xs text-[#B9B6AC]">${mechanicName}</td>
             <td class="p-4 font-mono text-[10px] text-[#B9B6AC]">${dt}</td>
@@ -440,13 +464,13 @@
             <div class="flex justify-between items-start">
               <div>
                 <h4 class="font-mono text-xs font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</h4>
-                <p class="text-xs font-semibold text-[#F4F1E8] mt-0.5">${b.profiles?.full_name || b.name}</p>
+                <p class="text-xs font-semibold text-[#F4F1E8] mt-0.5">${b.name || "Customer"}</p>
               </div>
               ${statusPill}
             </div>
             <div class="grid grid-cols-2 gap-2 text-[10px] text-[#B9B6AC] border-t border-[#3A3F49]/40 pt-2 font-mono">
-              <div>Bike: <span class="text-[#F4F1E8] uppercase">${b.bike_brand || ""} ${b.bike_model}</span></div>
-              <div>Type: <span class="text-[#F4F1E8] capitalize">${b.service_type.replace("-", " ")}</span></div>
+              <div>Bike: <span class="text-[#F4F1E8] uppercase">${b.bike_brand || ""} ${b.bike_model || "Motorcycle"}</span></div>
+              <div>Type: <span class="text-[#F4F1E8] capitalize">${(b.service_type || "Service").replace("-", " ")}</span></div>
               <div>Mech: <span class="text-[#F4F1E8]">${mechanicName}</span></div>
               <div>Time: <span class="text-[#F4F1E8]">${dt}</span></div>
             </div>
@@ -454,6 +478,43 @@
         `;
       }).join("");
     }
+
+    // CSV Export functionality
+    window.exportBookingsCSV = function() {
+      if (!bookings || bookings.length === 0) {
+        alert("No bookings available to export.");
+        return;
+      }
+
+      const headers = ["Booking ID", "Created At", "Customer Name", "Phone", "Bike Brand", "Bike Model", "Registration No", "Service Type", "Status", "Payment Status", "Assigned Mechanic", "Location", "Notes"];
+      const rows = bookings.map(b => {
+        const mObj = mechanics.find(m => m.id === b.assigned_mechanic_id);
+        return [
+          `"${b.id}"`,
+          `"${new Date(b.created_at).toISOString()}"`,
+          `"${(b.name || '').replace(/"/g, '""')}"`,
+          `"${(b.phone || '')}"`,
+          `"${(b.bike_brand || '').replace(/"/g, '""')}"`,
+          `"${(b.bike_model || '').replace(/"/g, '""')}"`,
+          `"${(b.registration_no || '').replace(/"/g, '""')}"`,
+          `"${(b.service_type || '')}"`,
+          `"${(b.status || '')}"`,
+          `"${(b.payment_status || '')}"`,
+          `"${(mObj ? mObj.name : 'Unassigned')}"`,
+          `"${(b.location || '').replace(/"/g, '""')}"`,
+          `"${(b.internal_notes || '').replace(/"/g, '""')}"`
+        ].join(",");
+      });
+
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `chhotu_bookings_${new Date().toISOString().split("T")[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
 
     window.zoomFinalPaymentProof = function() {
       const img = document.getElementById("drawer-final-pay-img");
@@ -551,12 +612,14 @@
       document.getElementById("drawer-ref-title").textContent = `#${b.id.substring(0, 12).toUpperCase()}...`;
       document.getElementById("drawer-created-at").textContent = new Date(b.created_at).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
       
-      document.getElementById("drawer-cust-name").textContent = b.profiles?.full_name || b.name || "Customer";
-      document.getElementById("drawer-cust-phone").textContent = b.profiles?.phone || b.phone || "No phone";
-      document.getElementById("drawer-call-link").setAttribute("href", `tel:${b.profiles?.phone || b.phone || ''}`);
+      const custName = b.name || "Customer";
+      const custPhone = b.phone || "No phone";
+      document.getElementById("drawer-cust-name").textContent = custName;
+      document.getElementById("drawer-cust-phone").textContent = custPhone;
+      document.getElementById("drawer-call-link").setAttribute("href", `tel:${custPhone}`);
       
-      document.getElementById("drawer-service-type").textContent = b.service_type.replace("-", " ");
-      document.getElementById("drawer-bike-model").textContent = `${b.bike_brand || ""} ${b.bike_model}`;
+      document.getElementById("drawer-service-type").textContent = (b.service_type || "").replace("-", " ");
+      document.getElementById("drawer-bike-model").textContent = `${b.bike_brand || ""} ${b.bike_model || "Motorcycle"}`;
       
       if (b.registration_no) {
         document.getElementById("drawer-reg-no").textContent = b.registration_no;
@@ -565,7 +628,7 @@
         document.getElementById("drawer-reg-no-row").classList.add("hidden");
       }
 
-      document.getElementById("drawer-location").textContent = b.location;
+      document.getElementById("drawer-location").textContent = b.location || "Not specified";
       
       if (b.coordinates) {
         document.getElementById("drawer-coords-link").setAttribute("href", `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.coordinates)}`);
@@ -587,7 +650,10 @@
         document.getElementById("drawer-job-link-input").value = portalLink;
         
         const mObj = mechanics.find(item => item.id === b.assigned_mechanic_id);
-        const mPhone = mObj ? mObj.phone.replace(/[-\s()]/g, "") : "";
+        let mPhone = mObj ? mObj.phone.replace(/[-\s()]/g, "") : "";
+        if (mPhone.length === 10 && (mPhone.startsWith("98") || mPhone.startsWith("97"))) {
+          mPhone = "977" + mPhone;
+        }
         const waMsg = `Hi, here is your direct mechanic job portal link for booking #${b.id.substring(0, 8).toUpperCase()}: ${portalLink}`;
         document.getElementById("drawer-whatsapp-job-link").setAttribute("href", `https://wa.me/${mPhone}?text=${encodeURIComponent(waMsg)}`);
         
@@ -678,7 +744,7 @@
         if (data && data.length > 0) {
           logContainer.innerHTML = data.map(log => {
             const dt = new Date(log.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-            const actor = log.profiles ? log.profiles.full_name.split(" ")[0] : "System";
+            const actor = (log.profiles?.full_name || "Admin").trim().split(/\s+/)[0];
             return `
               <div class="text-[10px] space-x-1 border-l-2 border-[#FF5A1F]/30 pl-2 py-0.5">
                 <span class="text-[#FF5A1F] font-semibold">${dt} ·</span>
@@ -805,12 +871,24 @@
       let badgeColorClass = "bg-[#3A3F49] text-[#B9B6AC]";
       let label = status || "Pending";
 
-      if (status === "assigned" || status === "confirmed") {
+      if (status === "pending_verification") {
+        badgeColorClass = "bg-amber-500/15 text-amber-400 border border-amber-500/20";
+        label = "Verifying Deposit";
+      } else if (status === "payment_rejected") {
+        badgeColorClass = "bg-red-500/15 text-red-400 border border-red-500/20";
+        label = "Deposit Rejected";
+      } else if (status === "pending") {
+        badgeColorClass = "bg-yellow-500/15 text-yellow-400";
+        label = "Pending Queue";
+      } else if (status === "assigned" || status === "confirmed") {
         badgeColorClass = "bg-blue-500/15 text-blue-400";
         label = "Assigned";
       } else if (status === "dispatched") {
         badgeColorClass = "bg-yellow-500/15 text-yellow-400";
         label = "Dispatched";
+      } else if (status === "en_route") {
+        badgeColorClass = "bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 animate-pulse";
+        label = "En Route";
       } else if (status === "in_progress" || status === "in-progress") {
         badgeColorClass = "bg-[#FF5A1F]/15 text-[#FF5A1F]";
         label = "In Progress";
@@ -819,7 +897,7 @@
         label = "Completed";
       } else if (status === "completed_awaiting_payment") {
         badgeColorClass = "bg-red-500/15 text-red-400 border border-red-500/20";
-        label = "Awaiting Payment";
+        label = "Awaiting Final Pay";
       } else if (status === "payment_submitted") {
         badgeColorClass = "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20";
         label = "Payment Submitted";

@@ -37,14 +37,20 @@
           </div>
         </div>
 
-        <!-- Search Bar -->
-        <div class="card p-4 max-w-md">
-          <label class="field-label" for="customer-search">Search Directory</label>
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#B9B6AC]">
-              <i class="fa-solid fa-magnifying-glass text-xs"></i>
-            </span>
-            <input type="text" id="customer-search" oninput="loadCustomersList()" class="field-input text-xs pl-9 pr-4 !py-1.5 !min-height-[40px]" placeholder="Search by name, email, phone...">
+        <!-- Search Bar & Filters -->
+        <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
+          <div class="card p-3 flex-1 max-w-md">
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#B9B6AC]">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+              </span>
+              <input type="text" id="customer-search" oninput="filterAndRenderCustomers()" class="field-input text-xs pl-9 pr-4 !py-1.5 !min-height-[38px] w-full" placeholder="Search by name, phone, or customer type...">
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="setCustomerFilter('all')" id="filter-all" class="px-3 py-2 rounded text-xs font-mono font-semibold bg-[#FF5A1F] text-white border border-[#FF5A1F]">All (<span id="count-all">0</span>)</button>
+            <button onclick="setCustomerFilter('registered')" id="filter-registered" class="px-3 py-2 rounded text-xs font-mono font-semibold bg-[#1B1E24] text-[#B9B6AC] border border-[#3A3F49] hover:text-[#F4F1E8]">Registered (<span id="count-registered">0</span>)</button>
+            <button onclick="setCustomerFilter('guest')" id="filter-guest" class="px-3 py-2 rounded text-xs font-mono font-semibold bg-[#1B1E24] text-[#B9B6AC] border border-[#3A3F49] hover:text-[#F4F1E8]">Guests (<span id="count-guest">0</span>)</button>
           </div>
         </div>
 
@@ -55,10 +61,11 @@
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="border-b border-[#3A3F49] bg-[#1B1E24]/30">
-                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Customer Name</th>
-                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Email Address</th>
-                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Phone</th>
-                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Member Since</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Customer</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Phone / Contact</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Account Type</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">Total Bookings</th>
+                  <th class="p-4 font-display text-xs text-[#B9B6AC] uppercase tracking-wider">First Seen</th>
                 </tr>
               </thead>
               <tbody id="customers-table-rows">
@@ -76,13 +83,16 @@
     </div>
 
     <!-- Customer Details Drawer (Hidden by default, slides from right) -->
-    <div id="customer-detail-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[425px] bg-[#1B1E24] border-l border-[#3A3F49] shadow-2xl translate-x-full transition-transform duration-300 flex flex-col justify-between">
+    <div id="customer-detail-drawer" class="fixed inset-y-0 right-0 z-50 w-full sm:w-[460px] bg-[#1B1E24] border-l border-[#3A3F49] shadow-2xl translate-x-full transition-transform duration-300 flex flex-col justify-between">
       <div class="flex-1 flex flex-col min-h-0">
         <!-- Header -->
         <div class="p-5 border-b border-[#3A3F49] flex items-center justify-between">
           <div>
-            <h3 class="font-display text-base font-bold text-[#FF5A1F]" id="cust-drawer-name">Rohan Sharma</h3>
-            <p class="text-[10px] text-[#B9B6AC] font-mono mt-0.5" id="cust-drawer-member-since">Member Since Jan 2026</p>
+            <div class="flex items-center gap-2">
+              <h3 class="font-display text-base font-bold text-[#FF5A1F]" id="cust-drawer-name">Customer Details</h3>
+              <span id="cust-drawer-badge" class="px-2 py-0.5 rounded text-[10px] uppercase font-mono font-semibold bg-[#3A3F49] text-[#B9B6AC]">Registered</span>
+            </div>
+            <p class="text-[10px] text-[#B9B6AC] font-mono mt-0.5" id="cust-drawer-member-since">Member Since -</p>
           </div>
           <button onclick="closeCustomerDrawer()" class="text-xl text-[#B9B6AC] hover:text-[#F4F1E8] p-1.5" aria-label="Close details">
             <i class="fa-solid fa-xmark"></i>
@@ -93,24 +103,38 @@
         <div class="flex-1 p-5 overflow-y-auto space-y-6 text-xs">
           <!-- Profile details -->
           <div class="space-y-2">
-            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Contact Metadata</h4>
-            <div class="space-y-1">
-              <p><span class="text-[#B9B6AC]">Email:</span> <span id="cust-drawer-email" class="text-[#F4F1E8] font-mono">iimtefy@gmail.com</span></p>
-              <p><span class="text-[#B9B6AC]">Phone:</span> <span id="cust-drawer-phone" class="text-[#F4F1E8] font-mono">+977 9813691072</span></p>
+            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Contact Details</h4>
+            <div class="space-y-1.5 font-mono text-xs">
+              <div class="flex justify-between items-center">
+                <span class="text-[#B9B6AC]">Phone:</span>
+                <span id="cust-drawer-phone" class="text-[#F4F1E8] font-bold">+977 9800000000</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-[#B9B6AC]">Customer Identifier:</span>
+                <span id="cust-drawer-id" class="text-[#B9B6AC] text-[11px] truncate max-w-[200px]">-</span>
+              </div>
+              <div class="pt-2 flex gap-2">
+                <a id="cust-drawer-call-btn" href="#" class="flex-1 text-center py-1.5 px-3 bg-[#14161A] border border-[#3A3F49] rounded text-[11px] font-mono hover:text-[#FF5A1F] transition-colors">
+                  <i class="fa-solid fa-phone text-[#FF5A1F] mr-1"></i> Direct Call
+                </a>
+                <a id="cust-drawer-whatsapp-btn" href="#" target="_blank" class="flex-1 text-center py-1.5 px-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded text-[11px] font-mono hover:bg-emerald-500/20 transition-colors">
+                  <i class="fa-brands fa-whatsapp mr-1"></i> WhatsApp
+                </a>
+              </div>
             </div>
           </div>
 
-          <!-- Saved Coordinates -->
-          <div class="space-y-2">
+          <!-- Saved Coordinates (For registered users) -->
+          <div id="cust-drawer-address-section" class="space-y-2">
             <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Saved Addresses</h4>
-            <div class="space-y-1">
+            <div class="space-y-1 font-mono">
               <p><span class="text-[#B9B6AC]">Home Address:</span> <span id="cust-drawer-home" class="text-[#F4F1E8]">Not set</span></p>
               <p><span class="text-[#B9B6AC]">Office Address:</span> <span id="cust-drawer-office" class="text-[#F4F1E8]">Not set</span></p>
             </div>
           </div>
 
           <!-- Saved Bikes -->
-          <div class="space-y-2">
+          <div id="cust-drawer-bikes-section" class="space-y-2">
             <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Saved Motorcycles</h4>
             <ul id="cust-drawer-bikes" class="space-y-1 pl-4 list-disc text-[#F4F1E8]">
               <!-- Dynamically populated -->
@@ -119,7 +143,10 @@
 
           <!-- Bookings History -->
           <div class="space-y-3">
-            <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider border-b border-[#3A3F49]/40 pb-1">Bookings History</h4>
+            <div class="flex justify-between items-center border-b border-[#3A3F49]/40 pb-1">
+              <h4 class="font-display text-xs uppercase text-[#FF5A1F] tracking-wider">Bookings History</h4>
+              <span id="cust-drawer-booking-count" class="text-[10px] font-mono text-[#B9B6AC]">0 Bookings</span>
+            </div>
             <div id="cust-drawer-history" class="space-y-3">
               <!-- Dynamically populated cards -->
             </div>
@@ -130,7 +157,8 @@
   </div>
 
   <script>
-    let customers = [];
+    let allCustomers = [];
+    let currentFilter = "all";
     let selectedCustomerId = null;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -138,64 +166,168 @@
         if (window.currentAdmin && window.supabaseClient) {
           clearInterval(checkInterval);
           await loadCustomersList();
+          initRealtime();
         }
       }, 100);
     });
 
+    function initRealtime() {
+      if (!window.supabaseClient) return;
+      window.supabaseClient
+        .channel("admin-customers-realtime")
+        .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, () => loadCustomersList())
+        .on("postgres_changes", { event: "*", schema: "public", table: "bookings" }, () => loadCustomersList())
+        .subscribe();
+    }
+
     async function loadCustomersList() {
-      const rows = document.getElementById("customers-table-rows");
-      const list = document.getElementById("customers-cards-list");
-      if (!rows || !list) return;
-
-      rows.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-xs text-[#B9B6AC] skeleton h-20"></td></tr>`;
-      list.innerHTML = `<p class="text-sm text-[#B9B6AC] skeleton h-20 rounded-md"></p>`;
-
       try {
-        // Query profiles and join user emails if available. (Note: Auth emails are secured in auth.users, but window.supabaseClient queries profiles. We fall back to metadata profiles which carry names/phone/created_at).
-        // Since we are checking user entries, let's query profiles.
-        const { data, error } = await window.supabaseClient
+        // 1. Fetch Registered Profiles
+        const { data: profiles, error: pErr } = await window.supabaseClient
           .from("profiles")
           .select("*")
           .order("created_at", { ascending: false });
 
-        if (error) throw error;
-        customers = data || [];
+        if (pErr) throw pErr;
 
-        const searchVal = document.getElementById("customer-search").value.toLowerCase().trim();
-        let filtered = customers;
+        // 2. Fetch All Bookings to aggregate guest customers and calculate booking counts
+        const { data: bookings, error: bErr } = await window.supabaseClient
+          .from("bookings")
+          .select("id, user_id, name, phone, bike_brand, bike_model, registration_no, service_type, status, location, created_at")
+          .order("created_at", { ascending: false });
 
-        if (searchVal) {
-          filtered = filtered.filter(c => 
-            (c.full_name && c.full_name.toLowerCase().includes(searchVal)) ||
-            (c.phone && c.phone.includes(searchVal))
-          );
-        }
+        if (bErr) throw bErr;
 
-        renderCustomersLayouts(filtered);
+        const profileMap = new Map();
+        (profiles || []).forEach(p => {
+          profileMap.set(p.id, {
+            id: p.id,
+            is_guest: false,
+            full_name: p.full_name || "Registered Customer",
+            phone: p.phone || "",
+            created_at: p.created_at,
+            bookings: []
+          });
+        });
+
+        // Group bookings
+        const guestMap = new Map();
+
+        (bookings || []).forEach(b => {
+          if (b.user_id && profileMap.has(b.user_id)) {
+            profileMap.get(b.user_id).bookings.push(b);
+          } else {
+            // Guest customer booking grouped by normalized phone or name
+            const phoneKey = (b.phone || "").replace(/\s+/g, "").trim() || (b.name || "Unknown");
+            if (!guestMap.has(phoneKey)) {
+              guestMap.set(phoneKey, {
+                id: "guest_" + (b.phone || Math.random().toString(36).substring(7)),
+                is_guest: true,
+                full_name: b.name || "Guest Customer",
+                phone: b.phone || "",
+                created_at: b.created_at,
+                bookings: [b]
+              });
+            } else {
+              const guest = guestMap.get(phoneKey);
+              guest.bookings.push(b);
+              // Set earliest date as first seen
+              if (new Date(b.created_at) < new Date(guest.created_at)) {
+                guest.created_at = b.created_at;
+              }
+            }
+          }
+        });
+
+        allCustomers = [...profileMap.values(), ...guestMap.values()];
+
+        // Sort by most recent activity or creation
+        allCustomers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        updateCounts();
+        filterAndRenderCustomers();
 
       } catch (err) {
         console.error("Failed to load customers list:", err);
       }
     }
 
+    function updateCounts() {
+      const regCount = allCustomers.filter(c => !c.is_guest).length;
+      const guestCount = allCustomers.filter(c => c.is_guest).length;
+      document.getElementById("count-all").textContent = allCustomers.length;
+      document.getElementById("count-registered").textContent = regCount;
+      document.getElementById("count-guest").textContent = guestCount;
+    }
+
+    function setCustomerFilter(filter) {
+      currentFilter = filter;
+      ["all", "registered", "guest"].forEach(f => {
+        const btn = document.getElementById(`filter-${f}`);
+        if (!btn) return;
+        if (f === filter) {
+          btn.className = "px-3 py-2 rounded text-xs font-mono font-semibold bg-[#FF5A1F] text-white border border-[#FF5A1F]";
+        } else {
+          btn.className = "px-3 py-2 rounded text-xs font-mono font-semibold bg-[#1B1E24] text-[#B9B6AC] border border-[#3A3F49] hover:text-[#F4F1E8]";
+        }
+      });
+      filterAndRenderCustomers();
+    }
+
+    function filterAndRenderCustomers() {
+      const searchVal = document.getElementById("customer-search").value.toLowerCase().trim();
+      let filtered = allCustomers;
+
+      if (currentFilter === "registered") {
+        filtered = filtered.filter(c => !c.is_guest);
+      } else if (currentFilter === "guest") {
+        filtered = filtered.filter(c => c.is_guest);
+      }
+
+      if (searchVal) {
+        filtered = filtered.filter(c => 
+          (c.full_name && c.full_name.toLowerCase().includes(searchVal)) ||
+          (c.phone && c.phone.includes(searchVal)) ||
+          (c.id && c.id.toLowerCase().includes(searchVal))
+        );
+      }
+
+      renderCustomersLayouts(filtered);
+    }
+
     function renderCustomersLayouts(list) {
       const rows = document.getElementById("customers-table-rows");
       const cardsList = document.getElementById("customers-cards-list");
+      if (!rows || !cardsList) return;
 
       if (list.length === 0) {
-        rows.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-xs text-[#B9B6AC]">No customers found.</td></tr>`;
-        cardsList.innerHTML = `<div class="card p-6 text-center text-xs text-[#B9B6AC]">No customers found.</div>`;
+        rows.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-xs text-[#B9B6AC] font-mono">No customers found matching this criteria.</td></tr>`;
+        cardsList.innerHTML = `<div class="card p-8 text-center text-xs text-[#B9B6AC] font-mono">No customers found matching this criteria.</div>`;
         return;
       }
 
       // Render Desktop Rows
       rows.innerHTML = list.map(c => {
-        const memberSince = new Date(c.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        const memberSince = new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        const typeBadge = c.is_guest
+          ? `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono font-semibold bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">Guest</span>`
+          : `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">Registered</span>`;
+        
         return `
-          <tr onclick="openCustomerDrawer('${c.id}')" class="border-b border-[#3A3F49] hover:bg-[#1B1E24]/30 cursor-pointer transition-all">
-            <td class="p-4 text-xs font-semibold text-[#F4F1E8]">${c.full_name || "Customer"}</td>
-            <td class="p-4 text-xs text-[#B9B6AC] font-mono">User ID: ${c.id.substring(0, 8).toUpperCase()}...</td>
+          <tr onclick="openCustomerDrawer('${c.id}')" class="border-b border-[#3A3F49] hover:bg-[#1B1E24]/50 cursor-pointer transition-all">
+            <td class="p-4 text-xs font-semibold text-[#F4F1E8]">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-full bg-[#14161A] border border-[#3A3F49] flex items-center justify-center font-display font-bold text-xs text-[#FF5A1F]">
+                  ${(c.full_name || "C").charAt(0).toUpperCase()}
+                </div>
+                <span>${c.full_name || "Customer"}</span>
+              </div>
+            </td>
             <td class="p-4 text-xs text-[#B9B6AC] font-mono">${c.phone || "No phone"}</td>
+            <td class="p-4 text-xs">${typeBadge}</td>
+            <td class="p-4 text-xs text-[#F4F1E8] font-mono font-semibold">
+              <span class="px-2 py-0.5 rounded bg-[#14161A] border border-[#3A3F49]">${c.bookings.length} jobs</span>
+            </td>
             <td class="p-4 text-xs text-[#B9B6AC] font-mono">${memberSince}</td>
           </tr>
         `;
@@ -204,14 +336,22 @@
       // Render Mobile Cards
       cardsList.innerHTML = list.map(c => {
         const memberSince = new Date(c.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+        const typeBadge = c.is_guest
+          ? `<span class="px-2 py-0.5 rounded text-[9px] uppercase font-mono font-semibold bg-yellow-500/15 text-yellow-400">Guest</span>`
+          : `<span class="px-2 py-0.5 rounded text-[9px] uppercase font-mono font-semibold bg-emerald-500/15 text-emerald-400">Registered</span>`;
+
         return `
           <div onclick="openCustomerDrawer('${c.id}')" class="card p-4 space-y-2 cursor-pointer hover:border-[#FF5A1F]/40 transition-all">
             <div class="flex justify-between items-start">
-              <h4 class="text-xs font-semibold text-[#F4F1E8]">${c.full_name || "Customer"}</h4>
-              <span class="text-[10px] text-[#B9B6AC] font-mono">${memberSince}</span>
+              <h4 class="text-xs font-semibold text-[#F4F1E8] flex items-center gap-2">
+                ${c.full_name || "Customer"}
+                ${typeBadge}
+              </h4>
+              <span class="text-[10px] text-[#B9B6AC] font-mono font-semibold">${c.bookings.length} jobs</span>
             </div>
-            <div class="text-[10px] text-[#B9B6AC] font-mono space-y-0.5">
-              <p>Phone: ${c.phone || "No phone"}</p>
+            <div class="text-[10px] text-[#B9B6AC] font-mono flex justify-between items-center">
+              <p>Phone: <span class="text-[#F4F1E8]">${c.phone || "No phone"}</span></p>
+              <span>${memberSince}</span>
             </div>
           </div>
         `;
@@ -220,94 +360,123 @@
 
     async function openCustomerDrawer(custId) {
       selectedCustomerId = custId;
-      const c = customers.find(item => item.id === custId);
+      const c = allCustomers.find(item => item.id === custId);
       if (!c) return;
 
       document.getElementById("cust-drawer-name").textContent = c.full_name || "Customer";
-      document.getElementById("cust-drawer-member-since").textContent = "Member Since " + new Date(c.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-      document.getElementById("cust-drawer-email").textContent = `ID: ${c.id}`;
+      const dateStr = new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      document.getElementById("cust-drawer-member-since").textContent = (c.is_guest ? "First Seen " : "Member Since ") + dateStr;
+      
+      const badgeEl = document.getElementById("cust-drawer-badge");
+      if (c.is_guest) {
+        badgeEl.textContent = "Guest Customer";
+        badgeEl.className = "px-2 py-0.5 rounded text-[10px] uppercase font-mono font-semibold bg-yellow-500/15 text-yellow-400 border border-yellow-500/20";
+      } else {
+        badgeEl.textContent = "Registered Account";
+        badgeEl.className = "px-2 py-0.5 rounded text-[10px] uppercase font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/20";
+      }
+
+      document.getElementById("cust-drawer-id").textContent = c.id;
       document.getElementById("cust-drawer-phone").textContent = c.phone || "No phone added";
 
-      // 1. Fetch saved addresses
-      const homeEl = document.getElementById("cust-drawer-home");
-      const officeEl = document.getElementById("cust-drawer-office");
-      homeEl.textContent = "Loading...";
-      officeEl.textContent = "Loading...";
+      // Call & WhatsApp links
+      const rawPhone = (c.phone || "").replace(/\D/g, "");
+      const callBtn = document.getElementById("cust-drawer-call-btn");
+      const waBtn = document.getElementById("cust-drawer-whatsapp-btn");
+      if (rawPhone) {
+        callBtn.href = `tel:${rawPhone}`;
+        const waNum = rawPhone.startsWith("977") ? rawPhone : "977" + rawPhone;
+        waBtn.href = `https://wa.me/${waNum}?text=${encodeURIComponent(`Namaste ${c.full_name || ""}, this is Chhotu Motorcycles.`)}`;
+        callBtn.classList.remove("pointer-events-none", "opacity-50");
+        waBtn.classList.remove("pointer-events-none", "opacity-50");
+      } else {
+        callBtn.classList.add("pointer-events-none", "opacity-50");
+        waBtn.classList.add("pointer-events-none", "opacity-50");
+      }
 
-      try {
-        const { data: addressData } = await window.supabaseClient
-          .from("addresses")
-          .select("*")
-          .eq("user_id", c.id)
-          .maybeSingle();
+      const addressSection = document.getElementById("cust-drawer-address-section");
+      const bikesSection = document.getElementById("cust-drawer-bikes-section");
 
-        if (addressData) {
-          homeEl.textContent = addressData.home_address || "Not set";
-          officeEl.textContent = addressData.office_address || "Not set";
-        } else {
+      if (c.is_guest) {
+        addressSection.classList.add("hidden");
+        bikesSection.classList.add("hidden");
+      } else {
+        addressSection.classList.remove("hidden");
+        bikesSection.classList.remove("hidden");
+
+        // 1. Fetch saved addresses
+        const homeEl = document.getElementById("cust-drawer-home");
+        const officeEl = document.getElementById("cust-drawer-office");
+        homeEl.textContent = "Loading...";
+        officeEl.textContent = "Loading...";
+
+        try {
+          const { data: addressData } = await window.supabaseClient
+            .from("addresses")
+            .select("*")
+            .eq("user_id", c.id)
+            .maybeSingle();
+
+          if (addressData) {
+            homeEl.textContent = addressData.home_address || "Not set";
+            officeEl.textContent = addressData.office_address || "Not set";
+          } else {
+            homeEl.textContent = "Not set";
+            officeEl.textContent = "Not set";
+          }
+        } catch (_) {
           homeEl.textContent = "Not set";
           officeEl.textContent = "Not set";
         }
-      } catch (_) {
-        homeEl.textContent = "Error";
-        officeEl.textContent = "Error";
-      }
 
-      // 2. Fetch saved bikes
-      const bikesList = document.getElementById("cust-drawer-bikes");
-      bikesList.innerHTML = `<li class="text-xs text-[#B9B6AC]">Loading...</li>`;
+        // 2. Fetch saved bikes
+        const bikesList = document.getElementById("cust-drawer-bikes");
+        bikesList.innerHTML = `<li class="text-xs text-[#B9B6AC]">Loading...</li>`;
 
-      try {
-        const { data: bikes } = await window.supabaseClient
-          .from("motorcycles")
-          .select("*")
-          .eq("user_id", c.id);
+        try {
+          const { data: bikes } = await window.supabaseClient
+            .from("motorcycles")
+            .select("*")
+            .eq("user_id", c.id);
 
-        if (bikes && bikes.length > 0) {
-          bikesList.innerHTML = bikes.map(b => `
-            <li><span class="font-display text-[11px] font-bold uppercase">${b.model}</span> ${b.registration_no ? `<span class="font-mono text-[10px] text-[#B9B6AC]">(${b.registration_no})</span>` : ""}</li>
-          `).join("");
-        } else {
-          bikesList.innerHTML = `<li class="text-xs text-[#B9B6AC] list-none">No saved bikes.</li>`;
+          if (bikes && bikes.length > 0) {
+            bikesList.innerHTML = bikes.map(b => `
+              <li><span class="font-display text-[11px] font-bold uppercase text-[#FF5A1F]">${b.model}</span> ${b.registration_no ? `<span class="font-mono text-[10px] text-[#B9B6AC]">(${b.registration_no})</span>` : ""}</li>
+            `).join("");
+          } else {
+            bikesList.innerHTML = `<li class="text-xs text-[#B9B6AC] list-none">No saved bikes.</li>`;
+          }
+        } catch (_) {
+          bikesList.innerHTML = `<li class="text-xs text-red-400 list-none">Failed to load bikes.</li>`;
         }
-      } catch (_) {
-        bikesList.innerHTML = `<li class="text-xs text-red-400 list-none">Failed to load bikes.</li>`;
       }
 
-      // 3. Fetch bookings history
+      // 3. Render Bookings History
       const history = document.getElementById("cust-drawer-history");
-      history.innerHTML = `<p class="text-xs text-[#B9B6AC]">Loading history...</p>`;
+      const bookingCountEl = document.getElementById("cust-drawer-booking-count");
+      bookingCountEl.textContent = `${c.bookings.length} Bookings`;
 
-      try {
-        const { data: bookings } = await window.supabaseClient
-          .from("bookings")
-          .select("*")
-          .eq("user_id", c.id)
-          .order("created_at", { ascending: false });
-
-        if (bookings && bookings.length > 0) {
-          history.innerHTML = bookings.map(b => {
-            const dt = new Date(b.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-            const statusPill = getStatusPill(b.status);
-            return `
-              <div class="card p-3.5 space-y-2">
-                <div class="flex justify-between items-center">
-                  <span class="font-mono text-[10px] font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</span>
-                  ${statusPill}
-                </div>
-                <div class="text-[10px] text-[#B9B6AC] font-mono space-y-0.5">
-                  <p>Bike: <span class="text-[#F4F1E8] uppercase">${b.bike_brand || ""} ${b.bike_model}</span></p>
-                  <p>Service: <span class="text-[#F4F1E8] capitalize">${b.service_type.replace("-", " ")}</span></p>
-                  <p>Date: <span class="text-[#F4F1E8]">${dt}</span></p>
-                </div>
+      if (c.bookings.length > 0) {
+        history.innerHTML = c.bookings.map(b => {
+          const dt = new Date(b.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+          const statusPill = getStatusPill(b.status);
+          return `
+            <div class="card p-3.5 space-y-2 border border-[#3A3F49]">
+              <div class="flex justify-between items-center">
+                <span class="font-mono text-[10px] font-bold text-[#FF5A1F]">#${(b.id || "").substring(0, 8).toUpperCase()}</span>
+                ${statusPill}
               </div>
-            `;
-          }).join("");
-        } else {
-          history.innerHTML = `<div class="card p-4 text-center text-[10px] text-[#B9B6AC]">No bookings found.</div>`;
-        }
-      } catch (_) {
-        history.innerHTML = `<p class="text-xs text-red-400">Failed to load bookings.</p>`;
+              <div class="text-[10px] text-[#B9B6AC] font-mono space-y-0.5">
+                <p>Bike: <span class="text-[#F4F1E8] uppercase font-bold">${b.bike_brand || ""} ${b.bike_model || "Motorcycle"}</span></p>
+                <p>Service: <span class="text-[#F4F1E8] capitalize">${(b.service_type || "General").replace("-", " ")}</span></p>
+                <p>Location: <span class="text-[#F4F1E8]">${b.location || "On-site"}</span></p>
+                <p>Date: <span class="text-[#B9B6AC]">${dt}</span></p>
+              </div>
+            </div>
+          `;
+        }).join("");
+      } else {
+        history.innerHTML = `<div class="card p-4 text-center text-[10px] text-[#B9B6AC] font-mono">No bookings found for this customer.</div>`;
       }
 
       // Slide drawer open
@@ -321,27 +490,61 @@
 
     // Status Badges helper
     function getStatusPill(status) {
-      let badgeColorClass = "bg-[#3A3F49] text-[#B9B6AC]";
-      let label = "Pending";
+      let badgeColorClass = "bg-[#3A3F49] text-[#B9B6AC] border-[#3A3F49]";
+      let label = (status || "Pending").replace(/_/g, " ");
 
-      if (status === "assigned" || status === "confirmed") {
-        badgeColorClass = "bg-blue-500/15 text-blue-400";
-        label = "Assigned";
-      } else if (status === "dispatched") {
-        badgeColorClass = "bg-yellow-500/15 text-yellow-400";
-        label = "Dispatched";
-      } else if (status === "in_progress" || status === "in-progress") {
-        badgeColorClass = "bg-[#FF5A1F]/15 text-[#FF5A1F]";
-        label = "In Progress";
-      } else if (status === "completed") {
-        badgeColorClass = "bg-green-500/15 text-green-400";
-        label = "Completed";
-      } else if (status === "cancelled") {
-        badgeColorClass = "bg-red-500/15 text-red-400";
-        label = "Cancelled";
+      switch (status) {
+        case "pending_verification":
+          badgeColorClass = "bg-amber-500/15 text-amber-400 border-amber-500/30";
+          label = "Deposit Verifying";
+          break;
+        case "payment_rejected":
+          badgeColorClass = "bg-red-500/15 text-red-400 border-red-500/30";
+          label = "Deposit Rejected";
+          break;
+        case "pending":
+          badgeColorClass = "bg-yellow-500/15 text-yellow-400 border-yellow-500/30";
+          label = "Pending";
+          break;
+        case "assigned":
+        case "confirmed":
+          badgeColorClass = "bg-blue-500/15 text-blue-400 border-blue-500/30";
+          label = "Assigned";
+          break;
+        case "dispatched":
+          badgeColorClass = "bg-indigo-500/15 text-indigo-400 border-indigo-500/30";
+          label = "Dispatched";
+          break;
+        case "en_route":
+          badgeColorClass = "bg-purple-500/15 text-purple-400 border-purple-500/30";
+          label = "En Route";
+          break;
+        case "in_progress":
+        case "in-progress":
+          badgeColorClass = "bg-[#FF5A1F]/15 text-[#FF5A1F] border-[#FF5A1F]/30";
+          label = "In Progress";
+          break;
+        case "completed_awaiting_payment":
+          badgeColorClass = "bg-amber-500/15 text-amber-300 border-amber-500/30";
+          label = "Awaiting Final Pay";
+          break;
+        case "payment_submitted":
+          badgeColorClass = "bg-cyan-500/15 text-cyan-400 border-cyan-500/30";
+          label = "Bill Paid (Verifying)";
+          break;
+        case "payment_verified":
+        case "paid":
+        case "completed":
+          badgeColorClass = "bg-green-500/15 text-green-400 border-green-500/30";
+          label = "Completed & Paid";
+          break;
+        case "cancelled":
+          badgeColorClass = "bg-red-500/15 text-red-400 border-red-500/30";
+          label = "Cancelled";
+          break;
       }
 
-      return `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold ${badgeColorClass}">${label}</span>`;
+      return `<span class="px-2 py-0.5 rounded text-[10px] uppercase font-mono tracking-wider font-semibold border ${badgeColorClass}">${label}</span>`;
     }
   </script>
   <script src="assets/agentation-bundle.js"></script>

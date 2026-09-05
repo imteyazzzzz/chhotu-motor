@@ -401,5 +401,60 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 12. Force Supabase PostgREST schema cache to reload
+-- 12. Workshop Settings & Broadcast Logs Tables
+CREATE TABLE IF NOT EXISTS public.workshop_settings (
+    id TEXT PRIMARY KEY DEFAULT 'default',
+    hours_start TEXT DEFAULT '09:00',
+    hours_end TEXT DEFAULT '20:00',
+    support_phone TEXT DEFAULT '+977 9813691072',
+    upi_id TEXT DEFAULT 'chhotumotorcycles@ybl',
+    deposit_fee NUMERIC DEFAULT 249.0,
+    base_charge NUMERIC DEFAULT 400.0,
+    emergency_fee NUMERIC DEFAULT 150.0,
+    service_areas TEXT DEFAULT 'Jorpati, Boudha, Chabahil, Jatar, Kapan, Gokarna',
+    updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Seed default settings row if not exists
+INSERT INTO public.workshop_settings (id, hours_start, hours_end, support_phone, upi_id, deposit_fee, base_charge, emergency_fee, service_areas)
+VALUES ('default', '09:00', '20:00', '+977 9813691072', 'chhotumotorcycles@ybl', 249.0, 400.0, 150.0, 'Jorpati, Boudha, Chabahil, Jatar, Kapan, Gokarna')
+ON CONFLICT (id) DO NOTHING;
+
+ALTER TABLE public.workshop_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can view workshop settings" ON public.workshop_settings;
+CREATE POLICY "Public can view workshop settings" ON public.workshop_settings
+    FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Admin/Staff can update workshop settings" ON public.workshop_settings;
+CREATE POLICY "Admin/Staff can update workshop settings" ON public.workshop_settings
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.role IN ('admin', 'staff')
+        )
+    );
+
+CREATE TABLE IF NOT EXISTS public.broadcast_logs (
+    id TEXT PRIMARY KEY DEFAULT ('bc-' || extract(epoch from now())::bigint),
+    title TEXT,
+    message TEXT NOT NULL,
+    target_audience TEXT DEFAULT 'all',
+    channels TEXT DEFAULT 'WhatsApp',
+    audience_size INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.broadcast_logs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admin/Staff can manage broadcast logs" ON public.broadcast_logs;
+CREATE POLICY "Admin/Staff can manage broadcast logs" ON public.broadcast_logs
+    FOR ALL USING (
+        EXISTS (
+            SELECT 1 FROM public.profiles 
+            WHERE profiles.id = auth.uid() AND profiles.role IN ('admin', 'staff')
+        )
+    );
+
+-- 13. Force Supabase PostgREST schema cache to reload
 NOTIFY pgrst, 'reload schema';

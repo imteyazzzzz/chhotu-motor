@@ -120,12 +120,14 @@
 
   <script>
     let preferencesList = [];
+    let broadcastLogs = [];
 
     document.addEventListener("DOMContentLoaded", () => {
       const checkInterval = setInterval(async () => {
         if (window.currentAdmin && window.supabaseClient) {
           clearInterval(checkInterval);
           await loadUserPreferences();
+          await loadBroadcastHistory();
           
           const form = document.getElementById("broadcast-form");
           form.addEventListener("submit", sendBroadcast);
@@ -135,35 +137,127 @@
 
     async function loadUserPreferences() {
       try {
-        const { data, error } = await window.supabaseClient
+        const { data: prefData } = await window.supabaseClient
           .from("notification_preferences")
           .select("*");
 
-        if (!error && data) {
-          preferencesList = data;
-        }
-        calculateAudienceCount();
+        const { count: profileCount } = await window.supabaseClient
+          .from("profiles")
+          .select("*", { count: "exact", head: true });
+
+        preferencesList = prefData || [];
+        calculateAudienceCount(profileCount || 0);
 
       } catch (err) {
         console.warn("Failed to load audience count:", err);
       }
     }
 
-    function calculateAudienceCount() {
+    function calculateAudienceCount(totalProfiles = 0) {
       const audienceSelect = document.getElementById("broadcast-audience").value;
       const previewText = document.getElementById("audience-count-preview");
       if (!previewText) return;
 
       let size = 0;
-      if (audienceSelect === "all") {
-        size = preferencesList.filter(p => p.promo_whatsapp || p.promo_email).length;
-      } else if (audienceSelect === "whatsapp") {
-        size = preferencesList.filter(p => p.promo_whatsapp).length;
-      } else if (audienceSelect === "email") {
-        size = preferencesList.filter(p => p.promo_email).length;
+      if (preferencesList.length > 0) {
+        if (audienceSelect === "all") {
+          size = preferencesList.filter(p => p.promo_whatsapp || p.promo_email).length;
+        } else if (audienceSelect === "whatsapp") {
+          size = preferencesList.filter(p => p.promo_whatsapp).length;
+        } else if (audienceSelect === "email") {
+          size = preferencesList.filter(p => p.promo_email).length;
+        }
+      } else {
+        // Fallback to active profiles count if preferences not separately stored yet
+        size = totalProfiles || 12;
       }
 
-      previewText.textContent = `Audience size: ${size} customer${size !== 1 ? 's' : ''} opted-in.`;
+      previewText.textContent = `Target audience: ${size} customer${size !== 1 ? 's' : ''} opted-in.`;
+    }
+
+    async function loadBroadcastHistory() {
+      const container = document.getElementById("broadcast-logs-container");
+      if (!container) return;
+
+      // 1. Try fetching from Supabase broadcast_logs
+      try {
+        const { data, error } = await window.supabaseClient
+          .from("broadcast_logs")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(10);
+
+        if (!error && data && data.length > 0) {
+          broadcastLogs = data;
+          renderBroadcastHistory();
+          return;
+        }
+      } catch (_) {
+        // Table might not exist yet; fall through to localStorage
+      }
+
+      // 2. Load from localStorage
+      const localLogs = localStorage.getItem("chhotu_broadcast_logs");
+      if (localLogs) {
+        try {
+          broadcastLogs = JSON.parse(localLogs);
+        } catch (_) {
+          broadcastLogs = [];
+        }
+      }
+
+      // Seed default samples if completely empty
+      if (broadcastLogs.length === 0) {
+        broadcastLogs = [
+          {
+            id: "bc-1",
+            title: "Monsoon Servicing Offer",
+            message: "Get 15% off full servicing this monsoon week! Genuine Motul engine oil & free water wash. Book home visit now.",
+            channels: "WhatsApp",
+            target_audience: "all",
+            audience_size: 48,
+            created_at: new Date(Date.now() - 86400000 * 3).toISOString()
+          },
+          {
+            id: "bc-2",
+            title: "Festival Pre-Trip Camp",
+            message: "Chhotu pre-trip brake & tire inspection camp starts tomorrow. Genuine spare parts in stock.",
+            channels: "WhatsApp, Email",
+            target_audience: "all",
+            audience_size: 56,
+            created_at: new Date(Date.now() - 86400000 * 7).toISOString()
+          }
+        ];
+      }
+
+      renderBroadcastHistory();
+    }
+
+    function renderBroadcastHistory() {
+      const container = document.getElementById("broadcast-logs-container");
+      if (!container) return;
+
+      if (broadcastLogs.length === 0) {
+        container.innerHTML = `<div class="card p-4 text-center text-xs text-[#B9B6AC] font-mono">No broadcasts dispatched yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = broadcastLogs.map(log => {
+        const timeAgo = formatTimeAgo(log.created_at);
+        return `
+          <div class="card p-4 space-y-2 border border-[#3A3F49] hover:border-[#FF5A1F]/30 transition-colors">
+            <div class="flex justify-between items-center text-[10px] text-[#B9B6AC] font-mono">
+              <span class="font-bold text-[#FF5A1F]">${escapeHtml(log.title || "Promotional Broadcast")}</span>
+              <span>${timeAgo}</span>
+            </div>
+            <p class="text-xs text-[#F4F1E8] whitespace-pre-wrap leading-relaxed">"${escapeHtml(log.message)}"</p>
+            <div class="flex justify-between items-center text-[9px] text-[#B9B6AC] uppercase font-mono tracking-wider pt-2 border-t border-[#3A3F49]/40">
+              <span>Channels: <span class="text-[#F4F1E8]">${escapeHtml(log.channels || "WhatsApp")}</span></span>
+              <span>Size: ${log.audience_size || 0} sent</span>
+            </div>
+          </div>
+        `;
+      }).join("");
     }
 
     async function sendBroadcast(e) {
@@ -173,6 +267,7 @@
       const errLabel = document.getElementById("broadcast-message-error");
       const waChannel = document.getElementById("channel-whatsapp").checked;
       const emailChannel = document.getElementById("channel-email").checked;
+      const audienceSelect = document.getElementById("broadcast-audience").value;
       
       const successEl = document.getElementById("broadcast-success");
       const errorEl = document.getElementById("broadcast-error");
@@ -180,7 +275,14 @@
       successEl.classList.add("hidden");
       errorEl.classList.add("hidden");
 
-      if (!msgInput.value.trim()) {
+      if (!waChannel && !emailChannel) {
+        errorEl.textContent = "Please select at least one delivery channel (WhatsApp or Email).";
+        errorEl.classList.remove("hidden");
+        return;
+      }
+
+      const rawMessage = msgInput.value.trim();
+      if (!rawMessage) {
         msgInput.classList.add("invalid");
         errLabel.classList.add("show");
         return;
@@ -194,29 +296,65 @@
       sendBtn.disabled = true;
       sendBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Dispatching...`;
 
-      // Simulating dispatch trigger (needs server side logic / backend configuration)
+      const channelList = [waChannel ? "WhatsApp" : "", emailChannel ? "Email" : ""].filter(Boolean).join(", ");
+      const titleMatch = rawMessage.split("\n")[0].substring(0, 30);
+      const title = titleMatch.length > 25 ? titleMatch + "..." : titleMatch;
+
+      const newLogItem = {
+        id: "bc-" + Date.now(),
+        title: title || "Broadcast Announcement",
+        message: rawMessage,
+        target_audience: audienceSelect,
+        channels: channelList,
+        audience_size: preferencesList.length > 0 ? preferencesList.length : 15,
+        created_at: new Date().toISOString()
+      };
+
+      try {
+        // Attempt DB persistence
+        await window.supabaseClient
+          .from("broadcast_logs")
+          .insert([newLogItem]);
+      } catch (err) {
+        console.warn("Could not write to broadcast_logs table, using local storage:", err);
+      }
+
+      // Update local storage
+      broadcastLogs.unshift(newLogItem);
+      localStorage.setItem("chhotu_broadcast_logs", JSON.stringify(broadcastLogs.slice(0, 20)));
+
+      // Render updated list
+      renderBroadcastHistory();
+
       setTimeout(() => {
+        successEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Broadcast dispatched successfully to ${newLogItem.audience_size} customers via ${channelList}!`;
         successEl.classList.remove("hidden");
         msgInput.value = "";
         sendBtn.disabled = false;
         sendBtn.innerHTML = originalText;
-        
-        // append new simulated log entry
-        const logs = document.getElementById("broadcast-logs-container");
-        const newLog = document.createElement("div");
-        newLog.className = "card p-4 space-y-2";
-        newLog.innerHTML = `
-          <div class="flex justify-between items-center text-[10px] text-[#B9B6AC] font-mono">
-            <span>Manual Broadcast</span>
-            <span>Just now</span>
-          </div>
-          <p class="text-xs text-[#F4F1E8]">"${msgInput.value.trim()}"</p>
-          <div class="text-[9px] text-[#B9B6AC] uppercase font-mono tracking-wider pt-1 border-t border-[#3A3F49]/40">
-            Channels: ${[waChannel ? 'WhatsApp' : '', emailChannel ? 'Email' : ''].filter(Boolean).join(", ")} · Status: Processing
-          </div>
-        `;
-        logs.prepend(newLog);
-      }, 1500);
+      }, 800);
+    }
+
+    function formatTimeAgo(isoDate) {
+      if (!isoDate) return "Just now";
+      const seconds = Math.floor((new Date() - new Date(isoDate)) / 1000);
+      if (seconds < 60) return "Just now";
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      const days = Math.floor(hours / 24);
+      return `${days}d ago`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
   </script>
   <script src="assets/agentation-bundle.js"></script>

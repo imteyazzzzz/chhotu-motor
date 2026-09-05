@@ -89,7 +89,8 @@
       const checkInterval = setInterval(async () => {
         if (window.currentAdmin && window.supabaseClient) {
           clearInterval(checkInterval);
-          document.getElementById("greeting-title").textContent = `GOOD DAY, ${window.adminProfile.full_name.split(" ")[0].toUpperCase()}`;
+          const firstWord = (window.adminProfile?.full_name || "Admin").trim().split(/\s+/)[0].toUpperCase();
+          document.getElementById("greeting-title").textContent = `GOOD DAY, ${firstWord}`;
           await loadDashboardData();
           initRealtimeDashboard();
         }
@@ -113,10 +114,10 @@
         const todayStr = new Date().toDateString();
 
         if (allBookings) {
-          pendingCount = allBookings.filter(b => b.status === "pending").length;
-          progressCount = allBookings.filter(b => b.status === "in_progress" || b.status === "assigned" || b.status === "dispatched").length;
-          completedToday = allBookings.filter(b => b.status === "completed" && new Date(b.created_at).toDateString() === todayStr).length;
-          unassignedEmergency = allBookings.filter(b => b.service_type === "emergency" && b.status === "pending").length;
+          pendingCount = allBookings.filter(b => ["pending", "pending_verification"].includes(b.status)).length;
+          progressCount = allBookings.filter(b => ["in_progress", "in-progress", "assigned", "dispatched", "en_route", "completed_awaiting_payment", "payment_submitted"].includes(b.status)).length;
+          completedToday = allBookings.filter(b => ["completed", "payment_verified", "paid"].includes(b.status) && new Date(b.created_at).toDateString() === todayStr).length;
+          unassignedEmergency = allBookings.filter(b => b.service_type === "emergency" && ["pending", "pending_verification"].includes(b.status)).length;
         }
 
         document.getElementById("stat-pending").textContent = pendingCount;
@@ -144,14 +145,14 @@
             const isEmergency = b.service_type === "emergency";
             const typeLabel = isEmergency 
               ? `<span class="px-2 py-0.5 rounded text-[9px] uppercase font-mono tracking-wider font-semibold bg-red-500/10 text-red-400 border border-red-500/20"><i class="fa-solid fa-triangle-exclamation"></i> Emergency</span>`
-              : `<span class="px-2 py-0.5 rounded text-[9px] uppercase font-mono tracking-wider font-semibold bg-[#22262E] text-[#B9B6AC] border border-[#3A3F49]">${b.service_type.replace("-", " ")}</span>`;
+              : `<span class="px-2 py-0.5 rounded text-[9px] uppercase font-mono tracking-wider font-semibold bg-[#22262E] text-[#B9B6AC] border border-[#3A3F49]">${(b.service_type || "service").replace("-", " ")}</span>`;
 
             return `
               <div onclick="window.location.href='admin-bookings.html?id=${b.id}'" class="card p-4 flex justify-between items-center cursor-pointer transition-all hover:border-[#FF5A1F]/40 hover:-translate-y-0.5">
                 <div class="space-y-1">
                   <div class="flex items-center gap-2.5">
-                    <span class="font-mono text-xs font-bold text-[#F4F1E8]">#${b.id.substring(0, 8).toUpperCase()}</span>
-                    <span class="text-xs text-[#B9B6AC] font-display uppercase font-semibold">${b.bike_brand || ""} ${b.bike_model}</span>
+                    <span class="font-mono text-xs font-bold text-[#FF5A1F]">#${b.id.substring(0, 8).toUpperCase()}</span>
+                    <span class="text-xs text-[#B9B6AC] font-display uppercase font-semibold">${b.bike_brand || ""} ${b.bike_model || "Motorcycle"}</span>
                   </div>
                   <div class="flex items-center gap-2">
                     ${typeLabel}
@@ -182,7 +183,7 @@
           const activeJobsMap = {};
           if (allBookings) {
             allBookings.forEach(b => {
-              if (b.assigned_mechanic_id && ["assigned", "in_progress", "dispatched"].includes(b.status)) {
+              if (b.assigned_mechanic_id && ["assigned", "in_progress", "in-progress", "dispatched", "en_route", "completed_awaiting_payment"].includes(b.status)) {
                 activeJobsMap[b.assigned_mechanic_id] = (activeJobsMap[b.assigned_mechanic_id] || 0) + 1;
               }
             });
@@ -274,20 +275,41 @@
       return seconds < 10 ? "Just now" : seconds + "s ago";
     }
 
-    // Status Badges mapping helper (identical to profile.html status values)
+    // Comprehensive Status Badges mapping helper
     function getStatusPill(status) {
       let badgeColorClass = "bg-[#3A3F49] text-[#B9B6AC]";
-      let label = "Pending";
+      let label = status || "Pending";
 
-      if (status === "assigned" || status === "confirmed") {
+      if (status === "pending_verification") {
+        badgeColorClass = "bg-amber-500/15 text-amber-400 border border-amber-500/20";
+        label = "Verifying Deposit";
+      } else if (status === "payment_rejected") {
+        badgeColorClass = "bg-red-500/15 text-red-400 border border-red-500/20";
+        label = "Deposit Rejected";
+      } else if (status === "pending") {
+        badgeColorClass = "bg-yellow-500/15 text-yellow-400";
+        label = "Pending Queue";
+      } else if (status === "assigned" || status === "confirmed") {
         badgeColorClass = "bg-blue-500/15 text-blue-400";
         label = "Assigned";
       } else if (status === "dispatched") {
         badgeColorClass = "bg-yellow-500/15 text-yellow-400";
         label = "Dispatched";
+      } else if (status === "en_route") {
+        badgeColorClass = "bg-cyan-500/15 text-cyan-400 border border-cyan-500/20 animate-pulse";
+        label = "En Route";
       } else if (status === "in_progress" || status === "in-progress") {
         badgeColorClass = "bg-[#FF5A1F]/15 text-[#FF5A1F]";
         label = "In Progress";
+      } else if (status === "completed_awaiting_payment") {
+        badgeColorClass = "bg-orange-500/15 text-orange-400 border border-orange-500/20";
+        label = "Awaiting Final Pay";
+      } else if (status === "payment_submitted") {
+        badgeColorClass = "bg-purple-500/15 text-purple-400 border border-purple-500/20";
+        label = "Payment Submitted";
+      } else if (status === "payment_verified" || status === "paid") {
+        badgeColorClass = "bg-green-500/15 text-green-400 border border-green-500/20";
+        label = "Paid & Verified";
       } else if (status === "completed") {
         badgeColorClass = "bg-green-500/15 text-green-400";
         label = "Completed";

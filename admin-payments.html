@@ -40,13 +40,22 @@
           </div>
         </div>
 
+        <!-- Filter Tabs -->
+        <div class="card p-3 flex flex-wrap gap-2">
+          <button onclick="setPaymentTab('pending_all')" id="tab-pending_all" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold">Pending All</button>
+          <button onclick="setPaymentTab('upfront')" id="tab-upfront" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Upfront Deposits</button>
+          <button onclick="setPaymentTab('final')" id="tab-final" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Final Bills</button>
+          <button onclick="setPaymentTab('verified_history')" id="tab-verified_history" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Verified History</button>
+          <button onclick="setPaymentTab('rejected_history')" id="tab-rejected_history" class="px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]">Rejected History</button>
+        </div>
+
         <!-- Verification Queue Container -->
         <div class="card overflow-hidden border border-[#3A3F49]/40 bg-[#1B1E24]/60">
           <div class="overflow-x-auto w-full">
             <table class="w-full text-left border-collapse">
               <thead>
                 <tr class="border-b border-[#3A3F49] bg-[#14161A]/50 text-[10px] text-[#B9B6AC] uppercase font-mono tracking-wider">
-                  <th class="p-4">Customer & Service</th>
+                  <th class="p-4">Customer &amp; Service</th>
                   <th class="p-4">Vehicle</th>
                   <th class="p-4">Payment Ref / UTR</th>
                   <th class="p-4">Submitted Time</th>
@@ -77,12 +86,12 @@
           <h4 id="lightbox-title" class="font-display text-xs text-[#FF5A1F] uppercase font-semibold">Payment Proof Screenshot</h4>
           <span id="lightbox-utr-display" class="font-mono text-[10px] text-[#B9B6AC]">UTR: N/A</span>
         </div>
-        <div class="flex-1 overflow-auto flex items-center justify-center bg-[#14161A] rounded p-2 border border-[#3A3F49]/30">
-          <img id="lightbox-img" src="" class="max-h-[60vh] object-contain rounded" alt="Loading screenshot...">
+        <div class="flex-1 overflow-auto flex items-center justify-center bg-[#14161A] rounded p-2 border border-[#3A3F49]/30 min-h-[260px]">
+          <img id="lightbox-img" src="" class="max-h-[60vh] object-contain rounded cursor-zoom-in" onclick="zoomProof()" alt="Loading screenshot...">
         </div>
-        <div class="flex justify-end gap-3 pt-2">
+        <div id="lightbox-action-row" class="flex justify-end gap-3 pt-2">
           <button id="lightbox-btn-reject" class="btn btn-outline border-red-500/40 text-red-400 hover:bg-red-500/5 !py-2 !px-4 !text-xs">Reject Proof</button>
-          <button id="lightbox-btn-approve" class="btn btn-primary !py-2 !px-4 !text-xs">Verify & Approve</button>
+          <button id="lightbox-btn-approve" class="btn btn-primary !py-2 !px-4 !text-xs">Verify &amp; Approve</button>
         </div>
       </div>
     </div>
@@ -110,6 +119,10 @@
   </div>
 
   <script>
+    let activeTab = "pending_all";
+    let currentQueue = [];
+    let selectedBooking = null;
+
     document.addEventListener("DOMContentLoaded", () => {
       const initCheck = setInterval(() => {
         if (window.currentAdmin && window.supabaseClient) {
@@ -120,20 +133,52 @@
       }, 100);
     });
 
-    let currentQueue = [];
-    let selectedBooking = null;
+    function setPaymentTab(tab) {
+      activeTab = tab;
+      const tabs = ["pending_all", "upfront", "final", "verified_history", "rejected_history"];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (btn) {
+          if (t === tab) {
+            btn.className = "px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider bg-[#FF5A1F] text-black font-semibold";
+          } else {
+            btn.className = "px-3.5 py-1.5 rounded-full text-xs font-display uppercase tracking-wider border border-[#3A3F49] text-[#B9B6AC]";
+          }
+        }
+      });
+      loadQueueData();
+    }
 
     async function loadQueueData() {
       const rowsContainer = document.getElementById("payment-queue-rows");
       if (!rowsContainer) return;
 
+      rowsContainer.innerHTML = `
+        <tr>
+          <td colspan="5" class="p-10 text-center text-sm text-[#B9B6AC]"><span class="inline-block h-6 w-6 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Loading...</td>
+        </tr>
+      `;
+
       try {
-        const { data: bookings, error } = await window.supabaseClient
+        let query = window.supabaseClient
           .from("bookings")
-          .select("*, invoices(*)")
-          .in("status", ["pending_verification", "payment_submitted"])
-          .order("service_type", { ascending: true }) // prioritizes 'emergency' alphabetically
-          .order("created_at", { ascending: true }); // oldest first
+          .select("*, invoices(*)");
+
+        if (activeTab === "pending_all") {
+          query = query.in("status", ["pending_verification", "payment_submitted"]);
+        } else if (activeTab === "upfront") {
+          query = query.eq("status", "pending_verification");
+        } else if (activeTab === "final") {
+          query = query.eq("status", "payment_submitted");
+        } else if (activeTab === "verified_history") {
+          query = query.or("status.in.(payment_verified,paid),payment_status.eq.verified,final_payment_status.eq.verified");
+        } else if (activeTab === "rejected_history") {
+          query = query.or("status.eq.payment_rejected,final_payment_status.eq.rejected");
+        }
+
+        const { data: bookings, error } = await query
+          .order("service_type", { ascending: true })
+          .order("created_at", { ascending: false });
 
         if (error) throw error;
         currentQueue = bookings || [];
@@ -141,7 +186,7 @@
         if (currentQueue.length === 0) {
           rowsContainer.innerHTML = `
             <tr>
-              <td colspan="5" class="p-10 text-center text-xs text-[#B9B6AC]">No payments awaiting verification in queue. All clear!</td>
+              <td colspan="5" class="p-10 text-center text-xs text-[#B9B6AC]">No records found in this view.</td>
             </tr>
           `;
           return;
@@ -150,7 +195,7 @@
         rowsContainer.innerHTML = currentQueue.map(b => {
           const dt = new Date(b.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
           const isEmergency = b.service_type === "emergency";
-          const isFinal = b.status === "payment_submitted";
+          const isFinal = b.status === "payment_submitted" || b.final_payment_status === "verified" || b.final_payment_status === "rejected";
           
           const priorityRowClass = isEmergency 
             ? "bg-red-950/5 border-l-2 border-l-red-500/80 hover:bg-red-950/10" 
@@ -166,14 +211,17 @@
             ? `<span class="px-1.5 py-0.5 rounded text-[8px] uppercase font-bold bg-green-500/10 text-green-400 border border-green-500/20">Final Bill</span>`
             : `<span class="px-1.5 py-0.5 rounded text-[8px] uppercase font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">Upfront Deposit</span>`;
 
-          const utr = isFinal ? b.final_payment_upi_reference : b.upi_reference;
-          const finalAmount = b.invoices && b.invoices[0] ? b.invoices[0].total_amount : 0;
+          const utr = isFinal ? (b.final_payment_upi_reference || b.final_payment_upi_extracted) : b.upi_reference;
+          const finalAmount = b.invoices && b.invoices[0] ? b.invoices[0].total_amount : (b.final_payment_amount_extracted || 0);
           const amountText = isFinal ? `Rs. ${finalAmount}` : "Rs. 249";
+
+          const isHistorical = activeTab === "verified_history" || activeTab === "rejected_history" || ["payment_verified", "paid", "payment_rejected"].includes(b.status);
+          const btnLabel = isHistorical ? "View Details" : "View Proof";
 
           return `
             <tr class="border-b border-[#3A3F49]/40 transition-colors ${priorityRowClass}">
               <td class="p-4">
-                <div class="font-semibold text-sm text-[#F4F1E8]">${b.name || "Guest"}</div>
+                <div class="font-semibold text-sm text-[#F4F1E8]">${b.name || "Customer"}</div>
                 <div class="text-[10px] text-[#B9B6AC] flex items-center gap-1.5 mt-0.5">
                   <i class="fa-solid fa-phone text-[9px]"></i> ${b.phone || "No Phone"}
                   <span>·</span>
@@ -188,7 +236,7 @@
               </td>
               <td class="p-4 text-xs text-[#B9B6AC] font-mono">${dt}</td>
               <td class="p-4 text-right">
-                <button onclick="viewProof('${b.id}')" class="btn btn-primary !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-eye"></i> View Proof</button>
+                <button onclick="viewProof('${b.id}')" class="btn btn-primary !py-1.5 !px-3 !text-xs"><i class="fa-solid fa-eye"></i> ${btnLabel}</button>
               </td>
             </tr>
           `;
@@ -212,28 +260,35 @@
       const img = document.getElementById("lightbox-img");
       const title = document.getElementById("lightbox-title");
       const utr = document.getElementById("lightbox-utr-display");
+      const actionRow = document.getElementById("lightbox-action-row");
 
-      title.textContent = `Proof: ${selectedBooking.name || "Guest"} (${selectedBooking.bike_brand || ""} ${selectedBooking.bike_model || "Motorcycle"})`;
+      title.textContent = `Proof: ${selectedBooking.name || "Customer"} (${selectedBooking.bike_brand || ""} ${selectedBooking.bike_model || "Motorcycle"})`;
       
-      const isFinal = selectedBooking.status === "payment_submitted";
-      const utrVal = isFinal ? selectedBooking.final_payment_upi_reference : selectedBooking.upi_reference;
+      const isFinal = selectedBooking.status === "payment_submitted" || selectedBooking.final_payment_status === "verified" || selectedBooking.final_payment_status === "rejected";
+      const utrVal = isFinal ? (selectedBooking.final_payment_upi_reference || selectedBooking.final_payment_upi_extracted) : selectedBooking.upi_reference;
       const screenshotUrl = isFinal ? selectedBooking.final_payment_screenshot_url : selectedBooking.payment_screenshot_url;
 
       utr.textContent = `UTR/Ref: ${utrVal || "N/A"}`;
       img.src = ""; // Clear old image state
 
-      // Hook up actions
-      document.getElementById("lightbox-btn-approve").onclick = () => approvePayment(selectedBooking.id);
-      document.getElementById("lightbox-btn-reject").onclick = () => {
-        closeLightbox();
-        openRejectPrompt(selectedBooking.id);
-      };
+      // If already resolved (verified or rejected), hide verify/reject buttons or show close only
+      const isPending = ["pending_verification", "payment_submitted"].includes(selectedBooking.status);
+      if (isPending) {
+        actionRow.classList.remove("hidden");
+        document.getElementById("lightbox-btn-approve").onclick = () => approvePayment(selectedBooking.id);
+        document.getElementById("lightbox-btn-reject").onclick = () => {
+          closeLightbox();
+          openRejectPrompt(selectedBooking.id);
+        };
+      } else {
+        actionRow.classList.add("hidden");
+      }
 
       lightbox.classList.remove("hidden");
 
       try {
         if (!screenshotUrl) {
-          throw new Error("No screenshot proof data found.");
+          throw new Error("No screenshot proof uploaded.");
         }
         img.src = screenshotUrl;
       } catch (err) {
@@ -241,6 +296,14 @@
         img.alt = "Failed to load proof image: " + err.message;
       }
     }
+
+    window.zoomProof = function() {
+      const img = document.getElementById("lightbox-img");
+      if (img && img.src) {
+        const w = window.open();
+        w.document.write(`<img src="${img.src}" style="max-width:100%; height:auto;">`);
+      }
+    };
 
     function closeLightbox() {
       document.getElementById("lightbox-modal").classList.add("hidden");

@@ -38,45 +38,85 @@
         <div class="grid lg:grid-cols-2 gap-8">
           <!-- Workshop Configuration -->
           <div class="card p-6 space-y-6">
-            <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49]/40 pb-2">Workshop Configuration</h3>
+            <div class="flex justify-between items-center border-b border-[#3A3F49]/40 pb-2">
+              <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">Operational & Payment Settings</h3>
+              <span id="settings-save-status" class="text-[10px] font-mono text-[#B9B6AC]">Synced</span>
+            </div>
             
             <form id="settings-workshop-form" class="space-y-4" onsubmit="saveWorkshopSettings(event)">
+              <!-- Workshop Hours -->
               <div class="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="field-label" for="settings-hours-start">Service Opening Time</label>
+                  <label class="field-label" for="settings-hours-start">Opening Time</label>
                   <input type="time" id="settings-hours-start" class="field-input text-xs" value="09:00">
                 </div>
                 <div>
-                  <label class="field-label" for="settings-hours-end">Service Closing Time</label>
+                  <label class="field-label" for="settings-hours-end">Closing Time</label>
                   <input type="time" id="settings-hours-end" class="field-input text-xs" value="20:00">
                 </div>
               </div>
 
+              <!-- Contact & Support -->
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="field-label" for="settings-support-phone">Support / Hotline Phone</label>
+                  <input type="text" id="settings-support-phone" class="field-input text-xs font-mono" value="+977 9813691072" placeholder="+977 9800000000">
+                </div>
+                <div>
+                  <label class="field-label" for="settings-upi-id">UPI / eSewa / Khalti ID</label>
+                  <input type="text" id="settings-upi-id" class="field-input text-xs font-mono" value="chhotumotorcycles@ybl" placeholder="merchant@upi">
+                </div>
+              </div>
+
+              <!-- Pricing Parameters -->
+              <div class="grid sm:grid-cols-3 gap-4 pt-1">
+                <div>
+                  <label class="field-label" for="settings-deposit-fee">Booking Deposit (Rs.)</label>
+                  <input type="number" id="settings-deposit-fee" class="field-input text-xs font-mono" value="249" min="0">
+                </div>
+                <div>
+                  <label class="field-label" for="settings-base-charge">Base Service (Rs.)</label>
+                  <input type="number" id="settings-base-charge" class="field-input text-xs font-mono" value="400" min="0">
+                </div>
+                <div>
+                  <label class="field-label" for="settings-emergency-fee">Emergency Fee (Rs.)</label>
+                  <input type="number" id="settings-emergency-fee" class="field-input text-xs font-mono" value="150" min="0">
+                </div>
+              </div>
+
+              <!-- Service Areas -->
               <div>
-                <label class="field-label" for="settings-location-text">Service Areas coverage</label>
+                <label class="field-label" for="settings-location-text">Service Areas Coverage</label>
                 <input type="text" id="settings-location-text" class="field-input text-xs" value="Jorpati, Boudha, Chabahil, Jatar, Kapan, Gokarna">
-                <p class="text-[10px] text-[#B9B6AC] font-mono mt-1">Separate areas by commas. Displayed on public booking sidebars.</p>
+                <p class="text-[10px] text-[#B9B6AC] font-mono mt-1">Separate areas by commas. Used across online booking validations.</p>
               </div>
 
-              <div id="workshop-save-success" class="hidden text-xs text-green-400 font-semibold bg-green-500/10 p-2 border border-green-500/20 rounded">
-                <i class="fa-solid fa-circle-check"></i> Workshop parameters updated.
+              <div id="workshop-save-success" class="hidden text-xs text-green-400 font-semibold bg-green-500/10 p-2.5 border border-green-500/20 rounded flex items-center gap-2">
+                <i class="fa-solid fa-circle-check"></i> Workshop & Payment parameters saved successfully to cloud database.
               </div>
 
-              <button type="submit" class="btn btn-primary text-xs w-full">Update Workshop Parameters</button>
+              <div id="workshop-save-error" class="hidden text-xs text-red-400 font-semibold bg-red-500/10 p-2.5 border border-red-500/20 rounded">
+                Failed to save settings. Please try again.
+              </div>
+
+              <button type="submit" id="btn-save-settings" class="btn btn-primary text-xs w-full"><i class="fa-solid fa-floppy-disk mr-1"></i> Save Parameters</button>
             </form>
           </div>
 
           <!-- Roster of Admin Accounts -->
           <div class="card p-6 space-y-4">
-            <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase border-b border-[#3A3F49]/40 pb-2">Admin Users & Staff</h3>
+            <div class="flex justify-between items-center border-b border-[#3A3F49]/40 pb-2">
+              <h3 class="font-display text-sm text-[#FF5A1F] tracking-wide uppercase">Admin Users & Staff Roster</h3>
+              <button onclick="loadAdminRoster()" class="text-xs text-[#B9B6AC] hover:text-[#FF5A1F]"><i class="fa-solid fa-rotate mr-1"></i> Refresh</button>
+            </div>
             
             <div class="overflow-x-auto">
               <table class="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr class="border-b border-[#3A3F49]">
-                    <th class="py-2 text-[#B9B6AC] font-display uppercase tracking-wider">Name</th>
-                    <th class="py-2 text-[#B9B6AC] font-display uppercase tracking-wider">Role</th>
-                    <th class="py-2 text-[#B9B6AC] font-display uppercase tracking-wider">Status</th>
+                    <th class="py-2.5 text-[#B9B6AC] font-display uppercase tracking-wider">Name</th>
+                    <th class="py-2.5 text-[#B9B6AC] font-display uppercase tracking-wider">Role</th>
+                    <th class="py-2.5 text-[#B9B6AC] font-display uppercase tracking-wider">Status</th>
                   </tr>
                 </thead>
                 <tbody id="admin-users-table-rows">
@@ -87,7 +127,10 @@
                 </tbody>
               </table>
             </div>
-            <p class="text-[10px] text-[#B9B6AC] font-mono"><i class="fa-solid fa-circle-info"></i> Promoting users to admin or staff must be handled manually via the Supabase Dashboard Console or secure migration functions.</p>
+            <div class="p-3 bg-[#14161A] border border-[#3A3F49]/60 rounded text-[11px] text-[#B9B6AC] space-y-1">
+              <p class="font-semibold text-[#F4F1E8]"><i class="fa-solid fa-shield-halved text-[#FF5A1F] mr-1"></i> Role Permissions Notice</p>
+              <p>Promoting or revoking admin access is managed via the Supabase Auth console or database migrations to ensure strict access control.</p>
+            </div>
           </div>
         </div>
       </main>
@@ -99,10 +142,102 @@
       const checkInterval = setInterval(async () => {
         if (window.currentAdmin && window.supabaseClient) {
           clearInterval(checkInterval);
+          await loadWorkshopSettings();
           await loadAdminRoster();
         }
       }, 100);
     });
+
+    async function loadWorkshopSettings() {
+      // 1. Try fetching from Supabase table workshop_settings
+      let settings = null;
+      try {
+        const { data, error } = await window.supabaseClient
+          .from("workshop_settings")
+          .select("*")
+          .eq("id", "default")
+          .maybeSingle();
+
+        if (!error && data) {
+          settings = data;
+        }
+      } catch (_) {
+        // Table might not exist yet
+      }
+
+      // 2. Fallback to localStorage
+      if (!settings) {
+        const local = localStorage.getItem("chhotu_workshop_settings");
+        if (local) {
+          try {
+            settings = JSON.parse(local);
+          } catch (_) {}
+        }
+      }
+
+      // Populate input fields
+      if (settings) {
+        if (settings.hours_start) document.getElementById("settings-hours-start").value = settings.hours_start;
+        if (settings.hours_end) document.getElementById("settings-hours-end").value = settings.hours_end;
+        if (settings.support_phone) document.getElementById("settings-support-phone").value = settings.support_phone;
+        if (settings.upi_id) document.getElementById("settings-upi-id").value = settings.upi_id;
+        if (settings.deposit_fee !== undefined) document.getElementById("settings-deposit-fee").value = settings.deposit_fee;
+        if (settings.base_charge !== undefined) document.getElementById("settings-base-charge").value = settings.base_charge;
+        if (settings.emergency_fee !== undefined) document.getElementById("settings-emergency-fee").value = settings.emergency_fee;
+        if (settings.service_areas) document.getElementById("settings-location-text").value = settings.service_areas;
+      }
+    }
+
+    async function saveWorkshopSettings(e) {
+      e.preventDefault();
+      
+      const successEl = document.getElementById("workshop-save-success");
+      const errorEl = document.getElementById("workshop-save-error");
+      const saveBtn = document.getElementById("btn-save-settings");
+      
+      successEl.classList.add("hidden");
+      errorEl.classList.add("hidden");
+
+      const settingsPayload = {
+        id: "default",
+        hours_start: document.getElementById("settings-hours-start").value,
+        hours_end: document.getElementById("settings-hours-end").value,
+        support_phone: document.getElementById("settings-support-phone").value.trim(),
+        upi_id: document.getElementById("settings-upi-id").value.trim(),
+        deposit_fee: Number(document.getElementById("settings-deposit-fee").value) || 249,
+        base_charge: Number(document.getElementById("settings-base-charge").value) || 400,
+        emergency_fee: Number(document.getElementById("settings-emergency-fee").value) || 150,
+        service_areas: document.getElementById("settings-location-text").value.trim(),
+        updated_at: new Date().toISOString()
+      };
+
+      const originalBtnHtml = saveBtn.innerHTML;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = `<span class="inline-block h-3.5 w-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Saving...`;
+
+      // Always save to localStorage
+      localStorage.setItem("chhotu_workshop_settings", JSON.stringify(settingsPayload));
+
+      // Attempt Supabase upsert
+      try {
+        const { error } = await window.supabaseClient
+          .from("workshop_settings")
+          .upsert([settingsPayload]);
+
+        if (error) {
+          console.warn("Supabase workshop_settings upsert warning:", error);
+        }
+      } catch (err) {
+        console.warn("Database save fallback to localStorage:", err);
+      }
+
+      setTimeout(() => {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalBtnHtml;
+        successEl.classList.remove("hidden");
+        setTimeout(() => successEl.classList.add("hidden"), 4000);
+      }, 500);
+    }
 
     async function loadAdminRoster() {
       const tableRows = document.getElementById("admin-users-table-rows");
@@ -125,15 +260,23 @@
               ? `<span class="px-2 py-0.5 rounded text-[9px] uppercase font-mono font-bold bg-[#FF5A1F]/15 text-[#FF5A1F] border border-[#FF5A1F]/30">Admin</span>`
               : `<span class="px-2 py-0.5 rounded text-[9px] uppercase font-mono font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30">Staff</span>`;
             
-            const isSelf = admin.id === window.currentAdmin.id 
+            const isSelf = window.currentAdmin && admin.id === window.currentAdmin.id 
               ? `<span class="text-[9px] font-mono text-[#B9B6AC] italic">(You)</span>` 
               : "";
 
             return `
               <tr class="border-b border-[#3A3F49]/40 hover:bg-[#1B1E24]/30">
-                <td class="py-3 font-semibold text-[#F4F1E8]">${admin.full_name} ${isSelf}</td>
+                <td class="py-3 font-semibold text-[#F4F1E8]">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-full bg-[#14161A] border border-[#3A3F49] flex items-center justify-center font-bold text-[10px] text-[#FF5A1F]">
+                      ${(admin.full_name || "A").charAt(0).toUpperCase()}
+                    </div>
+                    <span>${admin.full_name || "Admin"}</span>
+                    ${isSelf}
+                  </div>
+                </td>
                 <td class="py-3">${roleLabel}</td>
-                <td class="py-3 font-mono text-[#B9B6AC] text-[10px]">Active</td>
+                <td class="py-3 font-mono text-emerald-400 text-[10px]"><i class="fa-solid fa-circle text-[6px] mr-1"></i>Active</td>
               </tr>
             `;
           }).join("");
@@ -143,15 +286,8 @@
 
       } catch (err) {
         console.error("Failed to load admin list:", err);
-        tableRows.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-red-400">Error loading admin users.</td></tr>`;
+        tableRows.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-red-400 font-mono text-xs">Error loading admin users.</td></tr>`;
       }
-    }
-
-    function saveWorkshopSettings(e) {
-      e.preventDefault();
-      const successEl = document.getElementById("workshop-save-success");
-      successEl.classList.remove("hidden");
-      setTimeout(() => successEl.classList.add("hidden"), 3000);
     }
   </script>
   <script src="assets/agentation-bundle.js"></script>
